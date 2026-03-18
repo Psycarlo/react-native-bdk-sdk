@@ -16,8 +16,6 @@ on:
       - main
 
 jobs:
-  # ── Detect Release ──────────────────────────────────────────────
-
   detect-release:
     if: contains(github.event.head_commit.message, 'release/v')
     runs-on: ubuntu-latest
@@ -36,8 +34,6 @@ jobs:
           fi
           echo "Release detected: v$VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-  # ── Build Android ───────────────────────────────────────────────
 
   build-android:
     needs: detect-release
@@ -82,8 +78,6 @@ jobs:
           name: android-artifacts
           path: android-artifacts.zip
 
-  # ── Build iOS ───────────────────────────────────────────────────
-
   build-ios:
     needs: detect-release
     runs-on: macos-latest
@@ -123,8 +117,6 @@ jobs:
           name: ios-artifacts
           path: ios-artifacts.zip
 
-  # ── Create Tag and GitHub Release ───────────────────────────────
-
   release:
     needs: [detect-release, build-android, build-ios]
     runs-on: ubuntu-latest
@@ -159,8 +151,6 @@ jobs:
           files: |
             artifacts/android-artifacts/android-artifacts.zip
             artifacts/ios-artifacts/ios-artifacts.zip
-
-  # ── Publish to npm ──────────────────────────────────────────────
 
   publish-npm:
     needs: [detect-release, build-android, build-ios]
