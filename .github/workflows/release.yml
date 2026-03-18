@@ -65,6 +65,9 @@ jobs:
       - name: Build Android
         run: pnpm ubrn:android
 
+      - name: Patch bindings
+        run: bash scripts/patch-bindings.sh
+
       - name: Create android-artifacts.zip
         run: |
           zip -r android-artifacts.zip \
@@ -103,6 +106,9 @@ jobs:
 
       - name: Build iOS
         run: pnpm ubrn:ios
+
+      - name: Patch bindings
+        run: bash scripts/patch-bindings.sh
 
       - name: Create ios-artifacts.zip
         run: |
