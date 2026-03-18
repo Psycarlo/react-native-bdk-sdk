@@ -28,14 +28,39 @@
   ],
   "license": "MIT",
   "packageManager": "pnpm@10.6.2",
-  "workspaces": [
-    "expo-example"
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "*.podspec",
+    "app.plugin.js",
+    "react-native.config.js",
+    "scripts",
+    "!scripts/patch-bindings.sh",
+    "plugin",
+    "!plugin/src",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*",
+    "LICENSE"
   ],
   "scripts": {
     "ubrn:ios": "ubrn build ios --release --config ubrn.config.yaml --and-generate",
     "ubrn:android": "ubrn build android --release --config ubrn.config.yaml --and-generate",
     "postinstall": "node scripts/postinstall.js",
-    "prepare": "bob build"
+    "prepare": "bob build",
+    "plugin:build": "EXPO_NONINTERACTIVE=true expo-module build plugin",
+    "plugin:build:win": "tsc --project plugin/tsconfig.json",
+    "typecheck": "tsc"
   },
   "repository": {
     "type": "git",
@@ -67,6 +92,7 @@
   "devDependencies": {
     "@expo/config-plugins": "^55.0.6",
     "@react-native-community/cli": "^20.1.2",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "expo-module-scripts": "^55.0.2",
     "react": "^19.2.4",

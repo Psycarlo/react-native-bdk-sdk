@@ -6,6 +6,7 @@ license = "MIT"
 
 [lib]
 name = "bdk_ffi"
+crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
 bdk_wallet = { version = "2.3.0", features = ["all-keys", "keys-bip39", "rusqlite"] }

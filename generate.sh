@@ -22,7 +22,7 @@ if ! command -v rustc &> /dev/null; then
 fi
 
 echo "📦 Installing dependencies..."
-pnpm install
+pnpm install --ignore-scripts
 
 echo "📦 Ensuring Android Rust targets are installed..."
 rustup target add aarch64-linux-android

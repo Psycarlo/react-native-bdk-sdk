@@ -18,6 +18,9 @@ importers:
       '@react-native-community/cli':
         specifier: ^20.1.2
         version: 20.1.2(typescript@5.9.3)
+      '@types/node':
+        specifier: ^25.5.0
+        version: 25.5.0
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
