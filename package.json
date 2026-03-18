@@ -1,6 +1,6 @@
 {
   "name": "react-native-bdk-sdk",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "React Native language bindings for the Bitcoin Development Kit",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
