@@ -1,0 +1,3 @@
+[package]
+name = "bdk_ffi"
+namespace = "bdk_ffi"

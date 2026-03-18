@@ -1,0 +1,778 @@
+namespace bdk_ffi {
+    /// Runtime version of the bdk_wallet crate.
+    string version();
+
+    /// Returns true if the address string is valid for the given network.
+    boolean is_valid_address(string address, Network network);
+
+    /// Generate an output descriptor string from a mnemonic using a standard BIP template.
+    /// Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xprv.../0/*)" for BIP84.
+    /// Uses Bip44/49/84/86 descriptor templates.
+    [Throws=BdkError]
+    string create_descriptor(Mnemonic mnemonic, DescriptorTemplate template, KeychainKind keychain, Network network);
+
+    /// Generate a public (watch-only) descriptor from an xpub string using a standard BIP template.
+    /// Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xpub.../0/*)" for BIP84.
+    /// Uses Bip44Public/49Public/84Public/86Public descriptor templates.
+    [Throws=BdkError]
+    string create_public_descriptor(string xpub, DescriptorTemplate template, KeychainKind keychain, Network network);
+
+    /// Generate a single-key descriptor from a key string.
+    /// Uses P2Pkh, P2Wpkh, P2Wpkh_P2Sh, or P2TR templates.
+    [Throws=BdkError]
+    string create_single_key_descriptor(string key, SingleKeyDescriptorTemplate template, Network network);
+
+    /// Compute a deterministic wallet name from its descriptors (useful for DB naming).
+    /// Mirrors bdk_wallet::wallet_name_from_descriptor().
+    [Throws=BdkError]
+    string wallet_name_from_descriptor(string descriptor, string? change_descriptor, Network network);
+
+    /// Export a wallet in FullyNoded-compatible JSON format for backup.
+    /// Mirrors bdk_wallet::export::FullyNodedExport.
+    [Throws=BdkError]
+    string export_wallet(Wallet wallet, string label, boolean include_block_height);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  ERRORS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+[Error]
+enum BdkError {
+    // Wallet lifecycle
+    "InvalidDescriptor",
+    "WalletCreationFailed",
+    "WalletLoadFailed",
+    "WalletLoadMismatch",
+    "PersistError",
+
+    // Address / script
+    "InvalidAddress",
+    "InvalidScript",
+
+    // Transaction building (maps to CreateTxError variants)
+    "TransactionBuildFailed",
+    "NoRecipients",
+    "NoUtxosSelected",
+    "OutputBelowDustLimit",
+    "InsufficientFunds",
+    "FeeRateTooLow",
+    "FeeTooLow",
+    "LockTimeConflict",
+    "RbfSequenceConflict",
+    "VersionZero",
+    "VersionOneCsv",
+    "SpendingPolicyRequired",
+    "MissingKeyOrigin",
+    "MissingNonWitnessUtxo",
+
+    // UTXO management
+    "OutpointNotFound",
+
+    // Fee bumping (maps to BuildFeeBumpError)
+    "FeeBumpTargetNotFound",
+    "FeeBumpAlreadyConfirmed",
+    "FeeBumpIrreplaceable",
+    "FeeBumpFeeRateUnavailable",
+    "FeeBumpInvalidOutputIndex",
+
+    // PSBT / signing (maps to SignerError)
+    "InvalidPsbt",
+    "SignFailed",
+    "SignerMissingKey",
+    "SignerInvalidKey",
+    "SignerUserCanceled",
+    "SignerInputIndexOutOfRange",
+    "SignerMissingNonWitnessUtxo",
+    "SignerMissingWitnessUtxo",
+    "SignerMissingWitnessScript",
+    "SignerNonStandardSighash",
+    "SignerInvalidSighash",
+
+    // Sync / broadcast
+    "SyncFailed",
+    "BroadcastFailed",
+
+    // Transaction / PSBT parsing
+    "InvalidTransaction",
+    "TransactionNotFound",
+    "CannotConnect",
+    "CalculateFeeError",
+
+    // Keys / mnemonic
+    "InvalidMnemonic",
+    "InvalidEntropy",
+    "KeyError",
+
+    "Generic",
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  ENUMS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+enum Network {
+    "Bitcoin",
+    "Testnet",
+    "Signet",
+    "Regtest",
+};
+
+enum KeychainKind {
+    /// External keychain — used for deriving recipient addresses.
+    "External",
+    /// Internal keychain — used for deriving change addresses.
+    "Internal",
+};
+
+/// Controls which UTXOs the wallet may spend as change inputs.
+enum ChangeSpendPolicy {
+    /// Both change and non-change outputs may be spent (default).
+    "ChangeAllowed",
+    /// Only change outputs may be spent as inputs.
+    "OnlyChange",
+    /// Only non-change outputs may be spent as inputs.
+    "ChangeForbidden",
+};
+
+/// Ordering applied to inputs and outputs when building a transaction.
+/// Note: bdk_wallet also has a Custom variant (with closures) that cannot cross FFI.
+enum TxOrdering {
+    /// Randomise input and output order (default, good for privacy).
+    "Shuffle",
+    /// Preserve insertion order of recipients and manually added UTXOs.
+    "Untouched",
+};
+
+/// BIP-39 mnemonic word count (determines entropy length).
+enum WordCount {
+    "Words12",
+    "Words15",
+    "Words18",
+    "Words21",
+    "Words24",
+};
+
+/// BIP-39 mnemonic language. Mirrors bip39::Language.
+/// Requires `all-languages` feature on the bip39 crate.
+enum Language {
+    "English",
+    "SimplifiedChinese",
+    "TraditionalChinese",
+    "Czech",
+    "French",
+    "Italian",
+    "Japanese",
+    "Korean",
+    "Portuguese",
+    "Spanish",
+};
+
+/// Standard BIP descriptor templates for generating wallet descriptors
+/// from a mnemonic/xprv (also usable for xpub via create_public_descriptor).
+/// Mirrors descriptor::template::{Bip44, Bip49, Bip84, Bip86}.
+enum DescriptorTemplate {
+    /// BIP44 — Legacy P2PKH (1…)
+    "BIP44",
+    /// BIP49 — Nested SegWit P2SH-P2WPKH (3…)
+    "BIP49",
+    /// BIP84 — Native SegWit P2WPKH (bc1q…)
+    "BIP84",
+    /// BIP86 — Taproot P2TR (bc1p…)
+    "BIP86",
+};
+
+/// Single-key descriptor templates.
+/// Mirrors descriptor::template::{P2Pkh, P2Wpkh, P2Wpkh_P2Sh, P2TR}.
+enum SingleKeyDescriptorTemplate {
+    /// Pay-to-PubKey-Hash — Legacy (1…)
+    "P2Pkh",
+    /// Pay-to-Witness-PubKey-Hash — Native SegWit (bc1q…)
+    "P2Wpkh",
+    /// P2Wpkh wrapped in P2SH — Nested SegWit (3…)
+    "P2Wpkh_P2Sh",
+    /// Pay-to-Taproot (bc1p…)
+    "P2TR",
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  TAGGED UNION ENUMS (enums with associated data)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Events emitted when applying chain updates to the wallet.
+/// Mirrors bdk_wallet::event::WalletEvent (non-exhaustive in upstream).
+[Enum]
+interface WalletEvent {
+    /// The local chain tip has changed.
+    ChainTipChanged(BlockId old_tip, BlockId new_tip);
+    /// A transaction has been confirmed.
+    TxConfirmed(string txid, ConfirmationBlockTime block_time);
+    /// A previously confirmed transaction has been unconfirmed (reorg).
+    TxUnconfirmed(string txid);
+    /// A transaction has been replaced (RBF or conflict).
+    TxReplaced(string txid, sequence<string> conflicting_txids);
+    /// A transaction has been dropped from the mempool / evicted.
+    TxDropped(string txid);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  DATA RECORDS (dictionaries)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// A block identifier (height + hash). Mirrors bdk_chain::BlockId.
+dictionary BlockId {
+    u32 height;
+    string hash;
+};
+
+/// Reference to a specific transaction output. Mirrors bitcoin::OutPoint.
+dictionary OutPoint {
+    string txid;
+    u32 vout;
+};
+
+/// A transaction output (value + locking script). Mirrors bitcoin::TxOut.
+dictionary TxOut {
+    /// Value in satoshis.
+    u64 value;
+    /// Serialized scriptPubKey as lowercase hex.
+    string script_pubkey_hex;
+};
+
+/// Block position for a confirmed transaction/output.
+/// Mirrors bdk_chain::ConfirmationBlockTime.
+dictionary ConfirmationBlockTime {
+    u32 height;
+    /// Block hash as hex.
+    string block_hash;
+    /// Unix timestamp of the block.
+    u64 timestamp;
+};
+
+/// A wallet-owned output (spent or unspent). Mirrors bdk_wallet::LocalOutput.
+dictionary LocalOutput {
+    OutPoint outpoint;
+    TxOut txout;
+    KeychainKind keychain;
+    boolean is_spent;
+    u32 derivation_index;
+    /// None when the output is unconfirmed.
+    ConfirmationBlockTime? confirmation_block_time;
+};
+
+/// A derived address with its derivation index. Mirrors bdk_wallet::AddressInfo.
+dictionary AddressInfo {
+    u32 index;
+    string address;
+    KeychainKind keychain;
+};
+
+/// Wallet balance split into categories. All values in satoshis.
+/// Mirrors bdk_wallet::Balance (re-exported from bdk_chain).
+dictionary Balance {
+    /// Coinbase outputs not yet matured (< 100 confirmations).
+    u64 immature;
+    /// Unconfirmed UTXOs from transactions we sent ourselves.
+    u64 trusted_pending;
+    /// Unconfirmed UTXOs received from external wallets.
+    u64 untrusted_pending;
+    /// Confirmed and immediately spendable.
+    u64 confirmed;
+    /// trusted_pending + confirmed (safe to spend without double-spend risk).
+    u64 trusted_spendable;
+    /// Sum of all four categories.
+    u64 total;
+};
+
+/// Full details of a wallet-relevant transaction. Mirrors bdk_wallet::TxDetails.
+dictionary TxDetails {
+    string txid;
+    /// Sum of wallet-owned input amounts (satoshis).
+    u64 sent;
+    /// Sum of amounts to wallet-owned outputs (satoshis).
+    u64 received;
+    /// Fee paid in satoshis. None if some inputs are unknown.
+    u64? fee;
+    /// Fee rate in sat/vbyte. None if some inputs are unknown.
+    double? fee_rate;
+    /// Net change to wallet balance in satoshis (positive = received more than sent).
+    i64 balance_delta;
+    /// None when unconfirmed.
+    ConfirmationBlockTime? confirmation_block_time;
+    /// The full serialized transaction as hex.
+    string tx_hex;
+};
+
+/// How much was sent from / received into the wallet for a given transaction.
+dictionary SentAndReceived {
+    /// Satoshis sent (wallet inputs consumed).
+    u64 sent;
+    /// Satoshis received (wallet outputs created).
+    u64 received;
+};
+
+/// A single payment recipient.
+dictionary Recipient {
+    string address;
+    /// Amount in satoshis.
+    u64 amount_sats;
+};
+
+/// Derivation info for a scriptPubKey belonging to the wallet.
+dictionary DerivationInfo {
+    KeychainKind keychain;
+    u32 index;
+};
+
+/// Info about a keychain and its associated descriptor.
+dictionary KeychainInfo {
+    KeychainKind keychain;
+    /// The public descriptor string.
+    string descriptor;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  MNEMONIC INTERFACE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// BIP-39 mnemonic phrase for key generation.
+/// Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
+interface Mnemonic {
+    /// Generate a new random mnemonic with the given word count (English).
+    [Throws=BdkError]
+    constructor(WordCount word_count);
+
+    /// Parse an existing mnemonic string (auto-detects language).
+    [Name="from_string", Throws=BdkError]
+    constructor(string mnemonic);
+
+    /// Parse a mnemonic string in a specific language.
+    [Name="from_string_in", Throws=BdkError]
+    constructor(string mnemonic, Language language);
+
+    /// Create a mnemonic from raw entropy bytes (16–32 bytes).
+    [Name="from_entropy", Throws=BdkError]
+    constructor(sequence<u8> entropy);
+
+    /// Create a mnemonic from raw entropy bytes in a specific language.
+    [Name="from_entropy_in", Throws=BdkError]
+    constructor(sequence<u8> entropy, Language language);
+
+    /// The mnemonic as a space-separated word string.
+    string to_string();
+
+    /// Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
+    string to_seed_hex(string passphrase);
+
+    /// Number of words (12, 15, 18, 21, or 24).
+    u32 word_count();
+
+    /// The language of this mnemonic.
+    Language language();
+
+    /// List the individual words.
+    sequence<string> words();
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PSBT INTERFACE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
+/// Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
+interface Psbt {
+    /// Deserialize from a base64-encoded string.
+    [Throws=BdkError]
+    constructor(string psbt_base64);
+
+    /// Serialize to a base64-encoded string.
+    string to_base64();
+
+    /// The unsigned txid (available before finalization).
+    [Throws=BdkError]
+    string txid();
+
+    /// Total fee in satoshis. None if any input UTXO value is unknown.
+    /// From PsbtUtils::fee_amount().
+    u64? fee_amount();
+
+    /// Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+    /// From PsbtUtils::fee_rate().
+    double? fee_rate();
+
+    /// Retrieve the UTXO for a given input index. Returns None if unavailable.
+    /// From PsbtUtils::get_utxo_for().
+    TxOut? get_utxo_for(u64 input_index);
+
+    /// Extract the fully-signed transaction as raw hex.
+    /// Only valid after all inputs are finalized.
+    [Throws=BdkError]
+    string extract_tx_hex();
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  TX BUILDER INTERFACE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Fluent builder for constructing Bitcoin transactions.
+/// Create one, configure it, then call finish(wallet) to produce a PSBT.
+/// Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
+interface TxBuilder {
+    constructor();
+
+    // ── Recipients ────────────────────────────────────────────────────────────
+
+    /// Add a single recipient (address + amount).
+    void add_recipient(string address, u64 amount_sats);
+
+    /// Replace the entire recipient list.
+    void set_recipients(sequence<Recipient> recipients);
+
+    /// Attach OP_RETURN data to the transaction.
+    void add_data(sequence<u8> data);
+
+    // ── Fee control ───────────────────────────────────────────────────────────
+
+    /// Set a fee rate target in sat/vbyte.
+    void fee_rate(double sat_per_vbyte);
+
+    /// Set an absolute fee in satoshis (overrides fee_rate).
+    void fee_absolute(u64 fee_sats);
+
+    // ── Drain ─────────────────────────────────────────────────────────────────
+
+    /// Spend all spendable UTXOs (send remaining to the drain_to address).
+    void drain_wallet();
+
+    /// Set the script to receive the remaining change (use with drain_wallet).
+    [Throws=BdkError]
+    void drain_to(string address);
+
+    // ── UTXO / coin selection ─────────────────────────────────────────────────
+
+    /// Only use the UTXOs explicitly added with add_utxo / add_utxos.
+    void manually_selected_only();
+
+    /// Add a specific UTXO to spend.
+    [Throws=BdkError]
+    void add_utxo(OutPoint outpoint);
+
+    /// Add multiple specific UTXOs to spend.
+    [Throws=BdkError]
+    void add_utxos(sequence<OutPoint> outpoints);
+
+    /// Mark UTXOs as unspendable (excluded from coin selection).
+    void unspendable(sequence<OutPoint> outpoints);
+
+    /// Mark a single UTXO as unspendable.
+    void add_unspendable(OutPoint outpoint);
+
+    /// Exclude UTXOs with fewer than min_confirms confirmations.
+    void exclude_below_confirmations(u32 min_confirms);
+
+    /// Exclude all unconfirmed UTXOs.
+    void exclude_unconfirmed();
+
+    // ── Change policy ─────────────────────────────────────────────────────────
+
+    /// Forbid spending from change outputs.
+    void do_not_spend_change();
+
+    /// Only spend from change outputs.
+    void only_spend_change();
+
+    /// Set the change spend policy explicitly.
+    void change_policy(ChangeSpendPolicy policy);
+
+    // ── RBF (replace-by-fee) ──────────────────────────────────────────────────
+
+    /// Enable RBF signalling with the default nSequence (0xFFFFFFFD).
+    void enable_rbf();
+
+    /// Enable RBF signalling with a specific nSequence value (must be < 0xFFFFFFFE).
+    void enable_rbf_with_sequence(u32 nsequence);
+
+    /// Set an exact nSequence value for all inputs.
+    void set_exact_sequence(u32 nsequence);
+
+    // ── Transaction parameters ────────────────────────────────────────────────
+
+    /// Set the input/output ordering strategy.
+    void ordering(TxOrdering ordering);
+
+    /// Set an explicit nLockTime (as a block height).
+    void nlocktime(u32 lock_height);
+
+    /// Set the transaction version (1 or 2).
+    void tx_version(i32 version);
+
+    /// Allow outputs below the dust threshold.
+    void allow_dust(boolean allow);
+
+    /// Set the assumed current block height (for relative timelock evaluation).
+    void current_height(u32 height);
+
+    /// Include only witness UTXO in PSBT inputs (reduced size, less validation).
+    void only_witness_utxo();
+
+    /// Include the redeemScript / witnessScript in PSBT outputs.
+    void include_output_redeem_witness_script();
+
+    /// Include BIP-32 global xpubs in the PSBT.
+    void add_global_xpubs();
+
+    /// Set the sighash type for all inputs.
+    void sighash(u32 sighash_type);
+
+    /// Supply a policy path for complex descriptors (multisig, timelocks).
+    /// path_map is a JSON-encoded BTreeMap<String, Vec<usize>>.
+    void policy_path(string path_map_json, KeychainKind keychain);
+
+    // ── Finalize ──────────────────────────────────────────────────────────────
+
+    /// Build the transaction into a PSBT. The wallet is used for coin
+    /// selection and script resolution — the PSBT is NOT signed here.
+    [Throws=BdkError]
+    Psbt finish(Wallet wallet);
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  WALLET INTERFACE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+interface Wallet {
+    /// Create or load a persisted wallet.
+    /// descriptor / change_descriptor: output descriptor strings (e.g. "wpkh(tprv…/84'/1'/0'/0/*)")
+    /// db_path: file path for the SQLite persistence database.
+    [Throws=BdkError]
+    constructor(
+        string descriptor,
+        string change_descriptor,
+        Network network,
+        string db_path
+    );
+
+    // ── Address management ────────────────────────────────────────────────────
+
+    /// Return the next address that has not yet received funds.
+    /// Mirrors Wallet::next_unused_address().
+    [Throws=BdkError]
+    AddressInfo next_unused_address(KeychainKind keychain);
+
+    /// Reveal and return the next address at the next derivation index,
+    /// incrementing the index even if previous addresses are unused.
+    /// Mirrors Wallet::reveal_next_address().
+    [Throws=BdkError]
+    AddressInfo reveal_next_address(KeychainKind keychain);
+
+    /// Reveal all addresses up to and including the given derivation index.
+    /// Mirrors Wallet::reveal_addresses_to().
+    [Throws=BdkError]
+    sequence<AddressInfo> reveal_addresses_to(KeychainKind keychain, u32 index);
+
+    /// Peek at a specific derivation index without advancing the counter.
+    /// Mirrors Wallet::peek_address().
+    [Throws=BdkError]
+    AddressInfo peek_address(KeychainKind keychain, u32 index);
+
+    /// List all addresses that have been revealed but not yet received funds.
+    /// Mirrors Wallet::list_unused_addresses().
+    [Throws=BdkError]
+    sequence<AddressInfo> list_unused_addresses(KeychainKind keychain);
+
+    /// Mark an address index as used (returns true if previously unused).
+    /// Mirrors Wallet::mark_used().
+    boolean mark_used(KeychainKind keychain, u32 index);
+
+    /// Mark an address index as unused (returns true if previously used).
+    /// Mirrors Wallet::unmark_used().
+    boolean unmark_used(KeychainKind keychain, u32 index);
+
+    // ── Balance ───────────────────────────────────────────────────────────────
+
+    /// Get the wallet balance. Mirrors Wallet::balance().
+    [Throws=BdkError]
+    Balance get_balance();
+
+    // ── UTXOs ─────────────────────────────────────────────────────────────────
+
+    /// List all unspent wallet outputs. Mirrors Wallet::list_unspent().
+    [Throws=BdkError]
+    sequence<LocalOutput> list_unspent();
+
+    /// List all wallet outputs (spent and unspent). Mirrors Wallet::list_output().
+    [Throws=BdkError]
+    sequence<LocalOutput> list_output();
+
+    /// Get a specific UTXO. Returns null if not found. Mirrors Wallet::get_utxo().
+    [Throws=BdkError]
+    LocalOutput? get_utxo(OutPoint outpoint);
+
+    /// Manually insert a TxOut (e.g. for tracking external outputs).
+    /// Mirrors Wallet::insert_txout().
+    void insert_txout(OutPoint outpoint, TxOut txout);
+
+    // ── Transactions ──────────────────────────────────────────────────────────
+
+    /// All wallet-relevant canonical transactions.
+    /// Mirrors Wallet::transactions() → mapped to TxDetails.
+    [Throws=BdkError]
+    sequence<TxDetails> transactions();
+
+    /// Details for a single transaction. Returns null if not found.
+    /// Mirrors Wallet::tx_details().
+    [Throws=BdkError]
+    TxDetails? tx_details(string txid);
+
+    /// Returns the raw transaction hex for a given txid. Null if not found.
+    /// Mirrors Wallet::get_tx().
+    [Throws=BdkError]
+    string? get_tx(string txid);
+
+    /// How much was sent from / received into the wallet for a raw tx (hex).
+    /// Mirrors Wallet::sent_and_received().
+    [Throws=BdkError]
+    SentAndReceived sent_and_received(string tx_hex);
+
+    /// Calculate the fee paid by a raw transaction (hex). Returns satoshis.
+    /// Mirrors Wallet::calculate_fee().
+    [Throws=BdkError]
+    u64 calculate_fee(string tx_hex);
+
+    /// Calculate the fee rate for a raw transaction (hex). Returns sat/vbyte.
+    /// Mirrors Wallet::calculate_fee_rate().
+    [Throws=BdkError]
+    double calculate_fee_rate(string tx_hex);
+
+    /// Cancel (evict) a transaction from the wallet's view.
+    /// Mirrors Wallet::cancel_tx().
+    [Throws=BdkError]
+    void cancel_tx(string tx_hex);
+
+    // ── PSBT / Signing ────────────────────────────────────────────────────────
+
+    /// Sign all inputs in the PSBT that this wallet can sign.
+    /// Returns true if the PSBT is fully finalized after signing.
+    /// Mirrors Wallet::sign() with default SignOptions.
+    [Throws=BdkError]
+    boolean sign(Psbt psbt);
+
+    /// Sign and attempt to finalize all inputs.
+    /// Returns true if fully finalized.
+    /// Mirrors Wallet::finalize_psbt() with default SignOptions.
+    [Throws=BdkError]
+    boolean finalize_psbt(Psbt psbt);
+
+    // ── Sync ──────────────────────────────────────────────────────────────────
+
+    /// Full scan via an Esplora HTTP server (discovers all used addresses).
+    /// Uses Wallet::start_full_scan() + bdk_esplora client internally.
+    /// stop_gap: how many consecutive unused addresses to scan before stopping.
+    [Throws=BdkError]
+    void full_scan_with_esplora(string url, u64 stop_gap);
+
+    /// Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
+    /// Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
+    [Throws=BdkError]
+    void sync_with_esplora(string url, u64 stop_gap);
+
+    /// Full scan via an Electrum TCP/TLS server.
+    [Throws=BdkError]
+    void full_scan_with_electrum(string url, u64 stop_gap);
+
+    /// Incremental sync via Electrum.
+    [Throws=BdkError]
+    void sync_with_electrum(string url, u64 stop_gap);
+
+    // ── Broadcast ─────────────────────────────────────────────────────────────
+
+    /// Broadcast a finalized PSBT via Esplora. Returns the txid.
+    [Throws=BdkError]
+    string broadcast_with_esplora(string url, Psbt psbt);
+
+    /// Broadcast a finalized PSBT via Electrum. Returns the txid.
+    [Throws=BdkError]
+    string broadcast_with_electrum(string url, Psbt psbt);
+
+    // ── Convenience ───────────────────────────────────────────────────────────
+
+    /// Build, sign, and broadcast a simple payment in one call. Returns txid.
+    /// Combines build_tx → sign → broadcast via Esplora.
+    [Throws=BdkError]
+    string send(string address, u64 amount_sats, double fee_rate, string esplora_url);
+
+    /// Drain the entire wallet to an address. Returns txid.
+    [Throws=BdkError]
+    string drain(string address, double fee_rate, string esplora_url);
+
+    // ── Fee bumping ───────────────────────────────────────────────────────────
+
+    /// Build an RBF fee-bump PSBT for an unconfirmed transaction.
+    /// Mirrors Wallet::build_fee_bump().
+    [Throws=BdkError]
+    Psbt build_fee_bump(string txid, double new_fee_rate);
+
+    // ── Script / SPK queries ──────────────────────────────────────────────────
+
+    /// Return true if the given scriptPubKey (hex) belongs to this wallet.
+    /// Mirrors Wallet::is_mine().
+    boolean is_mine(string script_hex);
+
+    /// Find the keychain and derivation index for a scriptPubKey (hex).
+    /// Returns null if the script does not belong to this wallet.
+    /// Mirrors Wallet::derivation_of_spk().
+    DerivationInfo? derivation_of_spk(string script_hex);
+
+    // ── Descriptor / keychain info ────────────────────────────────────────────
+
+    /// The public-only descriptor for the given keychain as a string.
+    /// Mirrors Wallet::public_descriptor().
+    [Throws=BdkError]
+    string public_descriptor(KeychainKind keychain);
+
+    /// The descriptor checksum for the given keychain.
+    /// Mirrors Wallet::descriptor_checksum().
+    [Throws=BdkError]
+    string descriptor_checksum(KeychainKind keychain);
+
+    /// List all keychains and their public descriptors.
+    /// Mirrors Wallet::keychains().
+    sequence<KeychainInfo> keychains();
+
+    /// Spending policies for a given keychain, returned as a JSON string.
+    /// Returns null if the descriptor has no policy.
+    /// Mirrors Wallet::policies() — serialized because the Policy tree is complex.
+    [Throws=BdkError]
+    string? policies(KeychainKind keychain);
+
+    /// The highest derivation index that has been revealed, or null if none.
+    /// Mirrors Wallet::derivation_index().
+    u32? derivation_index(KeychainKind keychain);
+
+    /// The next derivation index that will be revealed.
+    /// Mirrors Wallet::next_derivation_index().
+    u32 next_derivation_index(KeychainKind keychain);
+
+    // ── Chain state ───────────────────────────────────────────────────────────
+
+    /// The latest checkpoint (tip of the local chain). Null if no blocks applied yet.
+    /// Mirrors Wallet::latest_checkpoint().
+    BlockId? latest_checkpoint();
+
+    /// All checkpoints in the local chain, ordered by height descending.
+    /// Mirrors Wallet::checkpoints().
+    sequence<BlockId> checkpoints();
+
+    // ── Persistence ───────────────────────────────────────────────────────────
+
+    /// Persist any staged changes to the database.
+    /// Our FFI wraps PersistedWallet; this calls persist() internally.
+    [Throws=BdkError]
+    boolean persist();
+
+    // ── Accessors ─────────────────────────────────────────────────────────────
+
+    /// The network this wallet is configured for.
+    /// Mirrors Wallet::network().
+    Network network();
+};

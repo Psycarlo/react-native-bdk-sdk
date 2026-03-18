@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find c:UserspsycarloDesktopdevbdk-react-native -name .gitignore -o -name *.gradle -o -name *.podspec -o -name podfile)",
+      "Bash(find c:UserspsycarloDesktopdevbdk-react-native -type f -name *.json -o -name *.toml -o -name *.yml -o -name *.yaml)",
+      "Bash(find c:UserspsycarloDesktopdevbdk-react-native -not -path */target/* -not -path */node_modules/* -type f)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:crates.io)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(cargo build:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo search:*)",
+      "Bash(cargo info:*)"
+    ]
+  }
+}

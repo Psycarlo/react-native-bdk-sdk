@@ -1,0 +1,13 @@
+{
+  "name": "react-native-bdk-sdk",
+  "description": "React Native language bindings for the Bitcoin Development Kit",
+  "keywords": [
+    "bitcoin",
+    "bdk",
+    "react-native",
+    "expo",
+    "ios",
+    "android"
+  ],
+  "devDependencies": {}
+}
