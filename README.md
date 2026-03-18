@@ -16,10 +16,6 @@ A modern, lightweight, descriptor-based wallet library written in Rust! And now,
   <a href="https://docs.rs/bdk_wallet/latest/bdk_wallet/">BDK Wallet</a>
 </p>
 
-https://bitcoindevkit.org/
-https://docs.rs/bdk_wallet/latest/bdk_wallet/
-
-
 ## Installation
 
 ### Expo
