@@ -30,4 +30,24 @@ else
   echo "  No podspec found, skipping"
 fi
 
+# ----------------------------------------------------------------------------
+#    Fix C++ reserved keyword used as parameter name in generated FFI code.
+#    `template` is a C++ keyword but a valid Rust identifier, so the uniffi
+#    codegen emits it verbatim into extern "C" declarations, causing compile
+#    errors. We rename it to `template_` in parameter positions.
+# ----------------------------------------------------------------------------
+CPP_FFI="$PROJECT_DIR/cpp/generated/bdk_ffi.cpp"
+if [ -f "$CPP_FFI" ]; then
+  if grep -q 'RustBuffer template,' "$CPP_FFI"; then
+    echo "  Patching bdk_ffi.cpp (C++ reserved keyword 'template')..."
+    sed -i.bak 's/RustBuffer template,/RustBuffer template_,/g' "$CPP_FFI"
+    rm -f "$CPP_FFI.bak"
+    echo "  bdk_ffi.cpp patched"
+  else
+    echo "  bdk_ffi.cpp already patched, skipping"
+  fi
+else
+  echo "  bdk_ffi.cpp not found, skipping"
+fi
+
 echo "Done."
