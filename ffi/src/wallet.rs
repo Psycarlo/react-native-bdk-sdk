@@ -230,37 +230,47 @@ impl Wallet {
 
     // ── Sync ──────────────────────────────────────────────────────────────────
 
-    pub fn full_scan_with_esplora(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
-        use bdk_esplora::EsploraExt;
+    pub async fn full_scan_with_esplora(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
+        use bdk_esplora::EsploraAsyncExt;
 
         let client = bdk_esplora::esplora_client::Builder::new(&url)
-            .build_blocking();
+            .build_async()
+            .map_err(|_| BdkError::SyncFailed)?;
 
-        let mut w = self.inner.lock().unwrap();
-        let request = w.start_full_scan().build();
+        let request = {
+            let w = self.inner.lock().unwrap();
+            w.start_full_scan().build()
+        };
 
         let update = client
             .full_scan(request, stop_gap as usize, 1)
+            .await
             .map_err(|_| BdkError::SyncFailed)?;
 
+        let mut w = self.inner.lock().unwrap();
         w.apply_update(update)?;
         self.persist_wallet(&mut w)?;
         Ok(())
     }
 
-    pub fn sync_with_esplora(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
-        use bdk_esplora::EsploraExt;
+    pub async fn sync_with_esplora(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
+        use bdk_esplora::EsploraAsyncExt;
 
         let client = bdk_esplora::esplora_client::Builder::new(&url)
-            .build_blocking();
+            .build_async()
+            .map_err(|_| BdkError::SyncFailed)?;
 
-        let mut w = self.inner.lock().unwrap();
-        let request = w.start_sync_with_revealed_spks().build();
+        let request = {
+            let w = self.inner.lock().unwrap();
+            w.start_sync_with_revealed_spks().build()
+        };
 
         let update = client
             .sync(request, 1)
+            .await
             .map_err(|_| BdkError::SyncFailed)?;
 
+        let mut w = self.inner.lock().unwrap();
         w.apply_update(update)?;
         self.persist_wallet(&mut w)?;
         Ok(())
@@ -306,18 +316,22 @@ impl Wallet {
 
     // ── Broadcast ─────────────────────────────────────────────────────────────
 
-    pub fn broadcast_with_esplora(&self, url: String, psbt: Arc<Psbt>) -> Result<String, BdkError> {
-        let psbt_inner = psbt.inner.lock().unwrap();
-        let tx = psbt_inner
-            .clone()
-            .extract_tx()
-            .map_err(|_| BdkError::InvalidPsbt)?;
+    pub async fn broadcast_with_esplora(&self, url: String, psbt: Arc<Psbt>) -> Result<String, BdkError> {
+        let tx = {
+            let psbt_inner = psbt.inner.lock().unwrap();
+            psbt_inner
+                .clone()
+                .extract_tx()
+                .map_err(|_| BdkError::InvalidPsbt)?
+        };
 
         let client = bdk_esplora::esplora_client::Builder::new(&url)
-            .build_blocking();
+            .build_async()
+            .map_err(|_| BdkError::BroadcastFailed)?;
 
         client
             .broadcast(&tx)
+            .await
             .map_err(|_| BdkError::BroadcastFailed)?;
 
         Ok(tx.compute_txid().to_string())
@@ -349,77 +363,85 @@ impl Wallet {
     // ── Convenience ───────────────────────────────────────────────────────────
 
     #[allow(deprecated)]
-    pub fn send(
+    pub async fn send(
         &self,
         address: String,
         amount_sats: u64,
         fee_rate: f64,
         esplora_url: String,
     ) -> Result<String, BdkError> {
-        let mut w = self.inner.lock().unwrap();
-        let network = w.network();
+        let tx = {
+            let mut w = self.inner.lock().unwrap();
+            let network = w.network();
 
-        let addr = address
-            .parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>()
-            .map_err(|_| BdkError::InvalidAddress)?
-            .require_network(network)
-            .map_err(|_| BdkError::InvalidAddress)?;
+            let addr = address
+                .parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>()
+                .map_err(|_| BdkError::InvalidAddress)?
+                .require_network(network)
+                .map_err(|_| BdkError::InvalidAddress)?;
 
-        let sat_per_kwu = (fee_rate * 250.0) as u64;
-        let fr = FeeRate::from_sat_per_kwu(sat_per_kwu);
+            let sat_per_kwu = (fee_rate * 250.0) as u64;
+            let fr = FeeRate::from_sat_per_kwu(sat_per_kwu);
 
-        let mut builder = w.build_tx();
-        builder
-            .add_recipient(addr.script_pubkey(), Amount::from_sat(amount_sats))
-            .fee_rate(fr);
+            let mut builder = w.build_tx();
+            builder
+                .add_recipient(addr.script_pubkey(), Amount::from_sat(amount_sats))
+                .fee_rate(fr);
 
-        let mut psbt = builder.finish()?;
-        w.sign(&mut psbt, SignOptions::default())?;
+            let mut psbt = builder.finish()?;
+            w.sign(&mut psbt, SignOptions::default())?;
 
-        let tx = psbt.extract_tx().map_err(|_| BdkError::InvalidPsbt)?;
+            psbt.extract_tx().map_err(|_| BdkError::InvalidPsbt)?
+        };
 
         let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-            .build_blocking();
-        client.broadcast(&tx).map_err(|_| BdkError::BroadcastFailed)?;
+            .build_async()
+            .map_err(|_| BdkError::BroadcastFailed)?;
+        client.broadcast(&tx).await.map_err(|_| BdkError::BroadcastFailed)?;
 
+        let mut w = self.inner.lock().unwrap();
         self.persist_wallet(&mut w)?;
         Ok(tx.compute_txid().to_string())
     }
 
     #[allow(deprecated)]
-    pub fn drain(
+    pub async fn drain(
         &self,
         address: String,
         fee_rate: f64,
         esplora_url: String,
     ) -> Result<String, BdkError> {
-        let mut w = self.inner.lock().unwrap();
-        let network = w.network();
+        let tx = {
+            let mut w = self.inner.lock().unwrap();
+            let network = w.network();
 
-        let addr = address
-            .parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>()
-            .map_err(|_| BdkError::InvalidAddress)?
-            .require_network(network)
-            .map_err(|_| BdkError::InvalidAddress)?;
+            let addr = address
+                .parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>()
+                .map_err(|_| BdkError::InvalidAddress)?
+                .require_network(network)
+                .map_err(|_| BdkError::InvalidAddress)?;
 
-        let sat_per_kwu = (fee_rate * 250.0) as u64;
-        let fr = FeeRate::from_sat_per_kwu(sat_per_kwu);
+            let sat_per_kwu = (fee_rate * 250.0) as u64;
+            let fr = FeeRate::from_sat_per_kwu(sat_per_kwu);
 
-        let mut builder = w.build_tx();
-        builder
-            .drain_wallet()
-            .drain_to(addr.script_pubkey())
-            .fee_rate(fr);
+            let mut builder = w.build_tx();
+            builder
+                .drain_wallet()
+                .drain_to(addr.script_pubkey())
+                .fee_rate(fr);
 
-        let mut psbt = builder.finish()?;
-        w.sign(&mut psbt, SignOptions::default())?;
+            let mut psbt = builder.finish()?;
+            w.sign(&mut psbt, SignOptions::default())?;
 
-        let tx = psbt.extract_tx().map_err(|_| BdkError::InvalidPsbt)?;
+            psbt.extract_tx().map_err(|_| BdkError::InvalidPsbt)?
+        };
 
         let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-            .build_blocking();
-        client.broadcast(&tx).map_err(|_| BdkError::BroadcastFailed)?;
+            .build_async()
+            .map_err(|_| BdkError::BroadcastFailed)?;
+        client.broadcast(&tx).await.map_err(|_| BdkError::BroadcastFailed)?;
 
+        let mut w = self.inner.lock().unwrap();
         self.persist_wallet(&mut w)?;
         Ok(tx.compute_txid().to_string())
     }

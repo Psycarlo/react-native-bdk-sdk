@@ -2403,7 +2403,7 @@ export declare const BdkError: {
     };
     instanceOf: (e: any) => e is BdkError;
 };
-export type BdkError = InstanceType<typeof BdkError[keyof Omit<typeof BdkError, 'instanceOf'>]>;
+export type BdkError = InstanceType<(typeof BdkError)[keyof Omit<typeof BdkError, "instanceOf">]>;
 /**
  * Controls which UTXOs the wallet may spend as change inputs.
  */
@@ -2740,7 +2740,7 @@ export declare const WalletEvent: Readonly<{
  * Events emitted when applying chain updates to the wallet.
  * Mirrors bdk_wallet::event::WalletEvent (non-exhaustive in upstream).
  */
-export type WalletEvent = InstanceType<typeof WalletEvent[keyof Omit<typeof WalletEvent, 'instanceOf'>]>;
+export type WalletEvent = InstanceType<(typeof WalletEvent)[keyof Omit<typeof WalletEvent, "instanceOf">]>;
 /**
  * BIP-39 mnemonic word count (determines entropy length).
  */
@@ -3194,7 +3194,9 @@ export interface WalletInterface {
     /**
      * Broadcast a finalized PSBT via Esplora. Returns the txid.
      */
-    broadcastWithEsplora(url: string, psbt: PsbtInterface): string;
+    broadcastWithEsplora(url: string, psbt: PsbtInterface, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * Build an RBF fee-bump PSBT for an unconfirmed transaction.
      * Mirrors Wallet::build_fee_bump().
@@ -3239,7 +3241,9 @@ export interface WalletInterface {
     /**
      * Drain the entire wallet to an address. Returns txid.
      */
-    drain(address: string, feeRate: number, esploraUrl: string): string;
+    drain(address: string, feeRate: number, esploraUrl: string, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * Sign and attempt to finalize all inputs.
      * Returns true if fully finalized.
@@ -3255,7 +3259,9 @@ export interface WalletInterface {
      * Uses Wallet::start_full_scan() + bdk_esplora client internally.
      * stop_gap: how many consecutive unused addresses to scan before stopping.
      */
-    fullScanWithEsplora(url: string, stopGap: bigint): void;
+    fullScanWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * Get the wallet balance. Mirrors Wallet::balance().
      */
@@ -3264,11 +3270,11 @@ export interface WalletInterface {
      * Returns the raw transaction hex for a given txid. Null if not found.
      * Mirrors Wallet::get_tx().
      */
-    getTx(txid: string): string | undefined;
+    getTx(txid: string): /*throws*/ string | undefined;
     /**
      * Get a specific UTXO. Returns null if not found. Mirrors Wallet::get_utxo().
      */
-    getUtxo(outpoint: OutPoint): LocalOutput | undefined;
+    getUtxo(outpoint: OutPoint): /*throws*/ LocalOutput | undefined;
     /**
      * Manually insert a TxOut (e.g. for tracking external outputs).
      * Mirrors Wallet::insert_txout().
@@ -3337,7 +3343,7 @@ export interface WalletInterface {
      * Returns null if the descriptor has no policy.
      * Mirrors Wallet::policies() — serialized because the Policy tree is complex.
      */
-    policies(keychain: KeychainKind): string | undefined;
+    policies(keychain: KeychainKind): /*throws*/ string | undefined;
     /**
      * The public-only descriptor for the given keychain as a string.
      * Mirrors Wallet::public_descriptor().
@@ -3358,7 +3364,9 @@ export interface WalletInterface {
      * Build, sign, and broadcast a simple payment in one call. Returns txid.
      * Combines build_tx → sign → broadcast via Esplora.
      */
-    send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string): string;
+    send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * How much was sent from / received into the wallet for a raw tx (hex).
      * Mirrors Wallet::sent_and_received().
@@ -3378,7 +3386,9 @@ export interface WalletInterface {
      * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
      * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
      */
-    syncWithEsplora(url: string, stopGap: bigint): void;
+    syncWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * All wallet-relevant canonical transactions.
      * Mirrors Wallet::transactions() → mapped to TxDetails.
@@ -3388,7 +3398,7 @@ export interface WalletInterface {
      * Details for a single transaction. Returns null if not found.
      * Mirrors Wallet::tx_details().
      */
-    txDetails(txid: string): TxDetails | undefined;
+    txDetails(txid: string): /*throws*/ TxDetails | undefined;
     /**
      * Mark an address index as unused (returns true if previously used).
      * Mirrors Wallet::unmark_used().
@@ -3412,7 +3422,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
     /**
      * Broadcast a finalized PSBT via Esplora. Returns the txid.
      */
-    broadcastWithEsplora(url: string, psbt: PsbtInterface): string;
+    broadcastWithEsplora(url: string, psbt: PsbtInterface, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * Build an RBF fee-bump PSBT for an unconfirmed transaction.
      * Mirrors Wallet::build_fee_bump().
@@ -3457,7 +3469,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
     /**
      * Drain the entire wallet to an address. Returns txid.
      */
-    drain(address: string, feeRate: number, esploraUrl: string): string;
+    drain(address: string, feeRate: number, esploraUrl: string, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * Sign and attempt to finalize all inputs.
      * Returns true if fully finalized.
@@ -3473,7 +3487,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
      * Uses Wallet::start_full_scan() + bdk_esplora client internally.
      * stop_gap: how many consecutive unused addresses to scan before stopping.
      */
-    fullScanWithEsplora(url: string, stopGap: bigint): void;
+    fullScanWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * Get the wallet balance. Mirrors Wallet::balance().
      */
@@ -3576,7 +3592,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
      * Build, sign, and broadcast a simple payment in one call. Returns txid.
      * Combines build_tx → sign → broadcast via Esplora.
      */
-    send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string): string;
+    send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * How much was sent from / received into the wallet for a raw tx (hex).
      * Mirrors Wallet::sent_and_received().
@@ -3596,7 +3614,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
      * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
      * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
      */
-    syncWithEsplora(url: string, stopGap: bigint): void;
+    syncWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * All wallet-relevant canonical transactions.
      * Mirrors Wallet::transactions() → mapped to TxDetails.

@@ -668,12 +668,12 @@ interface Wallet {
     /// Full scan via an Esplora HTTP server (discovers all used addresses).
     /// Uses Wallet::start_full_scan() + bdk_esplora client internally.
     /// stop_gap: how many consecutive unused addresses to scan before stopping.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     void full_scan_with_esplora(string url, u64 stop_gap);
 
     /// Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
     /// Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     void sync_with_esplora(string url, u64 stop_gap);
 
     /// Full scan via an Electrum TCP/TLS server.
@@ -687,7 +687,7 @@ interface Wallet {
     // ── Broadcast ─────────────────────────────────────────────────────────────
 
     /// Broadcast a finalized PSBT via Esplora. Returns the txid.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     string broadcast_with_esplora(string url, Psbt psbt);
 
     /// Broadcast a finalized PSBT via Electrum. Returns the txid.
@@ -698,11 +698,11 @@ interface Wallet {
 
     /// Build, sign, and broadcast a simple payment in one call. Returns txid.
     /// Combines build_tx → sign → broadcast via Esplora.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     string send(string address, u64 amount_sats, double fee_rate, string esplora_url);
 
     /// Drain the entire wallet to an address. Returns txid.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     string drain(string address, double fee_rate, string esplora_url);
 
     // ── Fee bumping ───────────────────────────────────────────────────────────
