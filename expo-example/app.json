@@ -25,6 +25,9 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.expoexample"
     },
+    "plugins": [
+      "../plugin/build"
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
     }

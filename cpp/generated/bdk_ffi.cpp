@@ -610,21 +610,21 @@ extern "C" {
     );
     RustBuffer uniffi_bdk_ffi_fn_func_create_descriptor(
         /*handle*/ uint64_t mnemonic, 
-        RustBuffer template, 
+        RustBuffer template_,
         RustBuffer keychain, 
         RustBuffer network, 
         RustCallStatus *uniffi_out_err
     );
     RustBuffer uniffi_bdk_ffi_fn_func_create_public_descriptor(
         RustBuffer xpub, 
-        RustBuffer template, 
+        RustBuffer template_,
         RustBuffer keychain, 
         RustBuffer network, 
         RustCallStatus *uniffi_out_err
     );
     RustBuffer uniffi_bdk_ffi_fn_func_create_single_key_descriptor(
         RustBuffer key, 
-        RustBuffer template, 
+        RustBuffer template_,
         RustBuffer network, 
         RustCallStatus *uniffi_out_err
     );

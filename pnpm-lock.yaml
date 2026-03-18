@@ -54,6 +54,9 @@ importers:
       react-native:
         specifier: 0.83.2
         version: 0.83.2(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.2.14)(react@19.2.0)
+      react-native-bdk-sdk:
+        specifier: workspace:*
+        version: link:..
     devDependencies:
       '@types/react':
         specifier: ~19.2.2
