@@ -517,6 +517,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     WalletCreationFailed: {
         new (message: string): {
@@ -554,6 +557,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     WalletLoadFailed: {
         new (message: string): {
@@ -591,6 +597,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     WalletLoadMismatch: {
         new (message: string): {
@@ -628,6 +637,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     PersistError: {
         new (message: string): {
@@ -665,6 +677,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InvalidAddress: {
         new (message: string): {
@@ -702,6 +717,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InvalidScript: {
         new (message: string): {
@@ -739,6 +757,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     TransactionBuildFailed: {
         new (message: string): {
@@ -776,6 +797,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     NoRecipients: {
         new (message: string): {
@@ -813,6 +837,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     NoUtxosSelected: {
         new (message: string): {
@@ -850,6 +877,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     OutputBelowDustLimit: {
         new (message: string): {
@@ -887,6 +917,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InsufficientFunds: {
         new (message: string): {
@@ -924,6 +957,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeRateTooLow: {
         new (message: string): {
@@ -961,6 +997,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeTooLow: {
         new (message: string): {
@@ -998,6 +1037,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     LockTimeConflict: {
         new (message: string): {
@@ -1035,6 +1077,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     RbfSequenceConflict: {
         new (message: string): {
@@ -1072,6 +1117,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     VersionZero: {
         new (message: string): {
@@ -1109,6 +1157,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     VersionOneCsv: {
         new (message: string): {
@@ -1146,6 +1197,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SpendingPolicyRequired: {
         new (message: string): {
@@ -1183,6 +1237,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     MissingKeyOrigin: {
         new (message: string): {
@@ -1220,6 +1277,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     MissingNonWitnessUtxo: {
         new (message: string): {
@@ -1257,6 +1317,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     OutpointNotFound: {
         new (message: string): {
@@ -1294,6 +1357,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeBumpTargetNotFound: {
         new (message: string): {
@@ -1331,6 +1397,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeBumpAlreadyConfirmed: {
         new (message: string): {
@@ -1368,6 +1437,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeBumpIrreplaceable: {
         new (message: string): {
@@ -1405,6 +1477,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeBumpFeeRateUnavailable: {
         new (message: string): {
@@ -1442,6 +1517,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     FeeBumpInvalidOutputIndex: {
         new (message: string): {
@@ -1479,6 +1557,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InvalidPsbt: {
         new (message: string): {
@@ -1516,6 +1597,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignFailed: {
         new (message: string): {
@@ -1553,6 +1637,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerMissingKey: {
         new (message: string): {
@@ -1590,6 +1677,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerInvalidKey: {
         new (message: string): {
@@ -1627,6 +1717,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerUserCanceled: {
         new (message: string): {
@@ -1664,6 +1757,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerInputIndexOutOfRange: {
         new (message: string): {
@@ -1701,6 +1797,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerMissingNonWitnessUtxo: {
         new (message: string): {
@@ -1738,6 +1837,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerMissingWitnessUtxo: {
         new (message: string): {
@@ -1775,6 +1877,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerMissingWitnessScript: {
         new (message: string): {
@@ -1812,6 +1917,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerNonStandardSighash: {
         new (message: string): {
@@ -1849,6 +1957,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SignerInvalidSighash: {
         new (message: string): {
@@ -1886,6 +1997,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     SyncFailed: {
         new (message: string): {
@@ -1923,6 +2037,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     BroadcastFailed: {
         new (message: string): {
@@ -1960,6 +2077,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InvalidTransaction: {
         new (message: string): {
@@ -1997,6 +2117,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     TransactionNotFound: {
         new (message: string): {
@@ -2034,6 +2157,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     CannotConnect: {
         new (message: string): {
@@ -2071,6 +2197,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     CalculateFeeError: {
         new (message: string): {
@@ -2108,6 +2237,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InvalidMnemonic: {
         new (message: string): {
@@ -2145,6 +2277,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     InvalidEntropy: {
         new (message: string): {
@@ -2182,6 +2317,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     KeyError: {
         new (message: string): {
@@ -2219,6 +2357,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     Generic: {
         new (message: string): {
@@ -2256,6 +2397,9 @@ export declare const BdkError: {
             cause?: unknown;
         };
         isError(error: unknown): error is Error;
+        captureStackTrace(targetObject: object, constructorOpt?: Function): void;
+        prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
+        stackTraceLimit: number;
     };
     instanceOf: (e: any) => e is BdkError;
 };
