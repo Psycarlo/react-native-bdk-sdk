@@ -17,14 +17,14 @@ const ARTIFACTS = [
     zipName: "android-artifacts.zip",
     checksumKey: "android",
     existsPath: path.join(PACKAGE_ROOT, "android", "src", "main", "jniLibs"),
-    buildCmd: "npm run ubrn:android",
+    buildCmd: "pnpm ubrn:android",
   },
   {
     name: "iOS",
     zipName: "ios-artifacts.zip",
     checksumKey: "ios",
     existsPath: path.join(PACKAGE_ROOT, "build", "RnBdk.xcframework"),
-    buildCmd: "npm run ubrn:ios",
+    buildCmd: "pnpm ubrn:ios",
     platformGuard: "darwin",
   },
 ];
