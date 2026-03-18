@@ -1,4 +1,4 @@
-![BDK Banner](https://github.com/Psycarlo/react-native-bdk-sdk/tree/main/assets/bdk-banner.png)
+![BDK Banner](https://github.com/Psycarlo/react-native-bdk-sdk/blob/main/assets/bdk-banner.png)
 
 <div align="center">
   <h1>react-native-bdk-sdk</h1>
@@ -14,11 +14,7 @@ A modern, lightweight, descriptor-based wallet library written in Rust! And now,
 <div align="center">
   <a href="https://bitcoindevkit.org/">BDK Website</a> ·
   <a href="https://docs.rs/bdk_wallet/latest/bdk_wallet/">BDK Wallet</a>
-</p>
-
-https://bitcoindevkit.org/
-https://docs.rs/bdk_wallet/latest/bdk_wallet/
-
+</div>
 
 ## Installation
 
