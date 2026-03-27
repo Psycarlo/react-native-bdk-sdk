@@ -16,10 +16,11 @@ bdk_kyoto = { version = "0.15.4" }
 bip39 = { version = "2.2", features = ["all-languages"] }
 serde_json = "1.0"
 
-uniffi = { version = "=0.30.0", features = ["cli"] }
+tokio = { version = "1", features = ["rt"] }
+uniffi = { version = "=0.31.0", features = ["cli"] }
 
 [dev-dependencies]
-uniffi = { version = "=0.30.0", features = ["bindgen-tests"] }
+uniffi = { version = "=0.31.0", features = ["bindgen-tests"] }
 
 [build-dependencies]
-uniffi = { version = "=0.30.0", features = ["build"] }
+uniffi = { version = "=0.31.0", features = ["build"] }
