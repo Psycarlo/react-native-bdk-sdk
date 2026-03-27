@@ -82,7 +82,7 @@ const uniffiIsDebug =
  * Uses Bip44/49/84/86 descriptor templates.
  */
 export function createDescriptor(
-  mnemonic: MnemonicInterface,
+  mnemonic: MnemonicLike,
   template: DescriptorTemplate,
   keychain: KeychainKind,
   network: Network
@@ -165,7 +165,7 @@ export function createSingleKeyDescriptor(
  * Mirrors bdk_wallet::export::FullyNodedExport.
  */
 export function exportWallet(
-  wallet: WalletInterface,
+  wallet: WalletLike,
   label: string,
   includeBlockHeight: boolean
 ): string /*throws*/ {
@@ -263,21 +263,8 @@ export const AddressInfo = (() => {
     );
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link AddressInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link AddressInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<AddressInfo>,
   });
 })();
@@ -348,21 +335,8 @@ export const Balance = (() => {
     return uniffiCreateRecord<Balance, ReturnType<typeof defaults>>(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link Balance}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link Balance}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<Balance>,
   });
 })();
@@ -419,21 +393,8 @@ export const BlockId = (() => {
     return uniffiCreateRecord<BlockId, ReturnType<typeof defaults>>(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link BlockId}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link BlockId}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<BlockId>,
   });
 })();
@@ -489,21 +450,8 @@ export const ConfirmationBlockTime = (() => {
     >(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link ConfirmationBlockTime}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link ConfirmationBlockTime}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<ConfirmationBlockTime>,
   });
 })();
@@ -553,21 +501,8 @@ export const DerivationInfo = (() => {
     );
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link DerivationInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link DerivationInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<DerivationInfo>,
   });
 })();
@@ -617,21 +552,8 @@ export const KeychainInfo = (() => {
     );
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link KeychainInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link KeychainInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<KeychainInfo>,
   });
 })();
@@ -671,7 +593,7 @@ export type LocalOutput = {
   /**
    * None when the output is unconfirmed.
    */
-  confirmationBlockTime: ConfirmationBlockTime | undefined;
+  confirmationBlockTime?: ConfirmationBlockTime;
 };
 
 /**
@@ -685,21 +607,8 @@ export const LocalOutput = (() => {
     );
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link LocalOutput}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link LocalOutput}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<LocalOutput>,
   });
 })();
@@ -762,21 +671,8 @@ export const OutPoint = (() => {
     return uniffiCreateRecord<OutPoint, ReturnType<typeof defaults>>(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link OutPoint}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link OutPoint}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<OutPoint>,
   });
 })();
@@ -824,21 +720,8 @@ export const Recipient = (() => {
     return uniffiCreateRecord<Recipient, ReturnType<typeof defaults>>(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link Recipient}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link Recipient}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<Recipient>,
   });
 })();
@@ -891,21 +774,8 @@ export const SentAndReceived = (() => {
     );
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link SentAndReceived}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link SentAndReceived}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<SentAndReceived>,
   });
 })();
@@ -949,11 +819,11 @@ export type TxDetails = {
   /**
    * Fee paid in satoshis. None if some inputs are unknown.
    */
-  fee: /*u64*/ bigint | undefined;
+  fee?: /*u64*/ bigint;
   /**
    * Fee rate in sat/vbyte. None if some inputs are unknown.
    */
-  feeRate: /*f64*/ number | undefined;
+  feeRate?: /*f64*/ number;
   /**
    * Net change to wallet balance in satoshis (positive = received more than sent).
    */
@@ -961,7 +831,7 @@ export type TxDetails = {
   /**
    * None when unconfirmed.
    */
-  confirmationBlockTime: ConfirmationBlockTime | undefined;
+  confirmationBlockTime?: ConfirmationBlockTime;
   /**
    * The full serialized transaction as hex.
    */
@@ -977,21 +847,8 @@ export const TxDetails = (() => {
     return uniffiCreateRecord<TxDetails, ReturnType<typeof defaults>>(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link TxDetails}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link TxDetails}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<TxDetails>,
   });
 })();
@@ -1066,21 +923,8 @@ export const TxOut = (() => {
     return uniffiCreateRecord<TxOut, ReturnType<typeof defaults>>(defaults);
   })();
   return Object.freeze({
-    /**
-     * Create a frozen instance of {@link TxOut}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create,
-
-    /**
-     * Create a frozen instance of {@link TxOut}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: create,
-
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Object.freeze(defaults()) as Partial<TxOut>,
   });
 })();
@@ -3260,7 +3104,7 @@ const FfiConverterTypeWordCount = (() => {
  * BIP-39 mnemonic phrase for key generation.
  * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
  */
-export interface MnemonicInterface {
+export interface MnemonicLike {
   /**
    * The language of this mnemonic.
    */
@@ -3282,15 +3126,16 @@ export interface MnemonicInterface {
    */
   words(): Array<string>;
 }
+/**
+ * @deprecated Use `MnemonicLike` instead.
+ */
+export type MnemonicInterface = MnemonicLike;
 
 /**
  * BIP-39 mnemonic phrase for key generation.
  * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
  */
-export class Mnemonic
-  extends UniffiAbstractObject
-  implements MnemonicInterface
-{
+export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
   readonly [uniffiTypeNameSymbol] = "Mnemonic";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -3319,9 +3164,7 @@ export class Mnemonic
   /**
    * Create a mnemonic from raw entropy bytes (16–32 bytes).
    */
-  static fromEntropy(
-    entropy: Array</*u8*/ number>
-  ): MnemonicInterface /*throws*/ {
+  static fromEntropy(entropy: Array</*u8*/ number>): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -3344,7 +3187,7 @@ export class Mnemonic
   static fromEntropyIn(
     entropy: Array</*u8*/ number>,
     language: Language
-  ): MnemonicInterface /*throws*/ {
+  ): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -3365,7 +3208,7 @@ export class Mnemonic
   /**
    * Parse an existing mnemonic string (auto-detects language).
    */
-  static fromString(mnemonic: string): MnemonicInterface /*throws*/ {
+  static fromString(mnemonic: string): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -3388,7 +3231,7 @@ export class Mnemonic
   static fromStringIn(
     mnemonic: string,
     language: Language
-  ): MnemonicInterface /*throws*/ {
+  ): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -3510,10 +3353,10 @@ export class Mnemonic
   }
 }
 
-const uniffiTypeMnemonicObjectFactory: UniffiObjectFactory<MnemonicInterface> =
+const uniffiTypeMnemonicObjectFactory: UniffiObjectFactory<MnemonicLike> =
   (() => {
     return {
-      create(pointer: UniffiHandle): MnemonicInterface {
+      create(pointer: UniffiHandle): MnemonicLike {
         const instance = Object.create(Mnemonic.prototype);
         instance[pointerLiteralSymbol] = pointer;
         instance[destructorGuardSymbol] = this.bless(pointer);
@@ -3536,14 +3379,14 @@ const uniffiTypeMnemonicObjectFactory: UniffiObjectFactory<MnemonicInterface> =
         ptr.markDestroyed();
       },
 
-      pointer(obj: MnemonicInterface): UniffiHandle {
+      pointer(obj: MnemonicLike): UniffiHandle {
         if ((obj as any)[destructorGuardSymbol] === undefined) {
           throw new UniffiInternalError.UnexpectedNullPointer();
         }
         return (obj as any)[pointerLiteralSymbol];
       },
 
-      clonePointer(obj: MnemonicInterface): UniffiHandle {
+      clonePointer(obj: MnemonicLike): UniffiHandle {
         const pointer = this.pointer(obj);
         return uniffiCaller.rustCall(
           /*caller:*/ (callStatus) =>
@@ -3566,14 +3409,14 @@ const uniffiTypeMnemonicObjectFactory: UniffiObjectFactory<MnemonicInterface> =
         );
       },
 
-      isConcreteType(obj: any): obj is MnemonicInterface {
+      isConcreteType(obj: any): obj is MnemonicLike {
         return (
           obj[destructorGuardSymbol] && obj[uniffiTypeNameSymbol] === "Mnemonic"
         );
       },
     };
   })();
-// FfiConverter for MnemonicInterface
+// FfiConverter for MnemonicLike
 const FfiConverterTypeMnemonic = new FfiConverterObject(
   uniffiTypeMnemonicObjectFactory
 );
@@ -3582,7 +3425,7 @@ const FfiConverterTypeMnemonic = new FfiConverterObject(
  * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
  * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
  */
-export interface PsbtInterface {
+export interface PsbtLike {
   /**
    * Extract the fully-signed transaction as raw hex.
    * Only valid after all inputs are finalized.
@@ -3612,12 +3455,16 @@ export interface PsbtInterface {
    */
   txid(): /*throws*/ string;
 }
+/**
+ * @deprecated Use `PsbtLike` instead.
+ */
+export type PsbtInterface = PsbtLike;
 
 /**
  * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
  * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
  */
-export class Psbt extends UniffiAbstractObject implements PsbtInterface {
+export class Psbt extends UniffiAbstractObject implements PsbtLike {
   readonly [uniffiTypeNameSymbol] = "Psbt";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -3773,9 +3620,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtInterface {
   }
 }
 
-const uniffiTypePsbtObjectFactory: UniffiObjectFactory<PsbtInterface> = (() => {
+const uniffiTypePsbtObjectFactory: UniffiObjectFactory<PsbtLike> = (() => {
   return {
-    create(pointer: UniffiHandle): PsbtInterface {
+    create(pointer: UniffiHandle): PsbtLike {
       const instance = Object.create(Psbt.prototype);
       instance[pointerLiteralSymbol] = pointer;
       instance[destructorGuardSymbol] = this.bless(pointer);
@@ -3798,14 +3645,14 @@ const uniffiTypePsbtObjectFactory: UniffiObjectFactory<PsbtInterface> = (() => {
       ptr.markDestroyed();
     },
 
-    pointer(obj: PsbtInterface): UniffiHandle {
+    pointer(obj: PsbtLike): UniffiHandle {
       if ((obj as any)[destructorGuardSymbol] === undefined) {
         throw new UniffiInternalError.UnexpectedNullPointer();
       }
       return (obj as any)[pointerLiteralSymbol];
     },
 
-    clonePointer(obj: PsbtInterface): UniffiHandle {
+    clonePointer(obj: PsbtLike): UniffiHandle {
       const pointer = this.pointer(obj);
       return uniffiCaller.rustCall(
         /*caller:*/ (callStatus) =>
@@ -3822,12 +3669,12 @@ const uniffiTypePsbtObjectFactory: UniffiObjectFactory<PsbtInterface> = (() => {
       );
     },
 
-    isConcreteType(obj: any): obj is PsbtInterface {
+    isConcreteType(obj: any): obj is PsbtLike {
       return obj[destructorGuardSymbol] && obj[uniffiTypeNameSymbol] === "Psbt";
     },
   };
 })();
-// FfiConverter for PsbtInterface
+// FfiConverter for PsbtLike
 const FfiConverterTypePsbt = new FfiConverterObject(
   uniffiTypePsbtObjectFactory
 );
@@ -3837,7 +3684,7 @@ const FfiConverterTypePsbt = new FfiConverterObject(
  * Create one, configure it, then call finish(wallet) to produce a PSBT.
  * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
  */
-export interface TxBuilderInterface {
+export interface TxBuilderLike {
   /**
    * Attach OP_RETURN data to the transaction.
    */
@@ -3914,7 +3761,7 @@ export interface TxBuilderInterface {
    * Build the transaction into a PSBT. The wallet is used for coin
    * selection and script resolution — the PSBT is NOT signed here.
    */
-  finish(wallet: WalletInterface): /*throws*/ PsbtInterface;
+  finish(wallet: WalletLike): /*throws*/ PsbtLike;
   /**
    * Include the redeemScript / witnessScript in PSBT outputs.
    */
@@ -3965,16 +3812,17 @@ export interface TxBuilderInterface {
    */
   unspendable(outpoints: Array<OutPoint>): void;
 }
+/**
+ * @deprecated Use `TxBuilderLike` instead.
+ */
+export type TxBuilderInterface = TxBuilderLike;
 
 /**
  * Fluent builder for constructing Bitcoin transactions.
  * Create one, configure it, then call finish(wallet) to produce a PSBT.
  * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
  */
-export class TxBuilder
-  extends UniffiAbstractObject
-  implements TxBuilderInterface
-{
+export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
   readonly [uniffiTypeNameSymbol] = "TxBuilder";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -4290,7 +4138,7 @@ export class TxBuilder
    * Build the transaction into a PSBT. The wallet is used for coin
    * selection and script resolution — the PSBT is NOT signed here.
    */
-  finish(wallet: WalletInterface): PsbtInterface /*throws*/ {
+  finish(wallet: WalletLike): PsbtLike /*throws*/ {
     return FfiConverterTypePsbt.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -4516,10 +4364,10 @@ export class TxBuilder
   }
 }
 
-const uniffiTypeTxBuilderObjectFactory: UniffiObjectFactory<TxBuilderInterface> =
+const uniffiTypeTxBuilderObjectFactory: UniffiObjectFactory<TxBuilderLike> =
   (() => {
     return {
-      create(pointer: UniffiHandle): TxBuilderInterface {
+      create(pointer: UniffiHandle): TxBuilderLike {
         const instance = Object.create(TxBuilder.prototype);
         instance[pointerLiteralSymbol] = pointer;
         instance[destructorGuardSymbol] = this.bless(pointer);
@@ -4542,14 +4390,14 @@ const uniffiTypeTxBuilderObjectFactory: UniffiObjectFactory<TxBuilderInterface> 
         ptr.markDestroyed();
       },
 
-      pointer(obj: TxBuilderInterface): UniffiHandle {
+      pointer(obj: TxBuilderLike): UniffiHandle {
         if ((obj as any)[destructorGuardSymbol] === undefined) {
           throw new UniffiInternalError.UnexpectedNullPointer();
         }
         return (obj as any)[pointerLiteralSymbol];
       },
 
-      clonePointer(obj: TxBuilderInterface): UniffiHandle {
+      clonePointer(obj: TxBuilderLike): UniffiHandle {
         const pointer = this.pointer(obj);
         return uniffiCaller.rustCall(
           /*caller:*/ (callStatus) =>
@@ -4572,7 +4420,7 @@ const uniffiTypeTxBuilderObjectFactory: UniffiObjectFactory<TxBuilderInterface> 
         );
       },
 
-      isConcreteType(obj: any): obj is TxBuilderInterface {
+      isConcreteType(obj: any): obj is TxBuilderLike {
         return (
           obj[destructorGuardSymbol] &&
           obj[uniffiTypeNameSymbol] === "TxBuilder"
@@ -4580,32 +4428,33 @@ const uniffiTypeTxBuilderObjectFactory: UniffiObjectFactory<TxBuilderInterface> 
       },
     };
   })();
-// FfiConverter for TxBuilderInterface
+// FfiConverter for TxBuilderLike
 const FfiConverterTypeTxBuilder = new FfiConverterObject(
   uniffiTypeTxBuilderObjectFactory
 );
 
-export interface WalletInterface {
+export interface WalletLike {
   /**
    * Broadcast a finalized PSBT via Electrum. Returns the txid.
    */
-  broadcastWithElectrum(url: string, psbt: PsbtInterface): /*throws*/ string;
+  broadcastWithElectrum(
+    url: string,
+    psbt: PsbtLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<string>;
   /**
    * Broadcast a finalized PSBT via Esplora. Returns the txid.
    */
   broadcastWithEsplora(
     url: string,
-    psbt: PsbtInterface,
+    psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
   /**
    * Build an RBF fee-bump PSBT for an unconfirmed transaction.
    * Mirrors Wallet::build_fee_bump().
    */
-  buildFeeBump(
-    txid: string,
-    newFeeRate: /*f64*/ number
-  ): /*throws*/ PsbtInterface;
+  buildFeeBump(txid: string, newFeeRate: /*f64*/ number): /*throws*/ PsbtLike;
   /**
    * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
    * Mirrors Wallet::calculate_fee().
@@ -4656,11 +4505,15 @@ export interface WalletInterface {
    * Returns true if fully finalized.
    * Mirrors Wallet::finalize_psbt() with default SignOptions.
    */
-  finalizePsbt(psbt: PsbtInterface): /*throws*/ boolean;
+  finalizePsbt(psbt: PsbtLike): /*throws*/ boolean;
   /**
    * Full scan via an Electrum TCP/TLS server.
    */
-  fullScanWithElectrum(url: string, stopGap: /*u64*/ bigint): /*throws*/ void;
+  fullScanWithElectrum(
+    url: string,
+    stopGap: /*u64*/ bigint,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<void>;
   /**
    * Full scan via an Esplora HTTP server (discovers all used addresses).
    * Uses Wallet::start_full_scan() + bdk_esplora client internally.
@@ -4796,11 +4649,15 @@ export interface WalletInterface {
    * Returns true if the PSBT is fully finalized after signing.
    * Mirrors Wallet::sign() with default SignOptions.
    */
-  sign(psbt: PsbtInterface): /*throws*/ boolean;
+  sign(psbt: PsbtLike): /*throws*/ boolean;
   /**
    * Incremental sync via Electrum.
    */
-  syncWithElectrum(url: string, stopGap: /*u64*/ bigint): /*throws*/ void;
+  syncWithElectrum(
+    url: string,
+    stopGap: /*u64*/ bigint,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<void>;
   /**
    * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
    * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
@@ -4826,8 +4683,12 @@ export interface WalletInterface {
    */
   unmarkUsed(keychain: KeychainKind, index: /*u32*/ number): boolean;
 }
+/**
+ * @deprecated Use `WalletLike` instead.
+ */
+export type WalletInterface = WalletLike;
 
-export class Wallet extends UniffiAbstractObject implements WalletInterface {
+export class Wallet extends UniffiAbstractObject implements WalletLike {
   readonly [uniffiTypeNameSymbol] = "Wallet";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -4865,23 +4726,43 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
   /**
    * Broadcast a finalized PSBT via Electrum. Returns the txid.
    */
-  broadcastWithElectrum(url: string, psbt: PsbtInterface): string /*throws*/ {
-    return FfiConverterString.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
-          FfiConverterTypeBdkError
-        ),
-        /*caller:*/ (callStatus) => {
+  async broadcastWithElectrum(
+    url: string,
+    psbt: PsbtLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterString.lower(url),
-            FfiConverterTypePsbt.lower(psbt),
-            callStatus
+            FfiConverterTypePsbt.lower(psbt)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -4889,7 +4770,7 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
    */
   async broadcastWithEsplora(
     url: string,
-    psbt: PsbtInterface,
+    psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<string> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -4930,10 +4811,7 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
    * Build an RBF fee-bump PSBT for an unconfirmed transaction.
    * Mirrors Wallet::build_fee_bump().
    */
-  buildFeeBump(
-    txid: string,
-    newFeeRate: /*f64*/ number
-  ): PsbtInterface /*throws*/ {
+  buildFeeBump(txid: string, newFeeRate: /*f64*/ number): PsbtLike /*throws*/ {
     return FfiConverterTypePsbt.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -5144,7 +5022,7 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
    * Returns true if fully finalized.
    * Mirrors Wallet::finalize_psbt() with default SignOptions.
    */
-  finalizePsbt(psbt: PsbtInterface): boolean /*throws*/ {
+  finalizePsbt(psbt: PsbtLike): boolean /*throws*/ {
     return FfiConverterBool.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -5165,21 +5043,40 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
   /**
    * Full scan via an Electrum TCP/TLS server.
    */
-  fullScanWithElectrum(url: string, stopGap: /*u64*/ bigint): void /*throws*/ {
-    uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
-        FfiConverterTypeBdkError
-      ),
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
-          uniffiTypeWalletObjectFactory.clonePointer(this),
-          FfiConverterString.lower(url),
-          FfiConverterUInt64.lower(stopGap),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
+  async fullScanWithElectrum(
+    url: string,
+    stopGap: /*u64*/ bigint,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterString.lower(url),
+            FfiConverterUInt64.lower(stopGap)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -5715,7 +5612,7 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
    * Returns true if the PSBT is fully finalized after signing.
    * Mirrors Wallet::sign() with default SignOptions.
    */
-  sign(psbt: PsbtInterface): boolean /*throws*/ {
+  sign(psbt: PsbtLike): boolean /*throws*/ {
     return FfiConverterBool.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -5736,21 +5633,40 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
   /**
    * Incremental sync via Electrum.
    */
-  syncWithElectrum(url: string, stopGap: /*u64*/ bigint): void /*throws*/ {
-    uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
-        FfiConverterTypeBdkError
-      ),
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
-          uniffiTypeWalletObjectFactory.clonePointer(this),
-          FfiConverterString.lower(url),
-          FfiConverterUInt64.lower(stopGap),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
+  async syncWithElectrum(
+    url: string,
+    stopGap: /*u64*/ bigint,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterString.lower(url),
+            FfiConverterUInt64.lower(stopGap)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
   /**
@@ -5874,70 +5790,69 @@ export class Wallet extends UniffiAbstractObject implements WalletInterface {
   }
 }
 
-const uniffiTypeWalletObjectFactory: UniffiObjectFactory<WalletInterface> =
-  (() => {
-    return {
-      create(pointer: UniffiHandle): WalletInterface {
-        const instance = Object.create(Wallet.prototype);
-        instance[pointerLiteralSymbol] = pointer;
-        instance[destructorGuardSymbol] = this.bless(pointer);
-        instance[uniffiTypeNameSymbol] = "Wallet";
-        return instance;
-      },
+const uniffiTypeWalletObjectFactory: UniffiObjectFactory<WalletLike> = (() => {
+  return {
+    create(pointer: UniffiHandle): WalletLike {
+      const instance = Object.create(Wallet.prototype);
+      instance[pointerLiteralSymbol] = pointer;
+      instance[destructorGuardSymbol] = this.bless(pointer);
+      instance[uniffiTypeNameSymbol] = "Wallet";
+      return instance;
+    },
 
-      bless(p: UniffiHandle): UniffiGcObject {
-        return uniffiCaller.rustCall(
-          /*caller:*/ (status) =>
-            nativeModule().ubrn_uniffi_internal_fn_method_wallet_ffi__bless_pointer(
-              p,
-              status
-            ),
-          /*liftString:*/ FfiConverterString.lift
-        );
-      },
+    bless(p: UniffiHandle): UniffiGcObject {
+      return uniffiCaller.rustCall(
+        /*caller:*/ (status) =>
+          nativeModule().ubrn_uniffi_internal_fn_method_wallet_ffi__bless_pointer(
+            p,
+            status
+          ),
+        /*liftString:*/ FfiConverterString.lift
+      );
+    },
 
-      unbless(ptr: UniffiGcObject) {
-        ptr.markDestroyed();
-      },
+    unbless(ptr: UniffiGcObject) {
+      ptr.markDestroyed();
+    },
 
-      pointer(obj: WalletInterface): UniffiHandle {
-        if ((obj as any)[destructorGuardSymbol] === undefined) {
-          throw new UniffiInternalError.UnexpectedNullPointer();
-        }
-        return (obj as any)[pointerLiteralSymbol];
-      },
+    pointer(obj: WalletLike): UniffiHandle {
+      if ((obj as any)[destructorGuardSymbol] === undefined) {
+        throw new UniffiInternalError.UnexpectedNullPointer();
+      }
+      return (obj as any)[pointerLiteralSymbol];
+    },
 
-      clonePointer(obj: WalletInterface): UniffiHandle {
-        const pointer = this.pointer(obj);
-        return uniffiCaller.rustCall(
-          /*caller:*/ (callStatus) =>
-            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_wallet(
-              pointer,
-              callStatus
-            ),
-          /*liftString:*/ FfiConverterString.lift
-        );
-      },
+    clonePointer(obj: WalletLike): UniffiHandle {
+      const pointer = this.pointer(obj);
+      return uniffiCaller.rustCall(
+        /*caller:*/ (callStatus) =>
+          nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_wallet(
+            pointer,
+            callStatus
+          ),
+        /*liftString:*/ FfiConverterString.lift
+      );
+    },
 
-      freePointer(pointer: UniffiHandle): void {
-        uniffiCaller.rustCall(
-          /*caller:*/ (callStatus) =>
-            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_wallet(
-              pointer,
-              callStatus
-            ),
-          /*liftString:*/ FfiConverterString.lift
-        );
-      },
+    freePointer(pointer: UniffiHandle): void {
+      uniffiCaller.rustCall(
+        /*caller:*/ (callStatus) =>
+          nativeModule().ubrn_uniffi_bdk_ffi_fn_free_wallet(
+            pointer,
+            callStatus
+          ),
+        /*liftString:*/ FfiConverterString.lift
+      );
+    },
 
-      isConcreteType(obj: any): obj is WalletInterface {
-        return (
-          obj[destructorGuardSymbol] && obj[uniffiTypeNameSymbol] === "Wallet"
-        );
-      },
-    };
-  })();
-// FfiConverter for WalletInterface
+    isConcreteType(obj: any): obj is WalletLike {
+      return (
+        obj[destructorGuardSymbol] && obj[uniffiTypeNameSymbol] === "Wallet"
+      );
+    },
+  };
+})();
+// FfiConverter for WalletLike
 const FfiConverterTypeWallet = new FfiConverterObject(
   uniffiTypeWalletObjectFactory
 );
@@ -6102,7 +6017,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language() !==
-    21218
+    59902
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_language"
@@ -6110,7 +6025,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex() !==
-    4827
+    33743
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex"
@@ -6118,7 +6033,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_string() !==
-    9706
+    8571
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_to_string"
@@ -6126,7 +6041,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_word_count() !==
-    43660
+    23669
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_word_count"
@@ -6134,7 +6049,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_words() !==
-    43060
+    27352
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_words"
@@ -6142,7 +6057,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_extract_tx_hex() !==
-    55644
+    11167
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_extract_tx_hex"
@@ -6150,14 +6065,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_amount() !==
-    56607
+    44530
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_fee_amount"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_rate() !== 60372
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_rate() !== 7329
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_fee_rate"
@@ -6165,7 +6080,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for() !==
-    21092
+    1731
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for"
@@ -6173,14 +6088,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_to_base64() !==
-    51389
+    47613
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_to_base64"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid() !== 48234
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid() !== 56652
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_txid"
@@ -6188,7 +6103,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_data() !==
-    24171
+    57070
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_data"
@@ -6196,7 +6111,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs() !==
-    49750
+    53720
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs"
@@ -6204,7 +6119,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_recipient() !==
-    4691
+    55150
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_recipient"
@@ -6212,7 +6127,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_unspendable() !==
-    34998
+    56609
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_unspendable"
@@ -6220,7 +6135,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_utxo() !==
-    20705
+    10770
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_utxo"
@@ -6228,7 +6143,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_utxos() !==
-    35571
+    8534
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_utxos"
@@ -6236,7 +6151,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_allow_dust() !==
-    56022
+    43752
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_allow_dust"
@@ -6244,7 +6159,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_change_policy() !==
-    46342
+    6977
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_change_policy"
@@ -6252,7 +6167,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_current_height() !==
-    46986
+    62295
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_current_height"
@@ -6260,7 +6175,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_do_not_spend_change() !==
-    50138
+    13462
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_do_not_spend_change"
@@ -6268,7 +6183,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_drain_to() !==
-    33757
+    33773
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_drain_to"
@@ -6276,7 +6191,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_drain_wallet() !==
-    46414
+    48711
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_drain_wallet"
@@ -6284,7 +6199,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf() !==
-    16464
+    31683
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf"
@@ -6292,7 +6207,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf_with_sequence() !==
-    21779
+    7301
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf_with_sequence"
@@ -6300,7 +6215,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_exclude_below_confirmations() !==
-    8223
+    61197
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_exclude_below_confirmations"
@@ -6308,7 +6223,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_exclude_unconfirmed() !==
-    63153
+    59334
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_exclude_unconfirmed"
@@ -6316,7 +6231,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_fee_absolute() !==
-    18715
+    38654
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_fee_absolute"
@@ -6324,7 +6239,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_fee_rate() !==
-    61803
+    2789
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_fee_rate"
@@ -6332,7 +6247,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_finish() !==
-    34471
+    35410
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_finish"
@@ -6340,7 +6255,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script() !==
-    41756
+    1428
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script"
@@ -6348,7 +6263,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only() !==
-    61274
+    15817
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only"
@@ -6356,7 +6271,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime() !==
-    33063
+    5541
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime"
@@ -6364,7 +6279,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_only_spend_change() !==
-    4190
+    34933
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_only_spend_change"
@@ -6372,7 +6287,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_only_witness_utxo() !==
-    16994
+    50325
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_only_witness_utxo"
@@ -6380,7 +6295,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_ordering() !==
-    46942
+    27106
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_ordering"
@@ -6388,7 +6303,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_policy_path() !==
-    3595
+    18350
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_policy_path"
@@ -6396,7 +6311,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence() !==
-    63261
+    25054
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence"
@@ -6404,7 +6319,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_recipients() !==
-    28721
+    45616
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_set_recipients"
@@ -6412,7 +6327,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_sighash() !==
-    22878
+    56408
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_sighash"
@@ -6420,7 +6335,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_tx_version() !==
-    13770
+    32700
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_tx_version"
@@ -6428,7 +6343,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable() !==
-    28900
+    10665
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_unspendable"
@@ -6436,7 +6351,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum() !==
-    14979
+    60979
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum"
@@ -6444,7 +6359,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora() !==
-    28791
+    37423
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora"
@@ -6452,7 +6367,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump() !==
-    47809
+    36133
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump"
@@ -6460,7 +6375,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee() !==
-    46069
+    47950
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_calculate_fee"
@@ -6468,7 +6383,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate() !==
-    23249
+    64903
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate"
@@ -6476,7 +6391,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx() !==
-    58967
+    39828
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_cancel_tx"
@@ -6484,7 +6399,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_checkpoints() !==
-    55082
+    44342
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_checkpoints"
@@ -6492,7 +6407,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_index() !==
-    63256
+    14373
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_derivation_index"
@@ -6500,7 +6415,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk() !==
-    22939
+    44475
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk"
@@ -6508,14 +6423,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_descriptor_checksum() !==
-    64735
+    25926
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_descriptor_checksum"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain() !== 24840
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain() !== 47076
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_drain"
@@ -6523,7 +6438,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_finalize_psbt() !==
-    22273
+    43414
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_finalize_psbt"
@@ -6531,7 +6446,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum() !==
-    15611
+    45470
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum"
@@ -6539,7 +6454,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora() !==
-    43655
+    39717
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora"
@@ -6547,14 +6462,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_balance() !==
-    18605
+    22733
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_get_balance"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_tx() !== 58042
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_tx() !== 59477
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_get_tx"
@@ -6562,7 +6477,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_utxo() !==
-    47916
+    35239
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_get_utxo"
@@ -6570,7 +6485,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_insert_txout() !==
-    33605
+    32676
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_insert_txout"
@@ -6578,7 +6493,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_is_mine() !==
-    27949
+    45210
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_is_mine"
@@ -6586,7 +6501,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_keychains() !==
-    1009
+    22099
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_keychains"
@@ -6594,7 +6509,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_latest_checkpoint() !==
-    5951
+    37521
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_latest_checkpoint"
@@ -6602,7 +6517,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_list_output() !==
-    35186
+    21768
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_list_output"
@@ -6610,7 +6525,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_list_unspent() !==
-    590
+    13240
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_list_unspent"
@@ -6618,7 +6533,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_list_unused_addresses() !==
-    63031
+    11229
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_list_unused_addresses"
@@ -6626,7 +6541,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_mark_used() !==
-    53427
+    63278
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_mark_used"
@@ -6634,7 +6549,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_network() !==
-    18889
+    50311
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_network"
@@ -6642,7 +6557,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_next_derivation_index() !==
-    28145
+    50867
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_next_derivation_index"
@@ -6650,7 +6565,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_next_unused_address() !==
-    58812
+    51015
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_next_unused_address"
@@ -6658,7 +6573,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_peek_address() !==
-    56579
+    10883
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_peek_address"
@@ -6666,7 +6581,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_persist() !==
-    18685
+    34809
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_persist"
@@ -6674,7 +6589,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_policies() !==
-    64896
+    31626
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_policies"
@@ -6682,7 +6597,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor() !==
-    19031
+    58604
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_public_descriptor"
@@ -6690,7 +6605,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to() !==
-    55968
+    12682
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to"
@@ -6698,14 +6613,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address() !==
-    61535
+    25820
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 51484
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 4457
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_send"
@@ -6713,14 +6628,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sent_and_received() !==
-    31024
+    949
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sent_and_received"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign() !== 49926
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign() !== 32193
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sign"
@@ -6728,7 +6643,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum() !==
-    58815
+    38866
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"
@@ -6736,7 +6651,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora() !==
-    55793
+    28111
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora"
@@ -6744,7 +6659,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions() !==
-    13072
+    33179
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_transactions"
@@ -6752,7 +6667,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details() !==
-    60609
+    15355
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_tx_details"
@@ -6760,7 +6675,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used() !==
-    25591
+    46731
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_unmark_used"

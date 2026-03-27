@@ -61,7 +61,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_clone_wallet(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_wallet(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(descriptor: Uint8Array, changeDescriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, url: Uint8Array, psbt: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, url: Uint8Array, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(ptr: bigint, url: Uint8Array, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(ptr: bigint, txid: Uint8Array, newFeeRate: number, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
@@ -73,7 +73,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_descriptor_checksum(ptr: bigint, keychain: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_drain(ptr: bigint, address: Uint8Array, feeRate: number, esploraUrl: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_finalize_psbt(ptr: bigint, psbt: bigint, uniffi_out_err: UniffiRustCallStatus): number;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(ptr: bigint, url: Uint8Array, stopGap: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_get_balance(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_get_tx(ptr: bigint, txid: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
@@ -98,7 +98,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_send(ptr: bigint, address: Uint8Array, amountSats: bigint, feeRate: number, esploraUrl: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sent_and_received(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sign(ptr: bigint, psbt: bigint, uniffi_out_err: UniffiRustCallStatus): number;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(ptr: bigint, url: Uint8Array, stopGap: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(ptr: bigint, txid: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
