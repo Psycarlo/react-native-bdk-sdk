@@ -677,11 +677,11 @@ interface Wallet {
     void sync_with_esplora(string url, u64 stop_gap);
 
     /// Full scan via an Electrum TCP/TLS server.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     void full_scan_with_electrum(string url, u64 stop_gap);
 
     /// Incremental sync via Electrum.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     void sync_with_electrum(string url, u64 stop_gap);
 
     // ── Broadcast ─────────────────────────────────────────────────────────────
@@ -691,7 +691,7 @@ interface Wallet {
     string broadcast_with_esplora(string url, Psbt psbt);
 
     /// Broadcast a finalized PSBT via Electrum. Returns the txid.
-    [Throws=BdkError]
+    [Async, Throws=BdkError]
     string broadcast_with_electrum(string url, Psbt psbt);
 
     // ── Convenience ───────────────────────────────────────────────────────────
