@@ -390,11 +390,10 @@ extern "C" {
         RustBuffer db_path, 
         RustCallStatus *uniffi_out_err
     );
-    RustBuffer uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
         /*handle*/ uint64_t ptr, 
         RustBuffer url, 
-        /*handle*/ uint64_t psbt, 
-        RustCallStatus *uniffi_out_err
+        /*handle*/ uint64_t psbt
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(
         /*handle*/ uint64_t ptr, 
@@ -452,11 +451,10 @@ extern "C" {
         /*handle*/ uint64_t psbt, 
         RustCallStatus *uniffi_out_err
     );
-    void uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
         /*handle*/ uint64_t ptr, 
         RustBuffer url, 
-        uint64_t stop_gap, 
-        RustCallStatus *uniffi_out_err
+        uint64_t stop_gap
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
         /*handle*/ uint64_t ptr, 
@@ -577,11 +575,10 @@ extern "C" {
         /*handle*/ uint64_t psbt, 
         RustCallStatus *uniffi_out_err
     );
-    void uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
         /*handle*/ uint64_t ptr, 
         RustBuffer url, 
-        uint64_t stop_gap, 
-        RustCallStatus *uniffi_out_err
+        uint64_t stop_gap
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
         /*handle*/ uint64_t ptr, 
@@ -5214,14 +5211,11 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_wallet_new(jsi::Runti
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
-        auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2]), 
-            &status
+        auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2])
         );
-        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
 
         
-        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2])
@@ -5328,14 +5322,11 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_finalize_psbt(jsi::
         return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
-        uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2]), 
-            &status
+        auto value = uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2])
         );
-        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
 
         
-        return jsi::Value::undefined();
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2])
@@ -5572,14 +5563,11 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sign(jsi::Runtime& 
         return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
-        uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2]), 
-            &status
+        auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2])
         );
-        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
 
         
-        return jsi::Value::undefined();
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2])

@@ -4,7 +4,7 @@ import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConver
  * Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xprv.../0/*)" for BIP84.
  * Uses Bip44/49/84/86 descriptor templates.
  */
-export declare function createDescriptor(mnemonic: MnemonicInterface, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
+export declare function createDescriptor(mnemonic: MnemonicLike, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
 /**
  * Generate a public (watch-only) descriptor from an xpub string using a standard BIP template.
  * Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xpub.../0/*)" for BIP84.
@@ -20,7 +20,7 @@ export declare function createSingleKeyDescriptor(key: string, template: SingleK
  * Export a wallet in FullyNoded-compatible JSON format for backup.
  * Mirrors bdk_wallet::export::FullyNodedExport.
  */
-export declare function exportWallet(wallet: WalletInterface, label: string, includeBlockHeight: boolean): string;
+export declare function exportWallet(wallet: WalletLike, label: string, includeBlockHeight: boolean): string;
 /**
  * Returns true if the address string is valid for the given network.
  */
@@ -46,19 +46,8 @@ export type AddressInfo = {
  * Generated factory for {@link AddressInfo} record objects.
  */
 export declare const AddressInfo: Readonly<{
-    /**
-     * Create a frozen instance of {@link AddressInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<AddressInfo> & Required<Omit<AddressInfo, never>>) => AddressInfo;
-    /**
-     * Create a frozen instance of {@link AddressInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<AddressInfo> & Required<Omit<AddressInfo, never>>) => AddressInfo;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<AddressInfo>;
 }>;
 /**
@@ -95,19 +84,8 @@ export type Balance = {
  * Generated factory for {@link Balance} record objects.
  */
 export declare const Balance: Readonly<{
-    /**
-     * Create a frozen instance of {@link Balance}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<Balance> & Required<Omit<Balance, never>>) => Balance;
-    /**
-     * Create a frozen instance of {@link Balance}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<Balance> & Required<Omit<Balance, never>>) => Balance;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<Balance>;
 }>;
 /**
@@ -121,19 +99,8 @@ export type BlockId = {
  * Generated factory for {@link BlockId} record objects.
  */
 export declare const BlockId: Readonly<{
-    /**
-     * Create a frozen instance of {@link BlockId}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<BlockId> & Required<Omit<BlockId, never>>) => BlockId;
-    /**
-     * Create a frozen instance of {@link BlockId}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<BlockId> & Required<Omit<BlockId, never>>) => BlockId;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<BlockId>;
 }>;
 /**
@@ -155,19 +122,8 @@ export type ConfirmationBlockTime = {
  * Generated factory for {@link ConfirmationBlockTime} record objects.
  */
 export declare const ConfirmationBlockTime: Readonly<{
-    /**
-     * Create a frozen instance of {@link ConfirmationBlockTime}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<ConfirmationBlockTime> & Required<Omit<ConfirmationBlockTime, never>>) => ConfirmationBlockTime;
-    /**
-     * Create a frozen instance of {@link ConfirmationBlockTime}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<ConfirmationBlockTime> & Required<Omit<ConfirmationBlockTime, never>>) => ConfirmationBlockTime;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<ConfirmationBlockTime>;
 }>;
 /**
@@ -181,19 +137,8 @@ export type DerivationInfo = {
  * Generated factory for {@link DerivationInfo} record objects.
  */
 export declare const DerivationInfo: Readonly<{
-    /**
-     * Create a frozen instance of {@link DerivationInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
-    /**
-     * Create a frozen instance of {@link DerivationInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<DerivationInfo>;
 }>;
 /**
@@ -210,19 +155,8 @@ export type KeychainInfo = {
  * Generated factory for {@link KeychainInfo} record objects.
  */
 export declare const KeychainInfo: Readonly<{
-    /**
-     * Create a frozen instance of {@link KeychainInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
-    /**
-     * Create a frozen instance of {@link KeychainInfo}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<KeychainInfo>;
 }>;
 /**
@@ -237,25 +171,14 @@ export type LocalOutput = {
     /**
      * None when the output is unconfirmed.
      */
-    confirmationBlockTime: ConfirmationBlockTime | undefined;
+    confirmationBlockTime?: ConfirmationBlockTime;
 };
 /**
  * Generated factory for {@link LocalOutput} record objects.
  */
 export declare const LocalOutput: Readonly<{
-    /**
-     * Create a frozen instance of {@link LocalOutput}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
-    create: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, never>>) => LocalOutput;
-    /**
-     * Create a frozen instance of {@link LocalOutput}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
-    new: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, never>>) => LocalOutput;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
+    create: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
+    new: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
     defaults: () => Partial<LocalOutput>;
 }>;
 /**
@@ -269,19 +192,8 @@ export type OutPoint = {
  * Generated factory for {@link OutPoint} record objects.
  */
 export declare const OutPoint: Readonly<{
-    /**
-     * Create a frozen instance of {@link OutPoint}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
-    /**
-     * Create a frozen instance of {@link OutPoint}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<OutPoint>;
 }>;
 /**
@@ -298,19 +210,8 @@ export type Recipient = {
  * Generated factory for {@link Recipient} record objects.
  */
 export declare const Recipient: Readonly<{
-    /**
-     * Create a frozen instance of {@link Recipient}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
-    /**
-     * Create a frozen instance of {@link Recipient}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<Recipient>;
 }>;
 /**
@@ -330,19 +231,8 @@ export type SentAndReceived = {
  * Generated factory for {@link SentAndReceived} record objects.
  */
 export declare const SentAndReceived: Readonly<{
-    /**
-     * Create a frozen instance of {@link SentAndReceived}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
-    /**
-     * Create a frozen instance of {@link SentAndReceived}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<SentAndReceived>;
 }>;
 /**
@@ -361,11 +251,11 @@ export type TxDetails = {
     /**
      * Fee paid in satoshis. None if some inputs are unknown.
      */
-    fee: /*u64*/ bigint | undefined;
+    fee?: bigint;
     /**
      * Fee rate in sat/vbyte. None if some inputs are unknown.
      */
-    feeRate: /*f64*/ number | undefined;
+    feeRate?: number;
     /**
      * Net change to wallet balance in satoshis (positive = received more than sent).
      */
@@ -373,7 +263,7 @@ export type TxDetails = {
     /**
      * None when unconfirmed.
      */
-    confirmationBlockTime: ConfirmationBlockTime | undefined;
+    confirmationBlockTime?: ConfirmationBlockTime;
     /**
      * The full serialized transaction as hex.
      */
@@ -383,19 +273,8 @@ export type TxDetails = {
  * Generated factory for {@link TxDetails} record objects.
  */
 export declare const TxDetails: Readonly<{
-    /**
-     * Create a frozen instance of {@link TxDetails}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
-    create: (partial: Partial<TxDetails> & Required<Omit<TxDetails, never>>) => TxDetails;
-    /**
-     * Create a frozen instance of {@link TxDetails}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
-    new: (partial: Partial<TxDetails> & Required<Omit<TxDetails, never>>) => TxDetails;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
+    create: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
+    new: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
     defaults: () => Partial<TxDetails>;
 }>;
 /**
@@ -415,19 +294,8 @@ export type TxOut = {
  * Generated factory for {@link TxOut} record objects.
  */
 export declare const TxOut: Readonly<{
-    /**
-     * Create a frozen instance of {@link TxOut}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     create: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
-    /**
-     * Create a frozen instance of {@link TxOut}, with defaults specified
-     * in Rust, in the {@link bdk_ffi} crate.
-     */
     new: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
-    /**
-     * Defaults specified in the {@link bdk_ffi} crate.
-     */
     defaults: () => Partial<TxOut>;
 }>;
 export declare enum BdkError_Tags {
@@ -2755,7 +2623,7 @@ export declare enum WordCount {
  * BIP-39 mnemonic phrase for key generation.
  * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
  */
-export interface MnemonicInterface {
+export interface MnemonicLike {
     /**
      * The language of this mnemonic.
      */
@@ -2778,10 +2646,14 @@ export interface MnemonicInterface {
     words(): Array<string>;
 }
 /**
+ * @deprecated Use `MnemonicLike` instead.
+ */
+export type MnemonicInterface = MnemonicLike;
+/**
  * BIP-39 mnemonic phrase for key generation.
  * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
  */
-export declare class Mnemonic extends UniffiAbstractObject implements MnemonicInterface {
+export declare class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     readonly [uniffiTypeNameSymbol] = "Mnemonic";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -2792,19 +2664,19 @@ export declare class Mnemonic extends UniffiAbstractObject implements MnemonicIn
     /**
      * Create a mnemonic from raw entropy bytes (16–32 bytes).
      */
-    static fromEntropy(entropy: Array</*u8*/ number>): MnemonicInterface;
+    static fromEntropy(entropy: Array</*u8*/ number>): MnemonicLike;
     /**
      * Create a mnemonic from raw entropy bytes in a specific language.
      */
-    static fromEntropyIn(entropy: Array</*u8*/ number>, language: Language): MnemonicInterface;
+    static fromEntropyIn(entropy: Array</*u8*/ number>, language: Language): MnemonicLike;
     /**
      * Parse an existing mnemonic string (auto-detects language).
      */
-    static fromString(mnemonic: string): MnemonicInterface;
+    static fromString(mnemonic: string): MnemonicLike;
     /**
      * Parse a mnemonic string in a specific language.
      */
-    static fromStringIn(mnemonic: string, language: Language): MnemonicInterface;
+    static fromStringIn(mnemonic: string, language: Language): MnemonicLike;
     /**
      * The language of this mnemonic.
      */
@@ -2835,7 +2707,7 @@ export declare class Mnemonic extends UniffiAbstractObject implements MnemonicIn
  * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
  * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
  */
-export interface PsbtInterface {
+export interface PsbtLike {
     /**
      * Extract the fully-signed transaction as raw hex.
      * Only valid after all inputs are finalized.
@@ -2866,10 +2738,14 @@ export interface PsbtInterface {
     txid(): string;
 }
 /**
+ * @deprecated Use `PsbtLike` instead.
+ */
+export type PsbtInterface = PsbtLike;
+/**
  * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
  * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
  */
-export declare class Psbt extends UniffiAbstractObject implements PsbtInterface {
+export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     readonly [uniffiTypeNameSymbol] = "Psbt";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -2916,7 +2792,7 @@ export declare class Psbt extends UniffiAbstractObject implements PsbtInterface 
  * Create one, configure it, then call finish(wallet) to produce a PSBT.
  * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
  */
-export interface TxBuilderInterface {
+export interface TxBuilderLike {
     /**
      * Attach OP_RETURN data to the transaction.
      */
@@ -2993,7 +2869,7 @@ export interface TxBuilderInterface {
      * Build the transaction into a PSBT. The wallet is used for coin
      * selection and script resolution — the PSBT is NOT signed here.
      */
-    finish(wallet: WalletInterface): PsbtInterface;
+    finish(wallet: WalletLike): PsbtLike;
     /**
      * Include the redeemScript / witnessScript in PSBT outputs.
      */
@@ -3045,11 +2921,15 @@ export interface TxBuilderInterface {
     unspendable(outpoints: Array<OutPoint>): void;
 }
 /**
+ * @deprecated Use `TxBuilderLike` instead.
+ */
+export type TxBuilderInterface = TxBuilderLike;
+/**
  * Fluent builder for constructing Bitcoin transactions.
  * Create one, configure it, then call finish(wallet) to produce a PSBT.
  * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
  */
-export declare class TxBuilder extends UniffiAbstractObject implements TxBuilderInterface {
+export declare class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     readonly [uniffiTypeNameSymbol] = "TxBuilder";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -3130,7 +3010,7 @@ export declare class TxBuilder extends UniffiAbstractObject implements TxBuilder
      * Build the transaction into a PSBT. The wallet is used for coin
      * selection and script resolution — the PSBT is NOT signed here.
      */
-    finish(wallet: WalletInterface): PsbtInterface;
+    finish(wallet: WalletLike): PsbtLike;
     /**
      * Include the redeemScript / witnessScript in PSBT outputs.
      */
@@ -3186,22 +3066,24 @@ export declare class TxBuilder extends UniffiAbstractObject implements TxBuilder
     uniffiDestroy(): void;
     static instanceOf(obj: any): obj is TxBuilder;
 }
-export interface WalletInterface {
+export interface WalletLike {
     /**
      * Broadcast a finalized PSBT via Electrum. Returns the txid.
      */
-    broadcastWithElectrum(url: string, psbt: PsbtInterface): string;
+    broadcastWithElectrum(url: string, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * Broadcast a finalized PSBT via Esplora. Returns the txid.
      */
-    broadcastWithEsplora(url: string, psbt: PsbtInterface, asyncOpts_?: {
+    broadcastWithEsplora(url: string, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     /**
      * Build an RBF fee-bump PSBT for an unconfirmed transaction.
      * Mirrors Wallet::build_fee_bump().
      */
-    buildFeeBump(txid: string, newFeeRate: number): PsbtInterface;
+    buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     /**
      * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
      * Mirrors Wallet::calculate_fee().
@@ -3249,11 +3131,13 @@ export interface WalletInterface {
      * Returns true if fully finalized.
      * Mirrors Wallet::finalize_psbt() with default SignOptions.
      */
-    finalizePsbt(psbt: PsbtInterface): boolean;
+    finalizePsbt(psbt: PsbtLike): boolean;
     /**
      * Full scan via an Electrum TCP/TLS server.
      */
-    fullScanWithElectrum(url: string, stopGap: bigint): void;
+    fullScanWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * Full scan via an Esplora HTTP server (discovers all used addresses).
      * Uses Wallet::start_full_scan() + bdk_esplora client internally.
@@ -3377,11 +3261,13 @@ export interface WalletInterface {
      * Returns true if the PSBT is fully finalized after signing.
      * Mirrors Wallet::sign() with default SignOptions.
      */
-    sign(psbt: PsbtInterface): boolean;
+    sign(psbt: PsbtLike): boolean;
     /**
      * Incremental sync via Electrum.
      */
-    syncWithElectrum(url: string, stopGap: bigint): void;
+    syncWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
      * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
@@ -3405,7 +3291,11 @@ export interface WalletInterface {
      */
     unmarkUsed(keychain: KeychainKind, index: number): boolean;
 }
-export declare class Wallet extends UniffiAbstractObject implements WalletInterface {
+/**
+ * @deprecated Use `WalletLike` instead.
+ */
+export type WalletInterface = WalletLike;
+export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     readonly [uniffiTypeNameSymbol] = "Wallet";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
@@ -3418,18 +3308,20 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
     /**
      * Broadcast a finalized PSBT via Electrum. Returns the txid.
      */
-    broadcastWithElectrum(url: string, psbt: PsbtInterface): string;
+    broadcastWithElectrum(url: string, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     /**
      * Broadcast a finalized PSBT via Esplora. Returns the txid.
      */
-    broadcastWithEsplora(url: string, psbt: PsbtInterface, asyncOpts_?: {
+    broadcastWithEsplora(url: string, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     /**
      * Build an RBF fee-bump PSBT for an unconfirmed transaction.
      * Mirrors Wallet::build_fee_bump().
      */
-    buildFeeBump(txid: string, newFeeRate: number): PsbtInterface;
+    buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     /**
      * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
      * Mirrors Wallet::calculate_fee().
@@ -3477,11 +3369,13 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
      * Returns true if fully finalized.
      * Mirrors Wallet::finalize_psbt() with default SignOptions.
      */
-    finalizePsbt(psbt: PsbtInterface): boolean;
+    finalizePsbt(psbt: PsbtLike): boolean;
     /**
      * Full scan via an Electrum TCP/TLS server.
      */
-    fullScanWithElectrum(url: string, stopGap: bigint): void;
+    fullScanWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * Full scan via an Esplora HTTP server (discovers all used addresses).
      * Uses Wallet::start_full_scan() + bdk_esplora client internally.
@@ -3605,11 +3499,13 @@ export declare class Wallet extends UniffiAbstractObject implements WalletInterf
      * Returns true if the PSBT is fully finalized after signing.
      * Mirrors Wallet::sign() with default SignOptions.
      */
-    sign(psbt: PsbtInterface): boolean;
+    sign(psbt: PsbtLike): boolean;
     /**
      * Incremental sync via Electrum.
      */
-    syncWithElectrum(url: string, stopGap: bigint): void;
+    syncWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     /**
      * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
      * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
@@ -3736,7 +3632,7 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): LocalOutput;
             lower(value: LocalOutput): UniffiByteArray;
         };
-        FfiConverterTypeMnemonic: FfiConverterObject<MnemonicInterface>;
+        FfiConverterTypeMnemonic: FfiConverterObject<MnemonicLike>;
         FfiConverterTypeNetwork: {
             read(from: RustBuffer): Network;
             write(value: Network, into: RustBuffer): void;
@@ -3751,7 +3647,7 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): OutPoint;
             lower(value: OutPoint): UniffiByteArray;
         };
-        FfiConverterTypePsbt: FfiConverterObject<PsbtInterface>;
+        FfiConverterTypePsbt: FfiConverterObject<PsbtLike>;
         FfiConverterTypeRecipient: {
             read(from: RustBuffer): Recipient;
             write(value: Recipient, into: RustBuffer): void;
@@ -3773,7 +3669,7 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): SingleKeyDescriptorTemplate;
             lower(value: SingleKeyDescriptorTemplate): UniffiByteArray;
         };
-        FfiConverterTypeTxBuilder: FfiConverterObject<TxBuilderInterface>;
+        FfiConverterTypeTxBuilder: FfiConverterObject<TxBuilderLike>;
         FfiConverterTypeTxDetails: {
             read(from: RustBuffer): TxDetails;
             write(value: TxDetails, into: RustBuffer): void;
@@ -3795,7 +3691,7 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): TxOut;
             lower(value: TxOut): UniffiByteArray;
         };
-        FfiConverterTypeWallet: FfiConverterObject<WalletInterface>;
+        FfiConverterTypeWallet: FfiConverterObject<WalletLike>;
         FfiConverterTypeWalletEvent: {
             read(from: RustBuffer): WalletEvent;
             write(value: WalletEvent, into: RustBuffer): void;

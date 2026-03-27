@@ -292,9 +292,8 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
     ptr: bigint,
     url: Uint8Array,
-    psbt: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
+    psbt: bigint
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(
     ptr: bigint,
     url: Uint8Array,
@@ -354,9 +353,8 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
     ptr: bigint,
     url: Uint8Array,
-    stopGap: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    stopGap: bigint
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
     ptr: bigint,
     url: Uint8Array,
@@ -479,9 +477,8 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
     ptr: bigint,
     url: Uint8Array,
-    stopGap: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
+    stopGap: bigint
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
     ptr: bigint,
     url: Uint8Array,

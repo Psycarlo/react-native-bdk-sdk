@@ -276,39 +276,51 @@ impl Wallet {
         Ok(())
     }
 
-    pub fn full_scan_with_electrum(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
+    pub async fn full_scan_with_electrum(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
         use bdk_electrum::BdkElectrumClient;
 
-        let electrum_client = bdk_electrum::electrum_client::Client::new(&url)
-            .map_err(|_| BdkError::SyncFailed)?;
-        let client = BdkElectrumClient::new(electrum_client);
+        let request = {
+            let w = self.inner.lock().unwrap();
+            w.start_full_scan().build()
+        };
+
+        let update = tokio::task::spawn_blocking(move || {
+            let electrum_client = bdk_electrum::electrum_client::Client::new(&url)
+                .map_err(|_| BdkError::SyncFailed)?;
+            let client = BdkElectrumClient::new(electrum_client);
+            client
+                .full_scan(request, stop_gap as usize, 1, false)
+                .map_err(|_| BdkError::SyncFailed)
+        })
+        .await
+        .map_err(|_| BdkError::SyncFailed)??;
 
         let mut w = self.inner.lock().unwrap();
-        let request = w.start_full_scan().build();
-
-        let update = client
-            .full_scan(request, stop_gap as usize, 1, false)
-            .map_err(|_| BdkError::SyncFailed)?;
-
         w.apply_update(update)?;
         self.persist_wallet(&mut w)?;
         Ok(())
     }
 
-    pub fn sync_with_electrum(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
+    pub async fn sync_with_electrum(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
         use bdk_electrum::BdkElectrumClient;
 
-        let electrum_client = bdk_electrum::electrum_client::Client::new(&url)
-            .map_err(|_| BdkError::SyncFailed)?;
-        let client = BdkElectrumClient::new(electrum_client);
+        let request = {
+            let w = self.inner.lock().unwrap();
+            w.start_sync_with_revealed_spks().build()
+        };
+
+        let update = tokio::task::spawn_blocking(move || {
+            let electrum_client = bdk_electrum::electrum_client::Client::new(&url)
+                .map_err(|_| BdkError::SyncFailed)?;
+            let client = BdkElectrumClient::new(electrum_client);
+            client
+                .sync(request, 1, false)
+                .map_err(|_| BdkError::SyncFailed)
+        })
+        .await
+        .map_err(|_| BdkError::SyncFailed)??;
 
         let mut w = self.inner.lock().unwrap();
-        let request = w.start_sync_with_revealed_spks().build();
-
-        let update = client
-            .sync(request, 1, false)
-            .map_err(|_| BdkError::SyncFailed)?;
-
         w.apply_update(update)?;
         self.persist_wallet(&mut w)?;
         Ok(())
@@ -337,27 +349,37 @@ impl Wallet {
         Ok(tx.compute_txid().to_string())
     }
 
-    pub fn broadcast_with_electrum(
+    pub async fn broadcast_with_electrum(
         &self,
         url: String,
         psbt: Arc<Psbt>,
     ) -> Result<String, BdkError> {
-        use bdk_electrum::electrum_client::ElectrumApi;
+        let tx = {
+            let psbt_inner = psbt.inner.lock().unwrap();
+            psbt_inner
+                .clone()
+                .extract_tx()
+                .map_err(|_| BdkError::InvalidPsbt)?
+        };
 
-        let psbt_inner = psbt.inner.lock().unwrap();
-        let tx = psbt_inner
-            .clone()
-            .extract_tx()
-            .map_err(|_| BdkError::InvalidPsbt)?;
+        let txid = tx.compute_txid().to_string();
 
-        let client = bdk_electrum::electrum_client::Client::new(&url)
-            .map_err(|_| BdkError::BroadcastFailed)?;
+        tokio::task::spawn_blocking(move || {
+            use bdk_electrum::electrum_client::ElectrumApi;
 
-        client
-            .transaction_broadcast(&tx)
-            .map_err(|_| BdkError::BroadcastFailed)?;
+            let client = bdk_electrum::electrum_client::Client::new(&url)
+                .map_err(|_| BdkError::BroadcastFailed)?;
 
-        Ok(tx.compute_txid().to_string())
+            client
+                .transaction_broadcast(&tx)
+                .map_err(|_| BdkError::BroadcastFailed)?;
+
+            Ok::<_, BdkError>(())
+        })
+        .await
+        .map_err(|_| BdkError::BroadcastFailed)??;
+
+        Ok(txid)
     }
 
     // ── Convenience ───────────────────────────────────────────────────────────
