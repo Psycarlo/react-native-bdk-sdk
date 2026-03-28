@@ -523,8 +523,20 @@ interface NativeModuleInterface {
     index: number,
     uniffi_out_err: UniffiRustCallStatus
   ): number;
+  ubrn_uniffi_bdk_ffi_fn_func_address_from_script(
+    scriptHex: Uint8Array,
+    network: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_func_create_descriptor(
     mnemonic: bigint,
+    template: Uint8Array,
+    keychain: Uint8Array,
+    network: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_func_create_descriptor_from_string(
+    mnemonic: Uint8Array,
     template: Uint8Array,
     keychain: Uint8Array,
     network: Uint8Array,
@@ -557,6 +569,11 @@ interface NativeModuleInterface {
   ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_func_is_valid_address(
     address: Uint8Array,
+    network: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor(
+    descriptor: Uint8Array,
     network: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): number;
@@ -701,12 +718,15 @@ interface NativeModuleInterface {
     handle: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
+  ubrn_uniffi_bdk_ffi_checksum_func_address_from_script(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor(): number;
+  ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_public_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_single_key_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_wallet(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_export_wallet(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_is_valid_address(): number;
+  ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language(): number;

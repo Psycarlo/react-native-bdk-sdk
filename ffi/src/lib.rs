@@ -42,10 +42,35 @@ pub fn is_valid_address(address: String, network: Network) -> bool {
         .unwrap_or(false)
 }
 
+/// Convert a scriptPubKey (hex) to an address string for the given network.
+/// Returns the address string, or an error if the script cannot be converted.
+pub fn address_from_script(script_hex: String, network: Network) -> Result<String, BdkError> {
+    let net: bitcoin::Network = network.into();
+    let bytes = types::hex::decode(&script_hex).map_err(|_| BdkError::InvalidScript {
+        message: "Invalid hex encoding".into(),
+    })?;
+    let script = bitcoin::ScriptBuf::from_bytes(bytes);
+    let addr = Address::from_script(&script, net).map_err(|e| BdkError::InvalidScript {
+        message: format!("Cannot derive address from script: {}", e),
+    })?;
+    Ok(addr.to_string())
+}
+
+/// Validate a descriptor string for the given network without creating a wallet.
+pub fn validate_descriptor(descriptor: String, network: Network) -> bool {
+    let net: bitcoin::Network = network.into();
+    let secp = bitcoin::secp256k1::Secp256k1::new();
+    descriptor
+        .as_str()
+        .into_wallet_descriptor(&secp, net)
+        .is_ok()
+}
+
 /// Async wallet factory — creates or loads a wallet without blocking the JS thread.
+/// Pass null/undefined for change_descriptor to use the main descriptor for both keychains.
 pub async fn create_wallet(
     descriptor: String,
-    change_descriptor: String,
+    change_descriptor: Option<String>,
     network: Network,
     db_path: String,
 ) -> Result<Arc<Wallet>, BdkError> {
@@ -83,6 +108,47 @@ pub fn create_descriptor(
         (DescriptorTemplate::BIP44, bdk_wallet::KeychainKind::External) => {
             Bip44(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
         }
+        (DescriptorTemplate::BIP44, _) => {
+            Bip44(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+        }
+        (DescriptorTemplate::BIP49, _) => {
+            Bip49(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+        }
+        (DescriptorTemplate::BIP84, _) => {
+            Bip84(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+        }
+        (DescriptorTemplate::BIP86, _) => {
+            Bip86(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+        }
+    };
+
+    Ok(descriptor_str)
+}
+
+/// Generate an output descriptor from a mnemonic string (convenience overload).
+pub fn create_descriptor_from_string(
+    mnemonic: String,
+    template: DescriptorTemplate,
+    keychain: KeychainKind,
+    network: Network,
+) -> Result<String, BdkError> {
+    let m: bip39::Mnemonic = mnemonic.parse().map_err(|e: bip39::Error| BdkError::InvalidMnemonic {
+        message: e.to_string(),
+    })?;
+    let net: bitcoin::Network = network.into();
+    let xkey: ExtendedKey = m.into_extended_key().map_err(|e| BdkError::KeyError {
+        message: format!("Failed to derive extended key: {}", e),
+    })?;
+    let xprv = xkey
+        .into_xprv(net)
+        .ok_or(BdkError::KeyError {
+            message: "Cannot derive xprv from extended key".into(),
+        })?;
+
+    let kc: bdk_wallet::KeychainKind = keychain.into();
+    let secp = bitcoin::secp256k1::Secp256k1::new();
+
+    let descriptor_str = match (template, kc) {
         (DescriptorTemplate::BIP44, _) => {
             Bip44(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
         }

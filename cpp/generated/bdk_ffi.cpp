@@ -624,8 +624,20 @@ extern "C" {
         uint32_t index, 
         RustCallStatus *uniffi_out_err
     );
+    RustBuffer uniffi_bdk_ffi_fn_func_address_from_script(
+        RustBuffer script_hex, 
+        RustBuffer network, 
+        RustCallStatus *uniffi_out_err
+    );
     RustBuffer uniffi_bdk_ffi_fn_func_create_descriptor(
         /*handle*/ uint64_t mnemonic, 
+        RustBuffer template_, 
+        RustBuffer keychain, 
+        RustBuffer network, 
+        RustCallStatus *uniffi_out_err
+    );
+    RustBuffer uniffi_bdk_ffi_fn_func_create_descriptor_from_string(
+        RustBuffer mnemonic, 
         RustBuffer template_, 
         RustBuffer keychain, 
         RustBuffer network, 
@@ -658,6 +670,11 @@ extern "C" {
     );
     int8_t uniffi_bdk_ffi_fn_func_is_valid_address(
         RustBuffer address, 
+        RustBuffer network, 
+        RustCallStatus *uniffi_out_err
+    );
+    int8_t uniffi_bdk_ffi_fn_func_validate_descriptor(
+        RustBuffer descriptor, 
         RustBuffer network, 
         RustCallStatus *uniffi_out_err
     );
@@ -866,7 +883,11 @@ extern "C" {
         /*handle*/ uint64_t handle, 
         RustCallStatus *uniffi_out_err
     );
+    uint16_t uniffi_bdk_ffi_checksum_func_address_from_script(
+    );
     uint16_t uniffi_bdk_ffi_checksum_func_create_descriptor(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_func_create_descriptor_from_string(
     );
     uint16_t uniffi_bdk_ffi_checksum_func_create_public_descriptor(
     );
@@ -877,6 +898,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_func_export_wallet(
     );
     uint16_t uniffi_bdk_ffi_checksum_func_is_valid_address(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_func_validate_descriptor(
     );
     uint16_t uniffi_bdk_ffi_checksum_func_version(
     );
@@ -3344,12 +3367,28 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_unmark_used(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_func_address_from_script"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_func_address_from_script"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_func_address_from_script(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_func_create_descriptor"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_func_create_descriptor"),
         4,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_func_create_descriptor(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_func_create_descriptor_from_string"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_func_create_descriptor_from_string"),
+        4,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_func_create_descriptor_from_string(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_func_create_public_descriptor"] = jsi::Function::createFromHostFunction(
@@ -3390,6 +3429,14 @@ NativeBdkFfi::NativeBdkFfi(
         2,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_func_is_valid_address(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_func_validate_descriptor(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_func_version"] = jsi::Function::createFromHostFunction(
@@ -3792,12 +3839,28 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_ffi_bdk_ffi_rust_future_complete_void(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_func_address_from_script"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_address_from_script"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_func_address_from_script(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor"),
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_func_create_descriptor(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_func_create_public_descriptor"] = jsi::Function::createFromHostFunction(
@@ -3838,6 +3901,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_func_is_valid_address(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_func_validate_descriptor(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_func_version"] = jsi::Function::createFromHostFunction(
@@ -5782,9 +5853,29 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_unmark_used(jsi::Ru
         
         return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_address_from_script(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_func_address_from_script(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_create_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_func_create_descriptor(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_create_descriptor_from_string(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_func_create_descriptor_from_string(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3]), 
             &status
         );
         uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
@@ -5832,6 +5923,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_export_wallet(jsi::Runtime& 
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_is_valid_address(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_func_is_valid_address(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_validate_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_func_validate_descriptor(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
             &status
         );
         uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
@@ -6230,8 +6331,22 @@ jsi::Value NativeBdkFfi::cpp_ffi_bdk_ffi_rust_future_complete_void(jsi::Runtime&
         
         return jsi::Value::undefined();
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_address_from_script(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_func_address_from_script(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_create_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_func_create_descriptor(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_func_create_descriptor_from_string(
         );
 
         
@@ -6267,6 +6382,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_export_wallet(jsi::Run
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_is_valid_address(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_func_is_valid_address(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_validate_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_func_validate_descriptor(
         );
 
         

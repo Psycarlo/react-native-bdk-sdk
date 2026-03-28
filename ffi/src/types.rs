@@ -370,6 +370,22 @@ impl From<bdk_wallet::Balance> for Balance {
 }
 
 #[derive(Debug, Clone)]
+pub struct TxInput {
+    pub previous_txid: String,
+    pub previous_vout: u32,
+    pub sequence: u32,
+    pub script_sig_hex: String,
+    pub witness: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct TxOutput {
+    pub value: u64,
+    pub script_pubkey_hex: String,
+    pub address: Option<String>,
+}
+
+#[derive(Debug, Clone)]
 pub struct TxDetails {
     pub txid: String,
     pub sent: u64,
@@ -379,6 +395,10 @@ pub struct TxDetails {
     pub balance_delta: i64,
     pub confirmation_block_time: Option<ConfirmationBlockTime>,
     pub tx_hex: String,
+    pub version: i32,
+    pub locktime: u32,
+    pub inputs: Vec<TxInput>,
+    pub outputs: Vec<TxOutput>,
 }
 
 #[derive(Debug, Clone)]

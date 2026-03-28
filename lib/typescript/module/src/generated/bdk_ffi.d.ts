@@ -1,8 +1,16 @@
 import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConverterObject, RustBuffer, UniffiAbstractObject, destructorGuardSymbol, pointerLiteralSymbol, uniffiTypeNameSymbol } from "uniffi-bindgen-react-native";
 /**
+ * Convert a scriptPubKey (hex) to an address string for the given network.
+ */
+export declare function addressFromScript(scriptHex: string, network: Network): string;
+/**
  * Generate an output descriptor string from a mnemonic using a standard BIP template.
  */
 export declare function createDescriptor(mnemonic: MnemonicLike, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
+/**
+ * Generate an output descriptor from a mnemonic string directly (convenience).
+ */
+export declare function createDescriptorFromString(mnemonic: string, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
 /**
  * Generate a public (watch-only) descriptor from an xpub string.
  */
@@ -13,8 +21,9 @@ export declare function createPublicDescriptor(xpub: string, template: Descripto
 export declare function createSingleKeyDescriptor(key: string, template: SingleKeyDescriptorTemplate, network: Network): string;
 /**
  * Async wallet factory — creates or loads a wallet without blocking the JS thread.
+ * Pass null for change_descriptor to use the main descriptor for both keychains.
  */
-export declare function createWallet(descriptor: string, changeDescriptor: string, network: Network, dbPath: string, asyncOpts_?: {
+export declare function createWallet(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string, asyncOpts_?: {
     signal: AbortSignal;
 }): Promise<WalletLike>;
 /**
@@ -25,6 +34,10 @@ export declare function exportWallet(wallet: WalletLike, label: string, includeB
  * Returns true if the address string is valid for the given network.
  */
 export declare function isValidAddress(address: string, network: Network): boolean;
+/**
+ * Validate a descriptor string for the given network without creating a wallet.
+ */
+export declare function validateDescriptor(descriptor: string, network: Network): boolean;
 /**
  * Runtime version of the bdk_wallet crate.
  */
@@ -172,6 +185,10 @@ export type TxDetails = {
     balanceDelta: bigint;
     confirmationBlockTime?: ConfirmationBlockTime;
     txHex: string;
+    version: number;
+    locktime: number;
+    inputs: Array<TxInput>;
+    outputs: Array<TxOutput>;
 };
 /**
  * Generated factory for {@link TxDetails} record objects.
@@ -180,6 +197,21 @@ export declare const TxDetails: Readonly<{
     create: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
     new: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
     defaults: () => Partial<TxDetails>;
+}>;
+export type TxInput = {
+    previousTxid: string;
+    previousVout: number;
+    sequence: number;
+    scriptSigHex: string;
+    witness: Array<string>;
+};
+/**
+ * Generated factory for {@link TxInput} record objects.
+ */
+export declare const TxInput: Readonly<{
+    create: (partial: Partial<TxInput> & Required<Omit<TxInput, never>>) => TxInput;
+    new: (partial: Partial<TxInput> & Required<Omit<TxInput, never>>) => TxInput;
+    defaults: () => Partial<TxInput>;
 }>;
 export type TxOut = {
     value: bigint;
@@ -192,6 +224,19 @@ export declare const TxOut: Readonly<{
     create: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
     new: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
     defaults: () => Partial<TxOut>;
+}>;
+export type TxOutput = {
+    value: bigint;
+    scriptPubkeyHex: string;
+    address?: string;
+};
+/**
+ * Generated factory for {@link TxOutput} record objects.
+ */
+export declare const TxOutput: Readonly<{
+    create: (partial: Partial<TxOutput> & Required<Omit<TxOutput, "address">>) => TxOutput;
+    new: (partial: Partial<TxOutput> & Required<Omit<TxOutput, "address">>) => TxOutput;
+    defaults: () => Partial<TxOutput>;
 }>;
 export declare enum BdkError_Tags {
     InvalidDescriptor = "InvalidDescriptor",
@@ -4946,7 +4991,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     /**
      * Create or load a persisted wallet (sync — for async use create_wallet()).
      */
-    constructor(descriptor: string, changeDescriptor: string, network: Network, dbPath: string);
+    constructor(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string);
     broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
@@ -5161,6 +5206,13 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): TxDetails;
             lower(value: TxDetails): UniffiByteArray;
         };
+        FfiConverterTypeTxInput: {
+            read(from: RustBuffer): TxInput;
+            write(value: TxInput, into: RustBuffer): void;
+            allocationSize(value: TxInput): number;
+            lift(value: UniffiByteArray): TxInput;
+            lower(value: TxInput): UniffiByteArray;
+        };
         FfiConverterTypeTxOrdering: {
             read(from: RustBuffer): TxOrdering;
             write(value: TxOrdering, into: RustBuffer): void;
@@ -5174,6 +5226,13 @@ declare const _default: Readonly<{
             allocationSize(value: TxOut): number;
             lift(value: UniffiByteArray): TxOut;
             lower(value: TxOut): UniffiByteArray;
+        };
+        FfiConverterTypeTxOutput: {
+            read(from: RustBuffer): TxOutput;
+            write(value: TxOutput, into: RustBuffer): void;
+            allocationSize(value: TxOutput): number;
+            lift(value: UniffiByteArray): TxOutput;
+            lower(value: TxOutput): UniffiByteArray;
         };
         FfiConverterTypeWallet: FfiConverterObject<WalletLike>;
         FfiConverterTypeWalletEvent: {
