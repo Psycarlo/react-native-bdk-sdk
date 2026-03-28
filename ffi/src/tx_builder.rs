@@ -9,7 +9,7 @@ use crate::wallet::Wallet;
 
 /// Internal storage for TxBuilder parameters.
 /// We accumulate params here and apply them in finish().
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct TxBuilderParams {
     recipients: Vec<(String, u64)>,
     fee_rate: Option<f64>,
@@ -83,7 +83,6 @@ impl TxBuilder {
     }
 
     pub fn drain_to(&self, address: String) -> Result<(), BdkError> {
-        // Validate address format (full validation happens in finish)
         let mut p = self.params.lock().unwrap();
         p.drain_to = Some(address);
         Ok(())
@@ -208,8 +207,20 @@ impl TxBuilder {
     }
 
     /// Build the transaction into a PSBT using the wallet.
-    pub fn finish(&self, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
-        let params = self.params.lock().unwrap();
+    /// Runs on a background thread to avoid blocking the JS thread.
+    pub async fn finish(&self, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
+        let params = self.params.lock().unwrap().clone();
+
+        tokio::task::spawn_blocking(move || {
+            Self::finish_inner(params, wallet)
+        })
+        .await
+        .map_err(|e| BdkError::TransactionBuildFailed {
+            message: format!("Transaction build task panicked: {}", e),
+        })?
+    }
+
+    fn finish_inner(params: TxBuilderParams, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
         let network = {
             let w = wallet.inner.lock().unwrap();
             w.network()
@@ -222,9 +233,13 @@ impl TxBuilder {
         for (addr_str, amount) in &params.recipients {
             let addr = addr_str
                 .parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>()
-                .map_err(|_| BdkError::InvalidAddress)?
+                .map_err(|e| BdkError::InvalidAddress {
+                    message: format!("Cannot parse address '{}': {}", addr_str, e),
+                })?
                 .require_network(network)
-                .map_err(|_| BdkError::InvalidAddress)?;
+                .map_err(|e| BdkError::InvalidAddress {
+                    message: format!("Address '{}' not valid for network: {}", addr_str, e),
+                })?;
             builder.add_recipient(addr.script_pubkey(), Amount::from_sat(*amount));
         }
 
@@ -245,9 +260,13 @@ impl TxBuilder {
         if let Some(ref addr_str) = params.drain_to {
             let addr = addr_str
                 .parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>()
-                .map_err(|_| BdkError::InvalidAddress)?
+                .map_err(|e| BdkError::InvalidAddress {
+                    message: format!("Cannot parse drain address '{}': {}", addr_str, e),
+                })?
                 .require_network(network)
-                .map_err(|_| BdkError::InvalidAddress)?;
+                .map_err(|e| BdkError::InvalidAddress {
+                    message: format!("Drain address '{}' not valid for network: {}", addr_str, e),
+                })?;
             builder.drain_to(addr.script_pubkey());
         }
 
@@ -286,7 +305,6 @@ impl TxBuilder {
             if let Some(seq) = params.rbf_sequence {
                 builder.set_exact_sequence(bitcoin::Sequence(seq));
             } else {
-                // Default RBF sequence: 0xFFFFFFFD
                 builder.set_exact_sequence(bitcoin::Sequence(0xFFFFFFFD));
             }
         }
@@ -298,8 +316,12 @@ impl TxBuilder {
 
         // Lock time
         if let Some(h) = params.nlocktime {
-            builder.nlocktime(bitcoin::absolute::LockTime::from_height(h)
-                .map_err(|_| BdkError::LockTimeConflict)?);
+            builder.nlocktime(
+                bitcoin::absolute::LockTime::from_height(h)
+                    .map_err(|e| BdkError::LockTimeConflict {
+                        message: format!("Invalid lock height {}: {}", h, e),
+                    })?,
+            );
         }
 
         // Version
@@ -327,14 +349,18 @@ impl TxBuilder {
         // Data
         for data in &params.data {
             let push_bytes = bitcoin::script::PushBytesBuf::try_from(data.clone())
-                .map_err(|_| BdkError::TransactionBuildFailed)?;
+                .map_err(|e| BdkError::TransactionBuildFailed {
+                    message: format!("OP_RETURN data too large: {}", e),
+                })?;
             builder.add_data(&push_bytes);
         }
 
         // Policy path
         for (json, keychain) in &params.policy_path {
             let path: std::collections::BTreeMap<String, Vec<usize>> =
-                serde_json::from_str(json).map_err(|_| BdkError::TransactionBuildFailed)?;
+                serde_json::from_str(json).map_err(|e| BdkError::TransactionBuildFailed {
+                    message: format!("Invalid policy path JSON: {}", e),
+                })?;
             builder.policy_path(path, (*keychain).into());
         }
 

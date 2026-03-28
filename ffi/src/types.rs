@@ -236,7 +236,9 @@ impl OutPoint {
         let txid: bitcoin::Txid = self
             .txid
             .parse()
-            .map_err(|_| crate::error::BdkError::InvalidTransaction)?;
+            .map_err(|e| crate::error::BdkError::InvalidTransaction {
+                message: format!("Invalid txid '{}': {}", self.txid, e),
+            })?;
         Ok(bitcoin::OutPoint::new(txid, self.vout))
     }
 }

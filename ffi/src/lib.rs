@@ -1,3 +1,4 @@
+pub mod electrum;
 pub mod error;
 pub mod mnemonic;
 pub mod psbt;
@@ -5,6 +6,7 @@ pub mod tx_builder;
 pub mod types;
 pub mod wallet;
 
+pub use electrum::*;
 pub use error::*;
 pub use mnemonic::*;
 pub use psbt::*;
@@ -40,6 +42,22 @@ pub fn is_valid_address(address: String, network: Network) -> bool {
         .unwrap_or(false)
 }
 
+/// Async wallet factory — creates or loads a wallet without blocking the JS thread.
+pub async fn create_wallet(
+    descriptor: String,
+    change_descriptor: String,
+    network: Network,
+    db_path: String,
+) -> Result<Arc<Wallet>, BdkError> {
+    tokio::task::spawn_blocking(move || {
+        Wallet::new(descriptor, change_descriptor, network, db_path).map(Arc::new)
+    })
+    .await
+    .map_err(|e| BdkError::WalletCreationFailed {
+        message: format!("Wallet creation task panicked: {}", e),
+    })?
+}
+
 /// Generate an output descriptor string from a mnemonic using a standard BIP template.
 pub fn create_descriptor(
     mnemonic: Arc<Mnemonic>,
@@ -49,10 +67,14 @@ pub fn create_descriptor(
 ) -> Result<String, BdkError> {
     let net: bitcoin::Network = network.into();
     let m = mnemonic.inner();
-    let xkey: ExtendedKey = m.clone().into_extended_key().map_err(|_| BdkError::KeyError)?;
+    let xkey: ExtendedKey = m.clone().into_extended_key().map_err(|e| BdkError::KeyError {
+        message: format!("Failed to derive extended key: {}", e),
+    })?;
     let xprv = xkey
         .into_xprv(net)
-        .ok_or(BdkError::KeyError)?;
+        .ok_or(BdkError::KeyError {
+            message: "Cannot derive xprv from extended key".into(),
+        })?;
 
     let kc: bdk_wallet::KeychainKind = keychain.into();
     let secp = bitcoin::secp256k1::Secp256k1::new();
@@ -91,9 +113,10 @@ pub fn create_public_descriptor(
 
     let xpub_key: bitcoin::bip32::Xpub = xpub
         .parse()
-        .map_err(|_| BdkError::KeyError)?;
+        .map_err(|e| BdkError::KeyError {
+            message: format!("Invalid xpub: {}", e),
+        })?;
 
-    // Use fingerprint [00000000] with empty origin for public templates
     let descriptor_str = match template {
         DescriptorTemplate::BIP44 => {
             Bip44Public(xpub_key, Default::default(), kc)
@@ -125,8 +148,9 @@ pub fn create_single_key_descriptor(
     let net: bitcoin::Network = network.into();
     let secp = bitcoin::secp256k1::Secp256k1::new();
 
-    // Try parsing as WIF private key
-    let pk: bitcoin::PrivateKey = key.parse().map_err(|_| BdkError::KeyError)?;
+    let pk: bitcoin::PrivateKey = key.parse().map_err(|e| BdkError::KeyError {
+        message: format!("Invalid private key: {}", e),
+    })?;
 
     let descriptor_str = match template {
         SingleKeyDescriptorTemplate::P2Pkh => {
@@ -161,7 +185,9 @@ pub fn wallet_name_from_descriptor(
         net,
         &secp,
     )
-    .map_err(|_| BdkError::InvalidDescriptor)?;
+    .map_err(|e| BdkError::InvalidDescriptor {
+        message: format!("Failed to compute wallet name: {}", e),
+    })?;
 
     Ok(name)
 }
@@ -174,7 +200,9 @@ pub fn export_wallet(
 ) -> Result<String, BdkError> {
     let w = wallet.inner.lock().unwrap();
     let export = bdk_wallet::export::FullyNodedExport::export_wallet(&*w, &label, include_block_height)
-        .map_err(|_| BdkError::Generic)?;
+        .map_err(|e| BdkError::Generic {
+            message: format!("Export failed: {}", e),
+        })?;
     Ok(export.to_string())
 }
 

@@ -3,6 +3,9 @@ interface NativeModuleInterface {
     ubrn_uniffi_internal_fn_func_ffi__string_to_byte_length(string: string, uniffi_out_err: UniffiRustCallStatus): number;
     ubrn_uniffi_internal_fn_func_ffi__string_to_arraybuffer(string: string, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_internal_fn_func_ffi__arraybuffer_to_string(buffer: Uint8Array, uniffi_out_err: UniffiRustCallStatus): string;
+    ubrn_uniffi_bdk_ffi_fn_clone_electrumclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_free_electrumclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_new(url: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_clone_mnemonic(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_mnemonic(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(entropy: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
@@ -45,7 +48,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_exclude_unconfirmed(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_absolute(ptr: bigint, feeSats: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_rate(ptr: bigint, satPerVbyte: number, uniffi_out_err: UniffiRustCallStatus): void;
-    ubrn_uniffi_bdk_ffi_fn_method_txbuilder_finish(ptr: bigint, wallet: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_txbuilder_finish(ptr: bigint, wallet: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_nlocktime(ptr: bigint, lockHeight: number, uniffi_out_err: UniffiRustCallStatus): void;
@@ -61,7 +64,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_clone_wallet(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_wallet(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(descriptor: Uint8Array, changeDescriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, url: Uint8Array, psbt: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(ptr: bigint, url: Uint8Array, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(ptr: bigint, txid: Uint8Array, newFeeRate: number, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
@@ -72,8 +75,9 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_of_spk(ptr: bigint, scriptHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_descriptor_checksum(ptr: bigint, keychain: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_drain(ptr: bigint, address: Uint8Array, feeRate: number, esploraUrl: Uint8Array): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_drain_with_electrum(ptr: bigint, address: Uint8Array, feeRate: number, client: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_finalize_psbt(ptr: bigint, psbt: bigint, uniffi_out_err: UniffiRustCallStatus): number;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(ptr: bigint, client: bigint, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_get_balance(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_get_tx(ptr: bigint, txid: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
@@ -96,9 +100,10 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to(ptr: bigint, keychain: Uint8Array, index: number, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_next_address(ptr: bigint, keychain: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_send(ptr: bigint, address: Uint8Array, amountSats: bigint, feeRate: number, esploraUrl: Uint8Array): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_send_with_electrum(ptr: bigint, address: Uint8Array, amountSats: bigint, feeRate: number, client: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sent_and_received(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sign(ptr: bigint, psbt: bigint, uniffi_out_err: UniffiRustCallStatus): number;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(ptr: bigint, client: bigint, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(ptr: bigint, url: Uint8Array, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(ptr: bigint, txid: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
@@ -106,6 +111,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_func_create_descriptor(mnemonic: bigint, template: Uint8Array, keychain: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_func_create_public_descriptor(xpub: Uint8Array, template: Uint8Array, keychain: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_func_create_single_key_descriptor(key: Uint8Array, template: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
+    ubrn_uniffi_bdk_ffi_fn_func_create_wallet(descriptor: Uint8Array, changeDescriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_func_export_wallet(wallet: bigint, label: Uint8Array, includeBlockHeight: number, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_func_is_valid_address(address: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): number;
     ubrn_uniffi_bdk_ffi_fn_func_version(uniffi_out_err: UniffiRustCallStatus): Uint8Array;
@@ -161,6 +167,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_create_public_descriptor(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_create_single_key_descriptor(): number;
+    ubrn_uniffi_bdk_ffi_checksum_func_create_wallet(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_export_wallet(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_is_valid_address(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_version(): number;
@@ -218,6 +225,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_descriptor_checksum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_finalize_psbt(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora(): number;
@@ -242,6 +250,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_send(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sent_and_received(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(): number;
@@ -249,6 +258,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(): number;
+    ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string(): number;
@@ -258,6 +268,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new(): number;
     ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
+    ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;

@@ -78,8 +78,6 @@ const uniffiIsDebug =
 
 /**
  * Generate an output descriptor string from a mnemonic using a standard BIP template.
- * Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xprv.../0/*)" for BIP84.
- * Uses Bip44/49/84/86 descriptor templates.
  */
 export function createDescriptor(
   mnemonic: MnemonicLike,
@@ -106,9 +104,7 @@ export function createDescriptor(
   );
 }
 /**
- * Generate a public (watch-only) descriptor from an xpub string using a standard BIP template.
- * Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xpub.../0/*)" for BIP84.
- * Uses Bip44Public/49Public/84Public/86Public descriptor templates.
+ * Generate a public (watch-only) descriptor from an xpub string.
  */
 export function createPublicDescriptor(
   xpub: string,
@@ -136,7 +132,6 @@ export function createPublicDescriptor(
 }
 /**
  * Generate a single-key descriptor from a key string.
- * Uses P2Pkh, P2Wpkh, P2Wpkh_P2Sh, or P2TR templates.
  */
 export function createSingleKeyDescriptor(
   key: string,
@@ -161,8 +156,48 @@ export function createSingleKeyDescriptor(
   );
 }
 /**
+ * Async wallet factory — creates or loads a wallet without blocking the JS thread.
+ */
+export async function createWallet(
+  descriptor: string,
+  changeDescriptor: string,
+  network: Network,
+  dbPath: string,
+  asyncOpts_?: { signal: AbortSignal }
+): Promise<WalletLike> /*throws*/ {
+  const __stack = uniffiIsDebug ? new Error().stack : undefined;
+  try {
+    return await uniffiRustCallAsync(
+      /*rustCaller:*/ uniffiCaller,
+      /*rustFutureFunc:*/ () => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_create_wallet(
+          FfiConverterString.lower(descriptor),
+          FfiConverterString.lower(changeDescriptor),
+          FfiConverterTypeNetwork.lower(network),
+          FfiConverterString.lower(dbPath)
+        );
+      },
+      /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_u64,
+      /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_u64,
+      /*completeFunc:*/ nativeModule()
+        .ubrn_ffi_bdk_ffi_rust_future_complete_u64,
+      /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_u64,
+      /*liftFunc:*/ FfiConverterTypeWallet.lift.bind(FfiConverterTypeWallet),
+      /*liftString:*/ FfiConverterString.lift,
+      /*asyncOpts:*/ asyncOpts_,
+      /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      )
+    );
+  } catch (__error: any) {
+    if (uniffiIsDebug && __error instanceof Error) {
+      __error.stack = __stack;
+    }
+    throw __error;
+  }
+}
+/**
  * Export a wallet in FullyNoded-compatible JSON format for backup.
- * Mirrors bdk_wallet::export::FullyNodedExport.
  */
 export function exportWallet(
   wallet: WalletLike,
@@ -217,8 +252,7 @@ export function version(): string {
   );
 }
 /**
- * Compute a deterministic wallet name from its descriptors (useful for DB naming).
- * Mirrors bdk_wallet::wallet_name_from_descriptor().
+ * Compute a deterministic wallet name from its descriptors.
  */
 export function walletNameFromDescriptor(
   descriptor: string,
@@ -243,9 +277,6 @@ export function walletNameFromDescriptor(
   );
 }
 
-/**
- * A derived address with its derivation index. Mirrors bdk_wallet::AddressInfo.
- */
 export type AddressInfo = {
   index: /*u32*/ number;
   address: string;
@@ -295,34 +326,12 @@ const FfiConverterTypeAddressInfo = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Wallet balance split into categories. All values in satoshis.
- * Mirrors bdk_wallet::Balance (re-exported from bdk_chain).
- */
 export type Balance = {
-  /**
-   * Coinbase outputs not yet matured (< 100 confirmations).
-   */
   immature: /*u64*/ bigint;
-  /**
-   * Unconfirmed UTXOs from transactions we sent ourselves.
-   */
   trustedPending: /*u64*/ bigint;
-  /**
-   * Unconfirmed UTXOs received from external wallets.
-   */
   untrustedPending: /*u64*/ bigint;
-  /**
-   * Confirmed and immediately spendable.
-   */
   confirmed: /*u64*/ bigint;
-  /**
-   * trusted_pending + confirmed (safe to spend without double-spend risk).
-   */
   trustedSpendable: /*u64*/ bigint;
-  /**
-   * Sum of all four categories.
-   */
   total: /*u64*/ bigint;
 };
 
@@ -376,9 +385,6 @@ const FfiConverterTypeBalance = (() => {
   return new FFIConverter();
 })();
 
-/**
- * A block identifier (height + hash). Mirrors bdk_chain::BlockId.
- */
 export type BlockId = {
   height: /*u32*/ number;
   hash: string;
@@ -422,19 +428,9 @@ const FfiConverterTypeBlockId = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Block position for a confirmed transaction/output.
- * Mirrors bdk_chain::ConfirmationBlockTime.
- */
 export type ConfirmationBlockTime = {
   height: /*u32*/ number;
-  /**
-   * Block hash as hex.
-   */
   blockHash: string;
-  /**
-   * Unix timestamp of the block.
-   */
   timestamp: /*u64*/ bigint;
 };
 
@@ -482,9 +478,6 @@ const FfiConverterTypeConfirmationBlockTime = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Derivation info for a scriptPubKey belonging to the wallet.
- */
 export type DerivationInfo = {
   keychain: KeychainKind;
   index: /*u32*/ number;
@@ -530,14 +523,8 @@ const FfiConverterTypeDerivationInfo = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Info about a keychain and its associated descriptor.
- */
 export type KeychainInfo = {
   keychain: KeychainKind;
-  /**
-   * The public descriptor string.
-   */
   descriptor: string;
 };
 
@@ -581,18 +568,12 @@ const FfiConverterTypeKeychainInfo = (() => {
   return new FFIConverter();
 })();
 
-/**
- * A wallet-owned output (spent or unspent). Mirrors bdk_wallet::LocalOutput.
- */
 export type LocalOutput = {
   outpoint: OutPoint;
   txout: TxOut;
   keychain: KeychainKind;
   isSpent: boolean;
   derivationIndex: /*u32*/ number;
-  /**
-   * None when the output is unconfirmed.
-   */
   confirmationBlockTime?: ConfirmationBlockTime;
 };
 
@@ -654,9 +635,6 @@ const FfiConverterTypeLocalOutput = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Reference to a specific transaction output. Mirrors bitcoin::OutPoint.
- */
 export type OutPoint = {
   txid: string;
   vout: /*u32*/ number;
@@ -700,14 +678,8 @@ const FfiConverterTypeOutPoint = (() => {
   return new FFIConverter();
 })();
 
-/**
- * A single payment recipient.
- */
 export type Recipient = {
   address: string;
-  /**
-   * Amount in satoshis.
-   */
   amountSats: /*u64*/ bigint;
 };
 
@@ -749,17 +721,8 @@ const FfiConverterTypeRecipient = (() => {
   return new FFIConverter();
 })();
 
-/**
- * How much was sent from / received into the wallet for a given transaction.
- */
 export type SentAndReceived = {
-  /**
-   * Satoshis sent (wallet inputs consumed).
-   */
   sent: /*u64*/ bigint;
-  /**
-   * Satoshis received (wallet outputs created).
-   */
   received: /*u64*/ bigint;
 };
 
@@ -803,38 +766,14 @@ const FfiConverterTypeSentAndReceived = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Full details of a wallet-relevant transaction. Mirrors bdk_wallet::TxDetails.
- */
 export type TxDetails = {
   txid: string;
-  /**
-   * Sum of wallet-owned input amounts (satoshis).
-   */
   sent: /*u64*/ bigint;
-  /**
-   * Sum of amounts to wallet-owned outputs (satoshis).
-   */
   received: /*u64*/ bigint;
-  /**
-   * Fee paid in satoshis. None if some inputs are unknown.
-   */
   fee?: /*u64*/ bigint;
-  /**
-   * Fee rate in sat/vbyte. None if some inputs are unknown.
-   */
   feeRate?: /*f64*/ number;
-  /**
-   * Net change to wallet balance in satoshis (positive = received more than sent).
-   */
   balanceDelta: /*i64*/ bigint;
-  /**
-   * None when unconfirmed.
-   */
   confirmationBlockTime?: ConfirmationBlockTime;
-  /**
-   * The full serialized transaction as hex.
-   */
   txHex: string;
 };
 
@@ -900,17 +839,8 @@ const FfiConverterTypeTxDetails = (() => {
   return new FFIConverter();
 })();
 
-/**
- * A transaction output (value + locking script). Mirrors bitcoin::TxOut.
- */
 export type TxOut = {
-  /**
-   * Value in satoshis.
-   */
   value: /*u64*/ bigint;
-  /**
-   * Serialized scriptPubKey as lowercase hex.
-   */
   scriptPubkeyHex: string;
 };
 
@@ -977,7 +907,9 @@ const stringConverter = {
 };
 const FfiConverterString = uniffiCreateFfiConverterString(stringConverter);
 
-// Flat error type: BdkError
+// Error type: BdkError
+
+// Enum: BdkError
 export enum BdkError_Tags {
   InvalidDescriptor = "InvalidDescriptor",
   WalletCreationFailed = "WalletCreationFailed",
@@ -1029,1343 +961,2675 @@ export enum BdkError_Tags {
   Generic = "Generic",
 }
 export const BdkError = (() => {
-  class InvalidDescriptor extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 1;
-
-    readonly tag = BdkError_Tags.InvalidDescriptor;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidDescriptor", message);
-    }
-
-    static instanceOf(e: any): e is InvalidDescriptor {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 1;
-    }
-  }
-  class WalletCreationFailed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 2;
-
-    readonly tag = BdkError_Tags.WalletCreationFailed;
-
-    constructor(message: string) {
-      super("BdkError", "WalletCreationFailed", message);
-    }
-
-    static instanceOf(e: any): e is WalletCreationFailed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 2;
-    }
-  }
-  class WalletLoadFailed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 3;
-
-    readonly tag = BdkError_Tags.WalletLoadFailed;
-
-    constructor(message: string) {
-      super("BdkError", "WalletLoadFailed", message);
-    }
-
-    static instanceOf(e: any): e is WalletLoadFailed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 3;
-    }
-  }
-  class WalletLoadMismatch extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 4;
-
-    readonly tag = BdkError_Tags.WalletLoadMismatch;
-
-    constructor(message: string) {
-      super("BdkError", "WalletLoadMismatch", message);
-    }
-
-    static instanceOf(e: any): e is WalletLoadMismatch {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 4;
-    }
-  }
-  class PersistError extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 5;
-
-    readonly tag = BdkError_Tags.PersistError;
-
-    constructor(message: string) {
-      super("BdkError", "PersistError", message);
-    }
-
-    static instanceOf(e: any): e is PersistError {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 5;
-    }
-  }
-  class InvalidAddress extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 6;
-
-    readonly tag = BdkError_Tags.InvalidAddress;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidAddress", message);
-    }
-
-    static instanceOf(e: any): e is InvalidAddress {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 6;
-    }
-  }
-  class InvalidScript extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 7;
-
-    readonly tag = BdkError_Tags.InvalidScript;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidScript", message);
-    }
-
-    static instanceOf(e: any): e is InvalidScript {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 7;
-    }
-  }
-  class TransactionBuildFailed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 8;
-
-    readonly tag = BdkError_Tags.TransactionBuildFailed;
-
-    constructor(message: string) {
-      super("BdkError", "TransactionBuildFailed", message);
-    }
-
-    static instanceOf(e: any): e is TransactionBuildFailed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 8;
-    }
-  }
-  class NoRecipients extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 9;
-
-    readonly tag = BdkError_Tags.NoRecipients;
-
-    constructor(message: string) {
-      super("BdkError", "NoRecipients", message);
-    }
-
-    static instanceOf(e: any): e is NoRecipients {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 9;
-    }
-  }
-  class NoUtxosSelected extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 10;
-
-    readonly tag = BdkError_Tags.NoUtxosSelected;
-
-    constructor(message: string) {
-      super("BdkError", "NoUtxosSelected", message);
-    }
-
-    static instanceOf(e: any): e is NoUtxosSelected {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 10;
-    }
-  }
-  class OutputBelowDustLimit extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 11;
-
-    readonly tag = BdkError_Tags.OutputBelowDustLimit;
-
-    constructor(message: string) {
-      super("BdkError", "OutputBelowDustLimit", message);
-    }
-
-    static instanceOf(e: any): e is OutputBelowDustLimit {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 11;
-    }
-  }
-  class InsufficientFunds extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 12;
-
-    readonly tag = BdkError_Tags.InsufficientFunds;
-
-    constructor(message: string) {
-      super("BdkError", "InsufficientFunds", message);
-    }
-
-    static instanceOf(e: any): e is InsufficientFunds {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 12;
-    }
-  }
-  class FeeRateTooLow extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 13;
-
-    readonly tag = BdkError_Tags.FeeRateTooLow;
-
-    constructor(message: string) {
-      super("BdkError", "FeeRateTooLow", message);
-    }
-
-    static instanceOf(e: any): e is FeeRateTooLow {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 13;
-    }
-  }
-  class FeeTooLow extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 14;
-
-    readonly tag = BdkError_Tags.FeeTooLow;
-
-    constructor(message: string) {
-      super("BdkError", "FeeTooLow", message);
-    }
-
-    static instanceOf(e: any): e is FeeTooLow {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 14;
-    }
-  }
-  class LockTimeConflict extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 15;
-
-    readonly tag = BdkError_Tags.LockTimeConflict;
-
-    constructor(message: string) {
-      super("BdkError", "LockTimeConflict", message);
-    }
-
-    static instanceOf(e: any): e is LockTimeConflict {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 15;
-    }
-  }
-  class RbfSequenceConflict extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 16;
-
-    readonly tag = BdkError_Tags.RbfSequenceConflict;
-
-    constructor(message: string) {
-      super("BdkError", "RbfSequenceConflict", message);
-    }
-
-    static instanceOf(e: any): e is RbfSequenceConflict {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 16;
-    }
-  }
-  class VersionZero extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 17;
-
-    readonly tag = BdkError_Tags.VersionZero;
-
-    constructor(message: string) {
-      super("BdkError", "VersionZero", message);
-    }
-
-    static instanceOf(e: any): e is VersionZero {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 17;
-    }
-  }
-  class VersionOneCsv extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 18;
-
-    readonly tag = BdkError_Tags.VersionOneCsv;
-
-    constructor(message: string) {
-      super("BdkError", "VersionOneCsv", message);
-    }
-
-    static instanceOf(e: any): e is VersionOneCsv {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 18;
-    }
-  }
-  class SpendingPolicyRequired extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 19;
-
-    readonly tag = BdkError_Tags.SpendingPolicyRequired;
-
-    constructor(message: string) {
-      super("BdkError", "SpendingPolicyRequired", message);
-    }
-
-    static instanceOf(e: any): e is SpendingPolicyRequired {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 19;
-    }
-  }
-  class MissingKeyOrigin extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 20;
-
-    readonly tag = BdkError_Tags.MissingKeyOrigin;
-
-    constructor(message: string) {
-      super("BdkError", "MissingKeyOrigin", message);
-    }
-
-    static instanceOf(e: any): e is MissingKeyOrigin {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 20;
-    }
-  }
-  class MissingNonWitnessUtxo extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 21;
-
-    readonly tag = BdkError_Tags.MissingNonWitnessUtxo;
-
-    constructor(message: string) {
-      super("BdkError", "MissingNonWitnessUtxo", message);
-    }
-
-    static instanceOf(e: any): e is MissingNonWitnessUtxo {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 21;
-    }
-  }
-  class OutpointNotFound extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 22;
-
-    readonly tag = BdkError_Tags.OutpointNotFound;
-
-    constructor(message: string) {
-      super("BdkError", "OutpointNotFound", message);
-    }
-
-    static instanceOf(e: any): e is OutpointNotFound {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 22;
-    }
-  }
-  class FeeBumpTargetNotFound extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 23;
-
-    readonly tag = BdkError_Tags.FeeBumpTargetNotFound;
-
-    constructor(message: string) {
-      super("BdkError", "FeeBumpTargetNotFound", message);
-    }
-
-    static instanceOf(e: any): e is FeeBumpTargetNotFound {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 23;
-    }
-  }
-  class FeeBumpAlreadyConfirmed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 24;
-
-    readonly tag = BdkError_Tags.FeeBumpAlreadyConfirmed;
-
-    constructor(message: string) {
-      super("BdkError", "FeeBumpAlreadyConfirmed", message);
-    }
-
-    static instanceOf(e: any): e is FeeBumpAlreadyConfirmed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 24;
-    }
-  }
-  class FeeBumpIrreplaceable extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 25;
-
-    readonly tag = BdkError_Tags.FeeBumpIrreplaceable;
-
-    constructor(message: string) {
-      super("BdkError", "FeeBumpIrreplaceable", message);
-    }
-
-    static instanceOf(e: any): e is FeeBumpIrreplaceable {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 25;
-    }
-  }
-  class FeeBumpFeeRateUnavailable extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 26;
-
-    readonly tag = BdkError_Tags.FeeBumpFeeRateUnavailable;
-
-    constructor(message: string) {
-      super("BdkError", "FeeBumpFeeRateUnavailable", message);
-    }
-
-    static instanceOf(e: any): e is FeeBumpFeeRateUnavailable {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 26;
-    }
-  }
-  class FeeBumpInvalidOutputIndex extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 27;
-
-    readonly tag = BdkError_Tags.FeeBumpInvalidOutputIndex;
-
-    constructor(message: string) {
-      super("BdkError", "FeeBumpInvalidOutputIndex", message);
-    }
-
-    static instanceOf(e: any): e is FeeBumpInvalidOutputIndex {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 27;
-    }
-  }
-  class InvalidPsbt extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 28;
-
-    readonly tag = BdkError_Tags.InvalidPsbt;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidPsbt", message);
-    }
-
-    static instanceOf(e: any): e is InvalidPsbt {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 28;
-    }
-  }
-  class SignFailed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 29;
-
-    readonly tag = BdkError_Tags.SignFailed;
-
-    constructor(message: string) {
-      super("BdkError", "SignFailed", message);
-    }
-
-    static instanceOf(e: any): e is SignFailed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 29;
-    }
-  }
-  class SignerMissingKey extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 30;
-
-    readonly tag = BdkError_Tags.SignerMissingKey;
-
-    constructor(message: string) {
-      super("BdkError", "SignerMissingKey", message);
-    }
-
-    static instanceOf(e: any): e is SignerMissingKey {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 30;
-    }
-  }
-  class SignerInvalidKey extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 31;
-
-    readonly tag = BdkError_Tags.SignerInvalidKey;
-
-    constructor(message: string) {
-      super("BdkError", "SignerInvalidKey", message);
-    }
-
-    static instanceOf(e: any): e is SignerInvalidKey {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 31;
-    }
-  }
-  class SignerUserCanceled extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 32;
-
-    readonly tag = BdkError_Tags.SignerUserCanceled;
-
-    constructor(message: string) {
-      super("BdkError", "SignerUserCanceled", message);
-    }
-
-    static instanceOf(e: any): e is SignerUserCanceled {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 32;
-    }
-  }
-  class SignerInputIndexOutOfRange extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 33;
-
-    readonly tag = BdkError_Tags.SignerInputIndexOutOfRange;
-
-    constructor(message: string) {
-      super("BdkError", "SignerInputIndexOutOfRange", message);
-    }
-
-    static instanceOf(e: any): e is SignerInputIndexOutOfRange {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 33;
-    }
-  }
-  class SignerMissingNonWitnessUtxo extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 34;
-
-    readonly tag = BdkError_Tags.SignerMissingNonWitnessUtxo;
-
-    constructor(message: string) {
-      super("BdkError", "SignerMissingNonWitnessUtxo", message);
-    }
-
-    static instanceOf(e: any): e is SignerMissingNonWitnessUtxo {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 34;
-    }
-  }
-  class SignerMissingWitnessUtxo extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 35;
-
-    readonly tag = BdkError_Tags.SignerMissingWitnessUtxo;
-
-    constructor(message: string) {
-      super("BdkError", "SignerMissingWitnessUtxo", message);
-    }
-
-    static instanceOf(e: any): e is SignerMissingWitnessUtxo {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 35;
-    }
-  }
-  class SignerMissingWitnessScript extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 36;
-
-    readonly tag = BdkError_Tags.SignerMissingWitnessScript;
-
-    constructor(message: string) {
-      super("BdkError", "SignerMissingWitnessScript", message);
-    }
-
-    static instanceOf(e: any): e is SignerMissingWitnessScript {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 36;
-    }
-  }
-  class SignerNonStandardSighash extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 37;
-
-    readonly tag = BdkError_Tags.SignerNonStandardSighash;
-
-    constructor(message: string) {
-      super("BdkError", "SignerNonStandardSighash", message);
-    }
-
-    static instanceOf(e: any): e is SignerNonStandardSighash {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 37;
-    }
-  }
-  class SignerInvalidSighash extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 38;
-
-    readonly tag = BdkError_Tags.SignerInvalidSighash;
-
-    constructor(message: string) {
-      super("BdkError", "SignerInvalidSighash", message);
-    }
-
-    static instanceOf(e: any): e is SignerInvalidSighash {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 38;
-    }
-  }
-  class SyncFailed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 39;
-
-    readonly tag = BdkError_Tags.SyncFailed;
-
-    constructor(message: string) {
-      super("BdkError", "SyncFailed", message);
-    }
-
-    static instanceOf(e: any): e is SyncFailed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 39;
-    }
-  }
-  class BroadcastFailed extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 40;
-
-    readonly tag = BdkError_Tags.BroadcastFailed;
-
-    constructor(message: string) {
-      super("BdkError", "BroadcastFailed", message);
-    }
-
-    static instanceOf(e: any): e is BroadcastFailed {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 40;
-    }
-  }
-  class InvalidTransaction extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 41;
-
-    readonly tag = BdkError_Tags.InvalidTransaction;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidTransaction", message);
-    }
-
-    static instanceOf(e: any): e is InvalidTransaction {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 41;
-    }
-  }
-  class TransactionNotFound extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 42;
-
-    readonly tag = BdkError_Tags.TransactionNotFound;
-
-    constructor(message: string) {
-      super("BdkError", "TransactionNotFound", message);
-    }
-
-    static instanceOf(e: any): e is TransactionNotFound {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 42;
-    }
-  }
-  class CannotConnect extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 43;
-
-    readonly tag = BdkError_Tags.CannotConnect;
-
-    constructor(message: string) {
-      super("BdkError", "CannotConnect", message);
-    }
-
-    static instanceOf(e: any): e is CannotConnect {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 43;
-    }
-  }
-  class CalculateFeeError extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 44;
-
-    readonly tag = BdkError_Tags.CalculateFeeError;
-
-    constructor(message: string) {
-      super("BdkError", "CalculateFeeError", message);
-    }
-
-    static instanceOf(e: any): e is CalculateFeeError {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 44;
-    }
-  }
-  class InvalidMnemonic extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 45;
-
-    readonly tag = BdkError_Tags.InvalidMnemonic;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidMnemonic", message);
-    }
-
-    static instanceOf(e: any): e is InvalidMnemonic {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 45;
-    }
-  }
-  class InvalidEntropy extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 46;
-
-    readonly tag = BdkError_Tags.InvalidEntropy;
-
-    constructor(message: string) {
-      super("BdkError", "InvalidEntropy", message);
-    }
-
-    static instanceOf(e: any): e is InvalidEntropy {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 46;
-    }
-  }
-  class KeyError extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 47;
-
-    readonly tag = BdkError_Tags.KeyError;
-
-    constructor(message: string) {
-      super("BdkError", "KeyError", message);
-    }
-
-    static instanceOf(e: any): e is KeyError {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 47;
-    }
-  }
-  class Generic extends UniffiError {
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [uniffiTypeNameSymbol]: string = "BdkError";
-    /**
-     * @private
-     * This field is private and should not be used.
-     */
-    readonly [variantOrdinalSymbol] = 48;
-
-    readonly tag = BdkError_Tags.Generic;
-
-    constructor(message: string) {
-      super("BdkError", "Generic", message);
-    }
-
-    static instanceOf(e: any): e is Generic {
-      return instanceOf(e) && (e as any)[variantOrdinalSymbol] === 48;
-    }
-  }
-
-  // Utility function which does not rely on instanceof.
-  function instanceOf(e: any): e is BdkError {
-    return (e as any)[uniffiTypeNameSymbol] === "BdkError";
-  }
-  return {
-    InvalidDescriptor,
-    WalletCreationFailed,
-    WalletLoadFailed,
-    WalletLoadMismatch,
-    PersistError,
-    InvalidAddress,
-    InvalidScript,
-    TransactionBuildFailed,
-    NoRecipients,
-    NoUtxosSelected,
-    OutputBelowDustLimit,
-    InsufficientFunds,
-    FeeRateTooLow,
-    FeeTooLow,
-    LockTimeConflict,
-    RbfSequenceConflict,
-    VersionZero,
-    VersionOneCsv,
-    SpendingPolicyRequired,
-    MissingKeyOrigin,
-    MissingNonWitnessUtxo,
-    OutpointNotFound,
-    FeeBumpTargetNotFound,
-    FeeBumpAlreadyConfirmed,
-    FeeBumpIrreplaceable,
-    FeeBumpFeeRateUnavailable,
-    FeeBumpInvalidOutputIndex,
-    InvalidPsbt,
-    SignFailed,
-    SignerMissingKey,
-    SignerInvalidKey,
-    SignerUserCanceled,
-    SignerInputIndexOutOfRange,
-    SignerMissingNonWitnessUtxo,
-    SignerMissingWitnessUtxo,
-    SignerMissingWitnessScript,
-    SignerNonStandardSighash,
-    SignerInvalidSighash,
-    SyncFailed,
-    BroadcastFailed,
-    InvalidTransaction,
-    TransactionNotFound,
-    CannotConnect,
-    CalculateFeeError,
-    InvalidMnemonic,
-    InvalidEntropy,
-    KeyError,
-    Generic,
-    instanceOf,
+  type InvalidDescriptor__interface = {
+    tag: BdkError_Tags.InvalidDescriptor;
+    inner: Readonly<{ message: string }>;
   };
-})();
 
-// Union type for BdkError error type.
+  class InvalidDescriptor_
+    extends UniffiError
+    implements InvalidDescriptor__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidDescriptor;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidDescriptor");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidDescriptor_ {
+      return new InvalidDescriptor_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidDescriptor_ {
+      return obj.tag === BdkError_Tags.InvalidDescriptor;
+    }
+
+    static hasInner(obj: any): obj is InvalidDescriptor_ {
+      return InvalidDescriptor_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidDescriptor_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type WalletCreationFailed__interface = {
+    tag: BdkError_Tags.WalletCreationFailed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class WalletCreationFailed_
+    extends UniffiError
+    implements WalletCreationFailed__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.WalletCreationFailed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "WalletCreationFailed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): WalletCreationFailed_ {
+      return new WalletCreationFailed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is WalletCreationFailed_ {
+      return obj.tag === BdkError_Tags.WalletCreationFailed;
+    }
+
+    static hasInner(obj: any): obj is WalletCreationFailed_ {
+      return WalletCreationFailed_.instanceOf(obj);
+    }
+
+    static getInner(obj: WalletCreationFailed_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type WalletLoadFailed__interface = {
+    tag: BdkError_Tags.WalletLoadFailed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class WalletLoadFailed_
+    extends UniffiError
+    implements WalletLoadFailed__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.WalletLoadFailed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "WalletLoadFailed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): WalletLoadFailed_ {
+      return new WalletLoadFailed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is WalletLoadFailed_ {
+      return obj.tag === BdkError_Tags.WalletLoadFailed;
+    }
+
+    static hasInner(obj: any): obj is WalletLoadFailed_ {
+      return WalletLoadFailed_.instanceOf(obj);
+    }
+
+    static getInner(obj: WalletLoadFailed_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type WalletLoadMismatch__interface = {
+    tag: BdkError_Tags.WalletLoadMismatch;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class WalletLoadMismatch_
+    extends UniffiError
+    implements WalletLoadMismatch__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.WalletLoadMismatch;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "WalletLoadMismatch");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): WalletLoadMismatch_ {
+      return new WalletLoadMismatch_(inner);
+    }
+
+    static instanceOf(obj: any): obj is WalletLoadMismatch_ {
+      return obj.tag === BdkError_Tags.WalletLoadMismatch;
+    }
+
+    static hasInner(obj: any): obj is WalletLoadMismatch_ {
+      return WalletLoadMismatch_.instanceOf(obj);
+    }
+
+    static getInner(obj: WalletLoadMismatch_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type PersistError__interface = {
+    tag: BdkError_Tags.PersistError;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class PersistError_ extends UniffiError implements PersistError__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.PersistError;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "PersistError");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): PersistError_ {
+      return new PersistError_(inner);
+    }
+
+    static instanceOf(obj: any): obj is PersistError_ {
+      return obj.tag === BdkError_Tags.PersistError;
+    }
+
+    static hasInner(obj: any): obj is PersistError_ {
+      return PersistError_.instanceOf(obj);
+    }
+
+    static getInner(obj: PersistError_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InvalidAddress__interface = {
+    tag: BdkError_Tags.InvalidAddress;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InvalidAddress_
+    extends UniffiError
+    implements InvalidAddress__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidAddress;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidAddress");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidAddress_ {
+      return new InvalidAddress_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidAddress_ {
+      return obj.tag === BdkError_Tags.InvalidAddress;
+    }
+
+    static hasInner(obj: any): obj is InvalidAddress_ {
+      return InvalidAddress_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidAddress_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InvalidScript__interface = {
+    tag: BdkError_Tags.InvalidScript;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InvalidScript_ extends UniffiError implements InvalidScript__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidScript;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidScript");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidScript_ {
+      return new InvalidScript_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidScript_ {
+      return obj.tag === BdkError_Tags.InvalidScript;
+    }
+
+    static hasInner(obj: any): obj is InvalidScript_ {
+      return InvalidScript_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidScript_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type TransactionBuildFailed__interface = {
+    tag: BdkError_Tags.TransactionBuildFailed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class TransactionBuildFailed_
+    extends UniffiError
+    implements TransactionBuildFailed__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.TransactionBuildFailed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "TransactionBuildFailed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): TransactionBuildFailed_ {
+      return new TransactionBuildFailed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is TransactionBuildFailed_ {
+      return obj.tag === BdkError_Tags.TransactionBuildFailed;
+    }
+
+    static hasInner(obj: any): obj is TransactionBuildFailed_ {
+      return TransactionBuildFailed_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: TransactionBuildFailed_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type NoRecipients__interface = {
+    tag: BdkError_Tags.NoRecipients;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class NoRecipients_ extends UniffiError implements NoRecipients__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.NoRecipients;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "NoRecipients");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): NoRecipients_ {
+      return new NoRecipients_(inner);
+    }
+
+    static instanceOf(obj: any): obj is NoRecipients_ {
+      return obj.tag === BdkError_Tags.NoRecipients;
+    }
+
+    static hasInner(obj: any): obj is NoRecipients_ {
+      return NoRecipients_.instanceOf(obj);
+    }
+
+    static getInner(obj: NoRecipients_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type NoUtxosSelected__interface = {
+    tag: BdkError_Tags.NoUtxosSelected;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class NoUtxosSelected_
+    extends UniffiError
+    implements NoUtxosSelected__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.NoUtxosSelected;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "NoUtxosSelected");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): NoUtxosSelected_ {
+      return new NoUtxosSelected_(inner);
+    }
+
+    static instanceOf(obj: any): obj is NoUtxosSelected_ {
+      return obj.tag === BdkError_Tags.NoUtxosSelected;
+    }
+
+    static hasInner(obj: any): obj is NoUtxosSelected_ {
+      return NoUtxosSelected_.instanceOf(obj);
+    }
+
+    static getInner(obj: NoUtxosSelected_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type OutputBelowDustLimit__interface = {
+    tag: BdkError_Tags.OutputBelowDustLimit;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class OutputBelowDustLimit_
+    extends UniffiError
+    implements OutputBelowDustLimit__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.OutputBelowDustLimit;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "OutputBelowDustLimit");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): OutputBelowDustLimit_ {
+      return new OutputBelowDustLimit_(inner);
+    }
+
+    static instanceOf(obj: any): obj is OutputBelowDustLimit_ {
+      return obj.tag === BdkError_Tags.OutputBelowDustLimit;
+    }
+
+    static hasInner(obj: any): obj is OutputBelowDustLimit_ {
+      return OutputBelowDustLimit_.instanceOf(obj);
+    }
+
+    static getInner(obj: OutputBelowDustLimit_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InsufficientFunds__interface = {
+    tag: BdkError_Tags.InsufficientFunds;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InsufficientFunds_
+    extends UniffiError
+    implements InsufficientFunds__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InsufficientFunds;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InsufficientFunds");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InsufficientFunds_ {
+      return new InsufficientFunds_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InsufficientFunds_ {
+      return obj.tag === BdkError_Tags.InsufficientFunds;
+    }
+
+    static hasInner(obj: any): obj is InsufficientFunds_ {
+      return InsufficientFunds_.instanceOf(obj);
+    }
+
+    static getInner(obj: InsufficientFunds_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeRateTooLow__interface = {
+    tag: BdkError_Tags.FeeRateTooLow;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeRateTooLow_ extends UniffiError implements FeeRateTooLow__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeRateTooLow;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeRateTooLow");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeRateTooLow_ {
+      return new FeeRateTooLow_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeRateTooLow_ {
+      return obj.tag === BdkError_Tags.FeeRateTooLow;
+    }
+
+    static hasInner(obj: any): obj is FeeRateTooLow_ {
+      return FeeRateTooLow_.instanceOf(obj);
+    }
+
+    static getInner(obj: FeeRateTooLow_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeTooLow__interface = {
+    tag: BdkError_Tags.FeeTooLow;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeTooLow_ extends UniffiError implements FeeTooLow__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeTooLow;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeTooLow");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeTooLow_ {
+      return new FeeTooLow_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeTooLow_ {
+      return obj.tag === BdkError_Tags.FeeTooLow;
+    }
+
+    static hasInner(obj: any): obj is FeeTooLow_ {
+      return FeeTooLow_.instanceOf(obj);
+    }
+
+    static getInner(obj: FeeTooLow_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type LockTimeConflict__interface = {
+    tag: BdkError_Tags.LockTimeConflict;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class LockTimeConflict_
+    extends UniffiError
+    implements LockTimeConflict__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.LockTimeConflict;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "LockTimeConflict");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): LockTimeConflict_ {
+      return new LockTimeConflict_(inner);
+    }
+
+    static instanceOf(obj: any): obj is LockTimeConflict_ {
+      return obj.tag === BdkError_Tags.LockTimeConflict;
+    }
+
+    static hasInner(obj: any): obj is LockTimeConflict_ {
+      return LockTimeConflict_.instanceOf(obj);
+    }
+
+    static getInner(obj: LockTimeConflict_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type RbfSequenceConflict__interface = {
+    tag: BdkError_Tags.RbfSequenceConflict;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class RbfSequenceConflict_
+    extends UniffiError
+    implements RbfSequenceConflict__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.RbfSequenceConflict;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "RbfSequenceConflict");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): RbfSequenceConflict_ {
+      return new RbfSequenceConflict_(inner);
+    }
+
+    static instanceOf(obj: any): obj is RbfSequenceConflict_ {
+      return obj.tag === BdkError_Tags.RbfSequenceConflict;
+    }
+
+    static hasInner(obj: any): obj is RbfSequenceConflict_ {
+      return RbfSequenceConflict_.instanceOf(obj);
+    }
+
+    static getInner(obj: RbfSequenceConflict_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type VersionZero__interface = {
+    tag: BdkError_Tags.VersionZero;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class VersionZero_ extends UniffiError implements VersionZero__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.VersionZero;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "VersionZero");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): VersionZero_ {
+      return new VersionZero_(inner);
+    }
+
+    static instanceOf(obj: any): obj is VersionZero_ {
+      return obj.tag === BdkError_Tags.VersionZero;
+    }
+
+    static hasInner(obj: any): obj is VersionZero_ {
+      return VersionZero_.instanceOf(obj);
+    }
+
+    static getInner(obj: VersionZero_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type VersionOneCsv__interface = {
+    tag: BdkError_Tags.VersionOneCsv;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class VersionOneCsv_ extends UniffiError implements VersionOneCsv__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.VersionOneCsv;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "VersionOneCsv");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): VersionOneCsv_ {
+      return new VersionOneCsv_(inner);
+    }
+
+    static instanceOf(obj: any): obj is VersionOneCsv_ {
+      return obj.tag === BdkError_Tags.VersionOneCsv;
+    }
+
+    static hasInner(obj: any): obj is VersionOneCsv_ {
+      return VersionOneCsv_.instanceOf(obj);
+    }
+
+    static getInner(obj: VersionOneCsv_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SpendingPolicyRequired__interface = {
+    tag: BdkError_Tags.SpendingPolicyRequired;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SpendingPolicyRequired_
+    extends UniffiError
+    implements SpendingPolicyRequired__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SpendingPolicyRequired;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SpendingPolicyRequired");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SpendingPolicyRequired_ {
+      return new SpendingPolicyRequired_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SpendingPolicyRequired_ {
+      return obj.tag === BdkError_Tags.SpendingPolicyRequired;
+    }
+
+    static hasInner(obj: any): obj is SpendingPolicyRequired_ {
+      return SpendingPolicyRequired_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: SpendingPolicyRequired_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type MissingKeyOrigin__interface = {
+    tag: BdkError_Tags.MissingKeyOrigin;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class MissingKeyOrigin_
+    extends UniffiError
+    implements MissingKeyOrigin__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.MissingKeyOrigin;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "MissingKeyOrigin");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): MissingKeyOrigin_ {
+      return new MissingKeyOrigin_(inner);
+    }
+
+    static instanceOf(obj: any): obj is MissingKeyOrigin_ {
+      return obj.tag === BdkError_Tags.MissingKeyOrigin;
+    }
+
+    static hasInner(obj: any): obj is MissingKeyOrigin_ {
+      return MissingKeyOrigin_.instanceOf(obj);
+    }
+
+    static getInner(obj: MissingKeyOrigin_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type MissingNonWitnessUtxo__interface = {
+    tag: BdkError_Tags.MissingNonWitnessUtxo;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class MissingNonWitnessUtxo_
+    extends UniffiError
+    implements MissingNonWitnessUtxo__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.MissingNonWitnessUtxo;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "MissingNonWitnessUtxo");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): MissingNonWitnessUtxo_ {
+      return new MissingNonWitnessUtxo_(inner);
+    }
+
+    static instanceOf(obj: any): obj is MissingNonWitnessUtxo_ {
+      return obj.tag === BdkError_Tags.MissingNonWitnessUtxo;
+    }
+
+    static hasInner(obj: any): obj is MissingNonWitnessUtxo_ {
+      return MissingNonWitnessUtxo_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: MissingNonWitnessUtxo_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type OutpointNotFound__interface = {
+    tag: BdkError_Tags.OutpointNotFound;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class OutpointNotFound_
+    extends UniffiError
+    implements OutpointNotFound__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.OutpointNotFound;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "OutpointNotFound");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): OutpointNotFound_ {
+      return new OutpointNotFound_(inner);
+    }
+
+    static instanceOf(obj: any): obj is OutpointNotFound_ {
+      return obj.tag === BdkError_Tags.OutpointNotFound;
+    }
+
+    static hasInner(obj: any): obj is OutpointNotFound_ {
+      return OutpointNotFound_.instanceOf(obj);
+    }
+
+    static getInner(obj: OutpointNotFound_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeBumpTargetNotFound__interface = {
+    tag: BdkError_Tags.FeeBumpTargetNotFound;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeBumpTargetNotFound_
+    extends UniffiError
+    implements FeeBumpTargetNotFound__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeBumpTargetNotFound;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeBumpTargetNotFound");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeBumpTargetNotFound_ {
+      return new FeeBumpTargetNotFound_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeBumpTargetNotFound_ {
+      return obj.tag === BdkError_Tags.FeeBumpTargetNotFound;
+    }
+
+    static hasInner(obj: any): obj is FeeBumpTargetNotFound_ {
+      return FeeBumpTargetNotFound_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: FeeBumpTargetNotFound_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeBumpAlreadyConfirmed__interface = {
+    tag: BdkError_Tags.FeeBumpAlreadyConfirmed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeBumpAlreadyConfirmed_
+    extends UniffiError
+    implements FeeBumpAlreadyConfirmed__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeBumpAlreadyConfirmed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeBumpAlreadyConfirmed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeBumpAlreadyConfirmed_ {
+      return new FeeBumpAlreadyConfirmed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeBumpAlreadyConfirmed_ {
+      return obj.tag === BdkError_Tags.FeeBumpAlreadyConfirmed;
+    }
+
+    static hasInner(obj: any): obj is FeeBumpAlreadyConfirmed_ {
+      return FeeBumpAlreadyConfirmed_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: FeeBumpAlreadyConfirmed_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeBumpIrreplaceable__interface = {
+    tag: BdkError_Tags.FeeBumpIrreplaceable;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeBumpIrreplaceable_
+    extends UniffiError
+    implements FeeBumpIrreplaceable__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeBumpIrreplaceable;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeBumpIrreplaceable");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeBumpIrreplaceable_ {
+      return new FeeBumpIrreplaceable_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeBumpIrreplaceable_ {
+      return obj.tag === BdkError_Tags.FeeBumpIrreplaceable;
+    }
+
+    static hasInner(obj: any): obj is FeeBumpIrreplaceable_ {
+      return FeeBumpIrreplaceable_.instanceOf(obj);
+    }
+
+    static getInner(obj: FeeBumpIrreplaceable_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeBumpFeeRateUnavailable__interface = {
+    tag: BdkError_Tags.FeeBumpFeeRateUnavailable;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeBumpFeeRateUnavailable_
+    extends UniffiError
+    implements FeeBumpFeeRateUnavailable__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeBumpFeeRateUnavailable;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeBumpFeeRateUnavailable");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeBumpFeeRateUnavailable_ {
+      return new FeeBumpFeeRateUnavailable_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeBumpFeeRateUnavailable_ {
+      return obj.tag === BdkError_Tags.FeeBumpFeeRateUnavailable;
+    }
+
+    static hasInner(obj: any): obj is FeeBumpFeeRateUnavailable_ {
+      return FeeBumpFeeRateUnavailable_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: FeeBumpFeeRateUnavailable_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type FeeBumpInvalidOutputIndex__interface = {
+    tag: BdkError_Tags.FeeBumpInvalidOutputIndex;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class FeeBumpInvalidOutputIndex_
+    extends UniffiError
+    implements FeeBumpInvalidOutputIndex__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.FeeBumpInvalidOutputIndex;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "FeeBumpInvalidOutputIndex");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): FeeBumpInvalidOutputIndex_ {
+      return new FeeBumpInvalidOutputIndex_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FeeBumpInvalidOutputIndex_ {
+      return obj.tag === BdkError_Tags.FeeBumpInvalidOutputIndex;
+    }
+
+    static hasInner(obj: any): obj is FeeBumpInvalidOutputIndex_ {
+      return FeeBumpInvalidOutputIndex_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: FeeBumpInvalidOutputIndex_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InvalidPsbt__interface = {
+    tag: BdkError_Tags.InvalidPsbt;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InvalidPsbt_ extends UniffiError implements InvalidPsbt__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidPsbt;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidPsbt");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidPsbt_ {
+      return new InvalidPsbt_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidPsbt_ {
+      return obj.tag === BdkError_Tags.InvalidPsbt;
+    }
+
+    static hasInner(obj: any): obj is InvalidPsbt_ {
+      return InvalidPsbt_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidPsbt_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignFailed__interface = {
+    tag: BdkError_Tags.SignFailed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignFailed_ extends UniffiError implements SignFailed__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignFailed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignFailed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignFailed_ {
+      return new SignFailed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignFailed_ {
+      return obj.tag === BdkError_Tags.SignFailed;
+    }
+
+    static hasInner(obj: any): obj is SignFailed_ {
+      return SignFailed_.instanceOf(obj);
+    }
+
+    static getInner(obj: SignFailed_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerMissingKey__interface = {
+    tag: BdkError_Tags.SignerMissingKey;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerMissingKey_
+    extends UniffiError
+    implements SignerMissingKey__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerMissingKey;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerMissingKey");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerMissingKey_ {
+      return new SignerMissingKey_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerMissingKey_ {
+      return obj.tag === BdkError_Tags.SignerMissingKey;
+    }
+
+    static hasInner(obj: any): obj is SignerMissingKey_ {
+      return SignerMissingKey_.instanceOf(obj);
+    }
+
+    static getInner(obj: SignerMissingKey_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerInvalidKey__interface = {
+    tag: BdkError_Tags.SignerInvalidKey;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerInvalidKey_
+    extends UniffiError
+    implements SignerInvalidKey__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerInvalidKey;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerInvalidKey");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerInvalidKey_ {
+      return new SignerInvalidKey_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerInvalidKey_ {
+      return obj.tag === BdkError_Tags.SignerInvalidKey;
+    }
+
+    static hasInner(obj: any): obj is SignerInvalidKey_ {
+      return SignerInvalidKey_.instanceOf(obj);
+    }
+
+    static getInner(obj: SignerInvalidKey_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerUserCanceled__interface = {
+    tag: BdkError_Tags.SignerUserCanceled;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerUserCanceled_
+    extends UniffiError
+    implements SignerUserCanceled__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerUserCanceled;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerUserCanceled");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerUserCanceled_ {
+      return new SignerUserCanceled_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerUserCanceled_ {
+      return obj.tag === BdkError_Tags.SignerUserCanceled;
+    }
+
+    static hasInner(obj: any): obj is SignerUserCanceled_ {
+      return SignerUserCanceled_.instanceOf(obj);
+    }
+
+    static getInner(obj: SignerUserCanceled_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerInputIndexOutOfRange__interface = {
+    tag: BdkError_Tags.SignerInputIndexOutOfRange;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerInputIndexOutOfRange_
+    extends UniffiError
+    implements SignerInputIndexOutOfRange__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerInputIndexOutOfRange;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerInputIndexOutOfRange");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerInputIndexOutOfRange_ {
+      return new SignerInputIndexOutOfRange_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerInputIndexOutOfRange_ {
+      return obj.tag === BdkError_Tags.SignerInputIndexOutOfRange;
+    }
+
+    static hasInner(obj: any): obj is SignerInputIndexOutOfRange_ {
+      return SignerInputIndexOutOfRange_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: SignerInputIndexOutOfRange_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerMissingNonWitnessUtxo__interface = {
+    tag: BdkError_Tags.SignerMissingNonWitnessUtxo;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerMissingNonWitnessUtxo_
+    extends UniffiError
+    implements SignerMissingNonWitnessUtxo__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerMissingNonWitnessUtxo;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerMissingNonWitnessUtxo");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerMissingNonWitnessUtxo_ {
+      return new SignerMissingNonWitnessUtxo_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerMissingNonWitnessUtxo_ {
+      return obj.tag === BdkError_Tags.SignerMissingNonWitnessUtxo;
+    }
+
+    static hasInner(obj: any): obj is SignerMissingNonWitnessUtxo_ {
+      return SignerMissingNonWitnessUtxo_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: SignerMissingNonWitnessUtxo_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerMissingWitnessUtxo__interface = {
+    tag: BdkError_Tags.SignerMissingWitnessUtxo;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerMissingWitnessUtxo_
+    extends UniffiError
+    implements SignerMissingWitnessUtxo__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerMissingWitnessUtxo;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerMissingWitnessUtxo");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerMissingWitnessUtxo_ {
+      return new SignerMissingWitnessUtxo_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerMissingWitnessUtxo_ {
+      return obj.tag === BdkError_Tags.SignerMissingWitnessUtxo;
+    }
+
+    static hasInner(obj: any): obj is SignerMissingWitnessUtxo_ {
+      return SignerMissingWitnessUtxo_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: SignerMissingWitnessUtxo_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerMissingWitnessScript__interface = {
+    tag: BdkError_Tags.SignerMissingWitnessScript;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerMissingWitnessScript_
+    extends UniffiError
+    implements SignerMissingWitnessScript__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerMissingWitnessScript;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerMissingWitnessScript");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerMissingWitnessScript_ {
+      return new SignerMissingWitnessScript_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerMissingWitnessScript_ {
+      return obj.tag === BdkError_Tags.SignerMissingWitnessScript;
+    }
+
+    static hasInner(obj: any): obj is SignerMissingWitnessScript_ {
+      return SignerMissingWitnessScript_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: SignerMissingWitnessScript_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerNonStandardSighash__interface = {
+    tag: BdkError_Tags.SignerNonStandardSighash;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerNonStandardSighash_
+    extends UniffiError
+    implements SignerNonStandardSighash__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerNonStandardSighash;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerNonStandardSighash");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerNonStandardSighash_ {
+      return new SignerNonStandardSighash_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerNonStandardSighash_ {
+      return obj.tag === BdkError_Tags.SignerNonStandardSighash;
+    }
+
+    static hasInner(obj: any): obj is SignerNonStandardSighash_ {
+      return SignerNonStandardSighash_.instanceOf(obj);
+    }
+
+    static getInner(
+      obj: SignerNonStandardSighash_
+    ): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SignerInvalidSighash__interface = {
+    tag: BdkError_Tags.SignerInvalidSighash;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SignerInvalidSighash_
+    extends UniffiError
+    implements SignerInvalidSighash__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SignerInvalidSighash;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SignerInvalidSighash");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SignerInvalidSighash_ {
+      return new SignerInvalidSighash_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SignerInvalidSighash_ {
+      return obj.tag === BdkError_Tags.SignerInvalidSighash;
+    }
+
+    static hasInner(obj: any): obj is SignerInvalidSighash_ {
+      return SignerInvalidSighash_.instanceOf(obj);
+    }
+
+    static getInner(obj: SignerInvalidSighash_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type SyncFailed__interface = {
+    tag: BdkError_Tags.SyncFailed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class SyncFailed_ extends UniffiError implements SyncFailed__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.SyncFailed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "SyncFailed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): SyncFailed_ {
+      return new SyncFailed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is SyncFailed_ {
+      return obj.tag === BdkError_Tags.SyncFailed;
+    }
+
+    static hasInner(obj: any): obj is SyncFailed_ {
+      return SyncFailed_.instanceOf(obj);
+    }
+
+    static getInner(obj: SyncFailed_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type BroadcastFailed__interface = {
+    tag: BdkError_Tags.BroadcastFailed;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class BroadcastFailed_
+    extends UniffiError
+    implements BroadcastFailed__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.BroadcastFailed;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "BroadcastFailed");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): BroadcastFailed_ {
+      return new BroadcastFailed_(inner);
+    }
+
+    static instanceOf(obj: any): obj is BroadcastFailed_ {
+      return obj.tag === BdkError_Tags.BroadcastFailed;
+    }
+
+    static hasInner(obj: any): obj is BroadcastFailed_ {
+      return BroadcastFailed_.instanceOf(obj);
+    }
+
+    static getInner(obj: BroadcastFailed_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InvalidTransaction__interface = {
+    tag: BdkError_Tags.InvalidTransaction;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InvalidTransaction_
+    extends UniffiError
+    implements InvalidTransaction__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidTransaction;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidTransaction");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidTransaction_ {
+      return new InvalidTransaction_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidTransaction_ {
+      return obj.tag === BdkError_Tags.InvalidTransaction;
+    }
+
+    static hasInner(obj: any): obj is InvalidTransaction_ {
+      return InvalidTransaction_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidTransaction_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type TransactionNotFound__interface = {
+    tag: BdkError_Tags.TransactionNotFound;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class TransactionNotFound_
+    extends UniffiError
+    implements TransactionNotFound__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.TransactionNotFound;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "TransactionNotFound");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): TransactionNotFound_ {
+      return new TransactionNotFound_(inner);
+    }
+
+    static instanceOf(obj: any): obj is TransactionNotFound_ {
+      return obj.tag === BdkError_Tags.TransactionNotFound;
+    }
+
+    static hasInner(obj: any): obj is TransactionNotFound_ {
+      return TransactionNotFound_.instanceOf(obj);
+    }
+
+    static getInner(obj: TransactionNotFound_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type CannotConnect__interface = {
+    tag: BdkError_Tags.CannotConnect;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class CannotConnect_ extends UniffiError implements CannotConnect__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.CannotConnect;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "CannotConnect");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): CannotConnect_ {
+      return new CannotConnect_(inner);
+    }
+
+    static instanceOf(obj: any): obj is CannotConnect_ {
+      return obj.tag === BdkError_Tags.CannotConnect;
+    }
+
+    static hasInner(obj: any): obj is CannotConnect_ {
+      return CannotConnect_.instanceOf(obj);
+    }
+
+    static getInner(obj: CannotConnect_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type CalculateFeeError__interface = {
+    tag: BdkError_Tags.CalculateFeeError;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class CalculateFeeError_
+    extends UniffiError
+    implements CalculateFeeError__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.CalculateFeeError;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "CalculateFeeError");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): CalculateFeeError_ {
+      return new CalculateFeeError_(inner);
+    }
+
+    static instanceOf(obj: any): obj is CalculateFeeError_ {
+      return obj.tag === BdkError_Tags.CalculateFeeError;
+    }
+
+    static hasInner(obj: any): obj is CalculateFeeError_ {
+      return CalculateFeeError_.instanceOf(obj);
+    }
+
+    static getInner(obj: CalculateFeeError_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InvalidMnemonic__interface = {
+    tag: BdkError_Tags.InvalidMnemonic;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InvalidMnemonic_
+    extends UniffiError
+    implements InvalidMnemonic__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidMnemonic;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidMnemonic");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidMnemonic_ {
+      return new InvalidMnemonic_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidMnemonic_ {
+      return obj.tag === BdkError_Tags.InvalidMnemonic;
+    }
+
+    static hasInner(obj: any): obj is InvalidMnemonic_ {
+      return InvalidMnemonic_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidMnemonic_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type InvalidEntropy__interface = {
+    tag: BdkError_Tags.InvalidEntropy;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class InvalidEntropy_
+    extends UniffiError
+    implements InvalidEntropy__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.InvalidEntropy;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "InvalidEntropy");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): InvalidEntropy_ {
+      return new InvalidEntropy_(inner);
+    }
+
+    static instanceOf(obj: any): obj is InvalidEntropy_ {
+      return obj.tag === BdkError_Tags.InvalidEntropy;
+    }
+
+    static hasInner(obj: any): obj is InvalidEntropy_ {
+      return InvalidEntropy_.instanceOf(obj);
+    }
+
+    static getInner(obj: InvalidEntropy_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type KeyError__interface = {
+    tag: BdkError_Tags.KeyError;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class KeyError_ extends UniffiError implements KeyError__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.KeyError;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "KeyError");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): KeyError_ {
+      return new KeyError_(inner);
+    }
+
+    static instanceOf(obj: any): obj is KeyError_ {
+      return obj.tag === BdkError_Tags.KeyError;
+    }
+
+    static hasInner(obj: any): obj is KeyError_ {
+      return KeyError_.instanceOf(obj);
+    }
+
+    static getInner(obj: KeyError_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  type Generic__interface = {
+    tag: BdkError_Tags.Generic;
+    inner: Readonly<{ message: string }>;
+  };
+
+  class Generic_ extends UniffiError implements Generic__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "BdkError";
+    readonly tag = BdkError_Tags.Generic;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("BdkError", "Generic");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: { message: string }): Generic_ {
+      return new Generic_(inner);
+    }
+
+    static instanceOf(obj: any): obj is Generic_ {
+      return obj.tag === BdkError_Tags.Generic;
+    }
+
+    static hasInner(obj: any): obj is Generic_ {
+      return Generic_.instanceOf(obj);
+    }
+
+    static getInner(obj: Generic_): Readonly<{ message: string }> {
+      return obj.inner;
+    }
+  }
+
+  function instanceOf(obj: any): obj is BdkError {
+    return obj[uniffiTypeNameSymbol] === "BdkError";
+  }
+
+  return Object.freeze({
+    instanceOf,
+    InvalidDescriptor: InvalidDescriptor_,
+    WalletCreationFailed: WalletCreationFailed_,
+    WalletLoadFailed: WalletLoadFailed_,
+    WalletLoadMismatch: WalletLoadMismatch_,
+    PersistError: PersistError_,
+    InvalidAddress: InvalidAddress_,
+    InvalidScript: InvalidScript_,
+    TransactionBuildFailed: TransactionBuildFailed_,
+    NoRecipients: NoRecipients_,
+    NoUtxosSelected: NoUtxosSelected_,
+    OutputBelowDustLimit: OutputBelowDustLimit_,
+    InsufficientFunds: InsufficientFunds_,
+    FeeRateTooLow: FeeRateTooLow_,
+    FeeTooLow: FeeTooLow_,
+    LockTimeConflict: LockTimeConflict_,
+    RbfSequenceConflict: RbfSequenceConflict_,
+    VersionZero: VersionZero_,
+    VersionOneCsv: VersionOneCsv_,
+    SpendingPolicyRequired: SpendingPolicyRequired_,
+    MissingKeyOrigin: MissingKeyOrigin_,
+    MissingNonWitnessUtxo: MissingNonWitnessUtxo_,
+    OutpointNotFound: OutpointNotFound_,
+    FeeBumpTargetNotFound: FeeBumpTargetNotFound_,
+    FeeBumpAlreadyConfirmed: FeeBumpAlreadyConfirmed_,
+    FeeBumpIrreplaceable: FeeBumpIrreplaceable_,
+    FeeBumpFeeRateUnavailable: FeeBumpFeeRateUnavailable_,
+    FeeBumpInvalidOutputIndex: FeeBumpInvalidOutputIndex_,
+    InvalidPsbt: InvalidPsbt_,
+    SignFailed: SignFailed_,
+    SignerMissingKey: SignerMissingKey_,
+    SignerInvalidKey: SignerInvalidKey_,
+    SignerUserCanceled: SignerUserCanceled_,
+    SignerInputIndexOutOfRange: SignerInputIndexOutOfRange_,
+    SignerMissingNonWitnessUtxo: SignerMissingNonWitnessUtxo_,
+    SignerMissingWitnessUtxo: SignerMissingWitnessUtxo_,
+    SignerMissingWitnessScript: SignerMissingWitnessScript_,
+    SignerNonStandardSighash: SignerNonStandardSighash_,
+    SignerInvalidSighash: SignerInvalidSighash_,
+    SyncFailed: SyncFailed_,
+    BroadcastFailed: BroadcastFailed_,
+    InvalidTransaction: InvalidTransaction_,
+    TransactionNotFound: TransactionNotFound_,
+    CannotConnect: CannotConnect_,
+    CalculateFeeError: CalculateFeeError_,
+    InvalidMnemonic: InvalidMnemonic_,
+    InvalidEntropy: InvalidEntropy_,
+    KeyError: KeyError_,
+    Generic: Generic_,
+  });
+})();
 
 export type BdkError = InstanceType<
   (typeof BdkError)[keyof Omit<typeof BdkError, "instanceOf">]
 >;
 
+// FfiConverter for enum BdkError
 const FfiConverterTypeBdkError = (() => {
-  const intConverter = FfiConverterInt32;
+  const ordinalConverter = FfiConverterInt32;
   type TypeName = BdkError;
-  class FfiConverter extends AbstractFfiConverterByteArray<TypeName> {
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
     read(from: RustBuffer): TypeName {
-      switch (intConverter.read(from)) {
+      switch (ordinalConverter.read(from)) {
         case 1:
-          return new BdkError.InvalidDescriptor(FfiConverterString.read(from));
-
+          return new BdkError.InvalidDescriptor({
+            message: FfiConverterString.read(from),
+          });
         case 2:
-          return new BdkError.WalletCreationFailed(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.WalletCreationFailed({
+            message: FfiConverterString.read(from),
+          });
         case 3:
-          return new BdkError.WalletLoadFailed(FfiConverterString.read(from));
-
+          return new BdkError.WalletLoadFailed({
+            message: FfiConverterString.read(from),
+          });
         case 4:
-          return new BdkError.WalletLoadMismatch(FfiConverterString.read(from));
-
+          return new BdkError.WalletLoadMismatch({
+            message: FfiConverterString.read(from),
+          });
         case 5:
-          return new BdkError.PersistError(FfiConverterString.read(from));
-
+          return new BdkError.PersistError({
+            message: FfiConverterString.read(from),
+          });
         case 6:
-          return new BdkError.InvalidAddress(FfiConverterString.read(from));
-
+          return new BdkError.InvalidAddress({
+            message: FfiConverterString.read(from),
+          });
         case 7:
-          return new BdkError.InvalidScript(FfiConverterString.read(from));
-
+          return new BdkError.InvalidScript({
+            message: FfiConverterString.read(from),
+          });
         case 8:
-          return new BdkError.TransactionBuildFailed(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.TransactionBuildFailed({
+            message: FfiConverterString.read(from),
+          });
         case 9:
-          return new BdkError.NoRecipients(FfiConverterString.read(from));
-
+          return new BdkError.NoRecipients({
+            message: FfiConverterString.read(from),
+          });
         case 10:
-          return new BdkError.NoUtxosSelected(FfiConverterString.read(from));
-
+          return new BdkError.NoUtxosSelected({
+            message: FfiConverterString.read(from),
+          });
         case 11:
-          return new BdkError.OutputBelowDustLimit(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.OutputBelowDustLimit({
+            message: FfiConverterString.read(from),
+          });
         case 12:
-          return new BdkError.InsufficientFunds(FfiConverterString.read(from));
-
+          return new BdkError.InsufficientFunds({
+            message: FfiConverterString.read(from),
+          });
         case 13:
-          return new BdkError.FeeRateTooLow(FfiConverterString.read(from));
-
+          return new BdkError.FeeRateTooLow({
+            message: FfiConverterString.read(from),
+          });
         case 14:
-          return new BdkError.FeeTooLow(FfiConverterString.read(from));
-
+          return new BdkError.FeeTooLow({
+            message: FfiConverterString.read(from),
+          });
         case 15:
-          return new BdkError.LockTimeConflict(FfiConverterString.read(from));
-
+          return new BdkError.LockTimeConflict({
+            message: FfiConverterString.read(from),
+          });
         case 16:
-          return new BdkError.RbfSequenceConflict(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.RbfSequenceConflict({
+            message: FfiConverterString.read(from),
+          });
         case 17:
-          return new BdkError.VersionZero(FfiConverterString.read(from));
-
+          return new BdkError.VersionZero({
+            message: FfiConverterString.read(from),
+          });
         case 18:
-          return new BdkError.VersionOneCsv(FfiConverterString.read(from));
-
+          return new BdkError.VersionOneCsv({
+            message: FfiConverterString.read(from),
+          });
         case 19:
-          return new BdkError.SpendingPolicyRequired(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SpendingPolicyRequired({
+            message: FfiConverterString.read(from),
+          });
         case 20:
-          return new BdkError.MissingKeyOrigin(FfiConverterString.read(from));
-
+          return new BdkError.MissingKeyOrigin({
+            message: FfiConverterString.read(from),
+          });
         case 21:
-          return new BdkError.MissingNonWitnessUtxo(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.MissingNonWitnessUtxo({
+            message: FfiConverterString.read(from),
+          });
         case 22:
-          return new BdkError.OutpointNotFound(FfiConverterString.read(from));
-
+          return new BdkError.OutpointNotFound({
+            message: FfiConverterString.read(from),
+          });
         case 23:
-          return new BdkError.FeeBumpTargetNotFound(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.FeeBumpTargetNotFound({
+            message: FfiConverterString.read(from),
+          });
         case 24:
-          return new BdkError.FeeBumpAlreadyConfirmed(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.FeeBumpAlreadyConfirmed({
+            message: FfiConverterString.read(from),
+          });
         case 25:
-          return new BdkError.FeeBumpIrreplaceable(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.FeeBumpIrreplaceable({
+            message: FfiConverterString.read(from),
+          });
         case 26:
-          return new BdkError.FeeBumpFeeRateUnavailable(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.FeeBumpFeeRateUnavailable({
+            message: FfiConverterString.read(from),
+          });
         case 27:
-          return new BdkError.FeeBumpInvalidOutputIndex(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.FeeBumpInvalidOutputIndex({
+            message: FfiConverterString.read(from),
+          });
         case 28:
-          return new BdkError.InvalidPsbt(FfiConverterString.read(from));
-
+          return new BdkError.InvalidPsbt({
+            message: FfiConverterString.read(from),
+          });
         case 29:
-          return new BdkError.SignFailed(FfiConverterString.read(from));
-
+          return new BdkError.SignFailed({
+            message: FfiConverterString.read(from),
+          });
         case 30:
-          return new BdkError.SignerMissingKey(FfiConverterString.read(from));
-
+          return new BdkError.SignerMissingKey({
+            message: FfiConverterString.read(from),
+          });
         case 31:
-          return new BdkError.SignerInvalidKey(FfiConverterString.read(from));
-
+          return new BdkError.SignerInvalidKey({
+            message: FfiConverterString.read(from),
+          });
         case 32:
-          return new BdkError.SignerUserCanceled(FfiConverterString.read(from));
-
+          return new BdkError.SignerUserCanceled({
+            message: FfiConverterString.read(from),
+          });
         case 33:
-          return new BdkError.SignerInputIndexOutOfRange(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SignerInputIndexOutOfRange({
+            message: FfiConverterString.read(from),
+          });
         case 34:
-          return new BdkError.SignerMissingNonWitnessUtxo(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SignerMissingNonWitnessUtxo({
+            message: FfiConverterString.read(from),
+          });
         case 35:
-          return new BdkError.SignerMissingWitnessUtxo(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SignerMissingWitnessUtxo({
+            message: FfiConverterString.read(from),
+          });
         case 36:
-          return new BdkError.SignerMissingWitnessScript(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SignerMissingWitnessScript({
+            message: FfiConverterString.read(from),
+          });
         case 37:
-          return new BdkError.SignerNonStandardSighash(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SignerNonStandardSighash({
+            message: FfiConverterString.read(from),
+          });
         case 38:
-          return new BdkError.SignerInvalidSighash(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.SignerInvalidSighash({
+            message: FfiConverterString.read(from),
+          });
         case 39:
-          return new BdkError.SyncFailed(FfiConverterString.read(from));
-
+          return new BdkError.SyncFailed({
+            message: FfiConverterString.read(from),
+          });
         case 40:
-          return new BdkError.BroadcastFailed(FfiConverterString.read(from));
-
+          return new BdkError.BroadcastFailed({
+            message: FfiConverterString.read(from),
+          });
         case 41:
-          return new BdkError.InvalidTransaction(FfiConverterString.read(from));
-
+          return new BdkError.InvalidTransaction({
+            message: FfiConverterString.read(from),
+          });
         case 42:
-          return new BdkError.TransactionNotFound(
-            FfiConverterString.read(from)
-          );
-
+          return new BdkError.TransactionNotFound({
+            message: FfiConverterString.read(from),
+          });
         case 43:
-          return new BdkError.CannotConnect(FfiConverterString.read(from));
-
+          return new BdkError.CannotConnect({
+            message: FfiConverterString.read(from),
+          });
         case 44:
-          return new BdkError.CalculateFeeError(FfiConverterString.read(from));
-
+          return new BdkError.CalculateFeeError({
+            message: FfiConverterString.read(from),
+          });
         case 45:
-          return new BdkError.InvalidMnemonic(FfiConverterString.read(from));
-
+          return new BdkError.InvalidMnemonic({
+            message: FfiConverterString.read(from),
+          });
         case 46:
-          return new BdkError.InvalidEntropy(FfiConverterString.read(from));
-
+          return new BdkError.InvalidEntropy({
+            message: FfiConverterString.read(from),
+          });
         case 47:
-          return new BdkError.KeyError(FfiConverterString.read(from));
-
+          return new BdkError.KeyError({
+            message: FfiConverterString.read(from),
+          });
         case 48:
-          return new BdkError.Generic(FfiConverterString.read(from));
-
+          return new BdkError.Generic({
+            message: FfiConverterString.read(from),
+          });
         default:
           throw new UniffiInternalError.UnexpectedEnumCase();
       }
     }
     write(value: TypeName, into: RustBuffer): void {
-      const obj = value as any;
-      const index = obj[variantOrdinalSymbol] as number;
-      intConverter.write(index, into);
+      switch (value.tag) {
+        case BdkError_Tags.InvalidDescriptor: {
+          ordinalConverter.write(1, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.WalletCreationFailed: {
+          ordinalConverter.write(2, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.WalletLoadFailed: {
+          ordinalConverter.write(3, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.WalletLoadMismatch: {
+          ordinalConverter.write(4, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.PersistError: {
+          ordinalConverter.write(5, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InvalidAddress: {
+          ordinalConverter.write(6, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InvalidScript: {
+          ordinalConverter.write(7, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.TransactionBuildFailed: {
+          ordinalConverter.write(8, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.NoRecipients: {
+          ordinalConverter.write(9, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.NoUtxosSelected: {
+          ordinalConverter.write(10, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.OutputBelowDustLimit: {
+          ordinalConverter.write(11, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InsufficientFunds: {
+          ordinalConverter.write(12, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeRateTooLow: {
+          ordinalConverter.write(13, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeTooLow: {
+          ordinalConverter.write(14, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.LockTimeConflict: {
+          ordinalConverter.write(15, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.RbfSequenceConflict: {
+          ordinalConverter.write(16, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.VersionZero: {
+          ordinalConverter.write(17, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.VersionOneCsv: {
+          ordinalConverter.write(18, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SpendingPolicyRequired: {
+          ordinalConverter.write(19, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.MissingKeyOrigin: {
+          ordinalConverter.write(20, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.MissingNonWitnessUtxo: {
+          ordinalConverter.write(21, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.OutpointNotFound: {
+          ordinalConverter.write(22, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeBumpTargetNotFound: {
+          ordinalConverter.write(23, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeBumpAlreadyConfirmed: {
+          ordinalConverter.write(24, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeBumpIrreplaceable: {
+          ordinalConverter.write(25, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeBumpFeeRateUnavailable: {
+          ordinalConverter.write(26, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.FeeBumpInvalidOutputIndex: {
+          ordinalConverter.write(27, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InvalidPsbt: {
+          ordinalConverter.write(28, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignFailed: {
+          ordinalConverter.write(29, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerMissingKey: {
+          ordinalConverter.write(30, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerInvalidKey: {
+          ordinalConverter.write(31, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerUserCanceled: {
+          ordinalConverter.write(32, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerInputIndexOutOfRange: {
+          ordinalConverter.write(33, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerMissingNonWitnessUtxo: {
+          ordinalConverter.write(34, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerMissingWitnessUtxo: {
+          ordinalConverter.write(35, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerMissingWitnessScript: {
+          ordinalConverter.write(36, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerNonStandardSighash: {
+          ordinalConverter.write(37, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SignerInvalidSighash: {
+          ordinalConverter.write(38, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.SyncFailed: {
+          ordinalConverter.write(39, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.BroadcastFailed: {
+          ordinalConverter.write(40, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InvalidTransaction: {
+          ordinalConverter.write(41, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.TransactionNotFound: {
+          ordinalConverter.write(42, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.CannotConnect: {
+          ordinalConverter.write(43, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.CalculateFeeError: {
+          ordinalConverter.write(44, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InvalidMnemonic: {
+          ordinalConverter.write(45, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.InvalidEntropy: {
+          ordinalConverter.write(46, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.KeyError: {
+          ordinalConverter.write(47, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        case BdkError_Tags.Generic: {
+          ordinalConverter.write(48, into);
+          const inner = value.inner;
+          FfiConverterString.write(inner.message, into);
+          return;
+        }
+        default:
+          // Throwing from here means that BdkError_Tags hasn't matched an ordinal.
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
     }
     allocationSize(value: TypeName): number {
-      return intConverter.allocationSize(0);
+      switch (value.tag) {
+        case BdkError_Tags.InvalidDescriptor: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(1);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.WalletCreationFailed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(2);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.WalletLoadFailed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(3);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.WalletLoadMismatch: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(4);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.PersistError: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(5);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InvalidAddress: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(6);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InvalidScript: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(7);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.TransactionBuildFailed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(8);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.NoRecipients: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(9);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.NoUtxosSelected: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(10);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.OutputBelowDustLimit: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(11);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InsufficientFunds: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(12);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeRateTooLow: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(13);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeTooLow: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(14);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.LockTimeConflict: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(15);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.RbfSequenceConflict: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(16);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.VersionZero: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(17);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.VersionOneCsv: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(18);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SpendingPolicyRequired: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(19);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.MissingKeyOrigin: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(20);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.MissingNonWitnessUtxo: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(21);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.OutpointNotFound: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(22);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeBumpTargetNotFound: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(23);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeBumpAlreadyConfirmed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(24);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeBumpIrreplaceable: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(25);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeBumpFeeRateUnavailable: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(26);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.FeeBumpInvalidOutputIndex: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(27);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InvalidPsbt: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(28);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignFailed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(29);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerMissingKey: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(30);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerInvalidKey: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(31);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerUserCanceled: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(32);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerInputIndexOutOfRange: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(33);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerMissingNonWitnessUtxo: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(34);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerMissingWitnessUtxo: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(35);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerMissingWitnessScript: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(36);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerNonStandardSighash: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(37);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SignerInvalidSighash: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(38);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.SyncFailed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(39);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.BroadcastFailed: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(40);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InvalidTransaction: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(41);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.TransactionNotFound: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(42);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.CannotConnect: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(43);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.CalculateFeeError: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(44);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InvalidMnemonic: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(45);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.InvalidEntropy: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(46);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.KeyError: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(47);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        case BdkError_Tags.Generic: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(48);
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
     }
   }
-  return new FfiConverter();
+  return new FFIConverter();
 })();
 
-/**
- * Controls which UTXOs the wallet may spend as change inputs.
- */
 export enum ChangeSpendPolicy {
-  /**
-   * Both change and non-change outputs may be spent (default).
-   */
   ChangeAllowed,
-  /**
-   * Only change outputs may be spent as inputs.
-   */
   OnlyChange,
-  /**
-   * Only non-change outputs may be spent as inputs.
-   */
   ChangeForbidden,
 }
 
@@ -2402,27 +3666,10 @@ const FfiConverterTypeChangeSpendPolicy = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Standard BIP descriptor templates for generating wallet descriptors
- * from a mnemonic/xprv (also usable for xpub via create_public_descriptor).
- * Mirrors descriptor::template::{Bip44, Bip49, Bip84, Bip86}.
- */
 export enum DescriptorTemplate {
-  /**
-   * BIP44 — Legacy P2PKH (1…)
-   */
   Bip44,
-  /**
-   * BIP49 — Nested SegWit P2SH-P2WPKH (3…)
-   */
   Bip49,
-  /**
-   * BIP84 — Native SegWit P2WPKH (bc1q…)
-   */
   Bip84,
-  /**
-   * BIP86 — Taproot P2TR (bc1p…)
-   */
   Bip86,
 }
 
@@ -2464,13 +3711,7 @@ const FfiConverterTypeDescriptorTemplate = (() => {
 })();
 
 export enum KeychainKind {
-  /**
-   * External keychain — used for deriving recipient addresses.
-   */
   External,
-  /**
-   * Internal keychain — used for deriving change addresses.
-   */
   Internal,
 }
 
@@ -2503,10 +3744,6 @@ const FfiConverterTypeKeychainKind = (() => {
   return new FFIConverter();
 })();
 
-/**
- * BIP-39 mnemonic language. Mirrors bip39::Language.
- * Requires `all-languages` feature on the bip39 crate.
- */
 export enum Language {
   English,
   SimplifiedChinese,
@@ -2625,26 +3862,10 @@ const FfiConverterTypeNetwork = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Single-key descriptor templates.
- * Mirrors descriptor::template::{P2Pkh, P2Wpkh, P2Wpkh_P2Sh, P2TR}.
- */
 export enum SingleKeyDescriptorTemplate {
-  /**
-   * Pay-to-PubKey-Hash — Legacy (1…)
-   */
   P2Pkh,
-  /**
-   * Pay-to-Witness-PubKey-Hash — Native SegWit (bc1q…)
-   */
   P2Wpkh,
-  /**
-   * P2Wpkh wrapped in P2SH — Nested SegWit (3…)
-   */
   P2WpkhP2Sh,
-  /**
-   * Pay-to-Taproot (bc1p…)
-   */
   P2tr,
 }
 
@@ -2685,18 +3906,8 @@ const FfiConverterTypeSingleKeyDescriptorTemplate = (() => {
   return new FFIConverter();
 })();
 
-/**
- * Ordering applied to inputs and outputs when building a transaction.
- * Note: bdk_wallet also has a Custom variant (with closures) that cannot cross FFI.
- */
 export enum TxOrdering {
-  /**
-   * Randomise input and output order (default, good for privacy).
-   */
   Shuffle,
-  /**
-   * Preserve insertion order of recipients and manually added UTXOs.
-   */
   Untouched,
 }
 
@@ -2737,19 +3948,12 @@ export enum WalletEvent_Tags {
   TxReplaced = "TxReplaced",
   TxDropped = "TxDropped",
 }
-/**
- * Events emitted when applying chain updates to the wallet.
- * Mirrors bdk_wallet::event::WalletEvent (non-exhaustive in upstream).
- */
 export const WalletEvent = (() => {
   type ChainTipChanged__interface = {
     tag: WalletEvent_Tags.ChainTipChanged;
     inner: Readonly<{ oldTip: BlockId; newTip: BlockId }>;
   };
 
-  /**
-   * The local chain tip has changed.
-   */
   class ChainTipChanged_
     extends UniffiEnum
     implements ChainTipChanged__interface
@@ -2780,9 +3984,6 @@ export const WalletEvent = (() => {
     inner: Readonly<{ txid: string; blockTime: ConfirmationBlockTime }>;
   };
 
-  /**
-   * A transaction has been confirmed.
-   */
   class TxConfirmed_ extends UniffiEnum implements TxConfirmed__interface {
     /**
      * @private
@@ -2816,9 +4017,6 @@ export const WalletEvent = (() => {
     inner: Readonly<{ txid: string }>;
   };
 
-  /**
-   * A previously confirmed transaction has been unconfirmed (reorg).
-   */
   class TxUnconfirmed_ extends UniffiEnum implements TxUnconfirmed__interface {
     /**
      * @private
@@ -2846,9 +4044,6 @@ export const WalletEvent = (() => {
     inner: Readonly<{ txid: string; conflictingTxids: Array<string> }>;
   };
 
-  /**
-   * A transaction has been replaced (RBF or conflict).
-   */
   class TxReplaced_ extends UniffiEnum implements TxReplaced__interface {
     /**
      * @private
@@ -2879,9 +4074,6 @@ export const WalletEvent = (() => {
     inner: Readonly<{ txid: string }>;
   };
 
-  /**
-   * A transaction has been dropped from the mempool / evicted.
-   */
   class TxDropped_ extends UniffiEnum implements TxDropped__interface {
     /**
      * @private
@@ -2917,11 +4109,6 @@ export const WalletEvent = (() => {
     TxDropped: TxDropped_,
   });
 })();
-
-/**
- * Events emitted when applying chain updates to the wallet.
- * Mirrors bdk_wallet::event::WalletEvent (non-exhaustive in upstream).
- */
 
 export type WalletEvent = InstanceType<
   (typeof WalletEvent)[keyof Omit<typeof WalletEvent, "instanceOf">]
@@ -3048,9 +4235,6 @@ const FfiConverterTypeWalletEvent = (() => {
   return new FFIConverter();
 })();
 
-/**
- * BIP-39 mnemonic word count (determines entropy length).
- */
 export enum WordCount {
   Words12,
   Words15,
@@ -3101,29 +4285,138 @@ const FfiConverterTypeWordCount = (() => {
 })();
 
 /**
- * BIP-39 mnemonic phrase for key generation.
- * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
+ * A reusable Electrum client that holds a persistent TCP/TLS connection.
  */
+export interface ElectrumClientLike {}
+/**
+ * @deprecated Use `ElectrumClientLike` instead.
+ */
+export type ElectrumClientInterface = ElectrumClientLike;
+
+/**
+ * A reusable Electrum client that holds a persistent TCP/TLS connection.
+ */
+export class ElectrumClient
+  extends UniffiAbstractObject
+  implements ElectrumClientLike
+{
+  readonly [uniffiTypeNameSymbol] = "ElectrumClient";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Connect to an Electrum server.
+   */
+  constructor(url: string) /*throws*/ {
+    super();
+    const pointer = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_new(
+          FfiConverterString.lower(url),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeElectrumClientObjectFactory.bless(pointer);
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer = uniffiTypeElectrumClientObjectFactory.pointer(this);
+      uniffiTypeElectrumClientObjectFactory.freePointer(pointer);
+      uniffiTypeElectrumClientObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is ElectrumClient {
+    return uniffiTypeElectrumClientObjectFactory.isConcreteType(obj);
+  }
+}
+
+const uniffiTypeElectrumClientObjectFactory: UniffiObjectFactory<ElectrumClientLike> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): ElectrumClientLike {
+        const instance = Object.create(ElectrumClient.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "ElectrumClient";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: ElectrumClientLike): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: ElectrumClientLike): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_electrumclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_electrumclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is ElectrumClientLike {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "ElectrumClient"
+        );
+      },
+    };
+  })();
+// FfiConverter for ElectrumClientLike
+const FfiConverterTypeElectrumClient = new FfiConverterObject(
+  uniffiTypeElectrumClientObjectFactory
+);
+
 export interface MnemonicLike {
-  /**
-   * The language of this mnemonic.
-   */
   language(): Language;
-  /**
-   * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
-   */
   toSeedHex(passphrase: string): string;
-  /**
-   * The mnemonic as a space-separated word string.
-   */
   toString(): string;
-  /**
-   * Number of words (12, 15, 18, 21, or 24).
-   */
   wordCount(): /*u32*/ number;
-  /**
-   * List the individual words.
-   */
   words(): Array<string>;
 }
 /**
@@ -3131,17 +4424,10 @@ export interface MnemonicLike {
  */
 export type MnemonicInterface = MnemonicLike;
 
-/**
- * BIP-39 mnemonic phrase for key generation.
- * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
- */
 export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
   readonly [uniffiTypeNameSymbol] = "Mnemonic";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
-  /**
-   * Generate a new random mnemonic with the given word count (English).
-   */
   constructor(wordCount: WordCount) /*throws*/ {
     super();
     const pointer = uniffiCaller.rustCallWithError(
@@ -3161,9 +4447,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
       uniffiTypeMnemonicObjectFactory.bless(pointer);
   }
 
-  /**
-   * Create a mnemonic from raw entropy bytes (16–32 bytes).
-   */
   static fromEntropy(entropy: Array</*u8*/ number>): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
@@ -3181,9 +4464,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * Create a mnemonic from raw entropy bytes in a specific language.
-   */
   static fromEntropyIn(
     entropy: Array</*u8*/ number>,
     language: Language
@@ -3205,9 +4485,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * Parse an existing mnemonic string (auto-detects language).
-   */
   static fromString(mnemonic: string): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
@@ -3225,9 +4502,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * Parse a mnemonic string in a specific language.
-   */
   static fromStringIn(
     mnemonic: string,
     language: Language
@@ -3249,9 +4523,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * The language of this mnemonic.
-   */
   language(): Language {
     return FfiConverterTypeLanguage.lift(
       uniffiCaller.rustCall(
@@ -3266,9 +4537,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
-   */
   toSeedHex(passphrase: string): string {
     return FfiConverterString.lift(
       uniffiCaller.rustCall(
@@ -3284,9 +4552,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * The mnemonic as a space-separated word string.
-   */
   toString(): string {
     return FfiConverterString.lift(
       uniffiCaller.rustCall(
@@ -3301,9 +4566,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * Number of words (12, 15, 18, 21, or 24).
-   */
   wordCount(): /*u32*/ number {
     return FfiConverterUInt32.lift(
       uniffiCaller.rustCall(
@@ -3318,9 +4580,6 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
-  /**
-   * List the individual words.
-   */
   words(): Array<string> {
     return FfiConverterArrayString.lift(
       uniffiCaller.rustCall(
@@ -3421,38 +4680,12 @@ const FfiConverterTypeMnemonic = new FfiConverterObject(
   uniffiTypeMnemonicObjectFactory
 );
 
-/**
- * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
- * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
- */
 export interface PsbtLike {
-  /**
-   * Extract the fully-signed transaction as raw hex.
-   * Only valid after all inputs are finalized.
-   */
   extractTxHex(): /*throws*/ string;
-  /**
-   * Total fee in satoshis. None if any input UTXO value is unknown.
-   * From PsbtUtils::fee_amount().
-   */
   feeAmount(): /*u64*/ bigint | undefined;
-  /**
-   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
-   * From PsbtUtils::fee_rate().
-   */
   feeRate(): /*f64*/ number | undefined;
-  /**
-   * Retrieve the UTXO for a given input index. Returns None if unavailable.
-   * From PsbtUtils::get_utxo_for().
-   */
   getUtxoFor(inputIndex: /*u64*/ bigint): TxOut | undefined;
-  /**
-   * Serialize to a base64-encoded string.
-   */
   toBase64(): string;
-  /**
-   * The unsigned txid (available before finalization).
-   */
   txid(): /*throws*/ string;
 }
 /**
@@ -3460,17 +4693,10 @@ export interface PsbtLike {
  */
 export type PsbtInterface = PsbtLike;
 
-/**
- * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
- * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
- */
 export class Psbt extends UniffiAbstractObject implements PsbtLike {
   readonly [uniffiTypeNameSymbol] = "Psbt";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
-  /**
-   * Deserialize from a base64-encoded string.
-   */
   constructor(psbtBase64: string) /*throws*/ {
     super();
     const pointer = uniffiCaller.rustCallWithError(
@@ -3489,10 +4715,6 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     this[destructorGuardSymbol] = uniffiTypePsbtObjectFactory.bless(pointer);
   }
 
-  /**
-   * Extract the fully-signed transaction as raw hex.
-   * Only valid after all inputs are finalized.
-   */
   extractTxHex(): string /*throws*/ {
     return FfiConverterString.lift(
       uniffiCaller.rustCallWithError(
@@ -3510,10 +4732,6 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
-  /**
-   * Total fee in satoshis. None if any input UTXO value is unknown.
-   * From PsbtUtils::fee_amount().
-   */
   feeAmount(): /*u64*/ bigint | undefined {
     return FfiConverterOptionalUInt64.lift(
       uniffiCaller.rustCall(
@@ -3528,10 +4746,6 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
-  /**
-   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
-   * From PsbtUtils::fee_rate().
-   */
   feeRate(): /*f64*/ number | undefined {
     return FfiConverterOptionalFloat64.lift(
       uniffiCaller.rustCall(
@@ -3546,10 +4760,6 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
-  /**
-   * Retrieve the UTXO for a given input index. Returns None if unavailable.
-   * From PsbtUtils::get_utxo_for().
-   */
   getUtxoFor(inputIndex: /*u64*/ bigint): TxOut | undefined {
     return FfiConverterOptionalTypeTxOut.lift(
       uniffiCaller.rustCall(
@@ -3565,9 +4775,6 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
-  /**
-   * Serialize to a base64-encoded string.
-   */
   toBase64(): string {
     return FfiConverterString.lift(
       uniffiCaller.rustCall(
@@ -3582,9 +4789,6 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
-  /**
-   * The unsigned txid (available before finalization).
-   */
   txid(): string /*throws*/ {
     return FfiConverterString.lift(
       uniffiCaller.rustCallWithError(
@@ -3679,137 +4883,43 @@ const FfiConverterTypePsbt = new FfiConverterObject(
   uniffiTypePsbtObjectFactory
 );
 
-/**
- * Fluent builder for constructing Bitcoin transactions.
- * Create one, configure it, then call finish(wallet) to produce a PSBT.
- * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
- */
 export interface TxBuilderLike {
-  /**
-   * Attach OP_RETURN data to the transaction.
-   */
   addData(data: Array</*u8*/ number>): void;
-  /**
-   * Include BIP-32 global xpubs in the PSBT.
-   */
   addGlobalXpubs(): void;
-  /**
-   * Add a single recipient (address + amount).
-   */
   addRecipient(address: string, amountSats: /*u64*/ bigint): void;
-  /**
-   * Mark a single UTXO as unspendable.
-   */
   addUnspendable(outpoint: OutPoint): void;
-  /**
-   * Add a specific UTXO to spend.
-   */
   addUtxo(outpoint: OutPoint): /*throws*/ void;
-  /**
-   * Add multiple specific UTXOs to spend.
-   */
   addUtxos(outpoints: Array<OutPoint>): /*throws*/ void;
-  /**
-   * Allow outputs below the dust threshold.
-   */
   allowDust(allow: boolean): void;
-  /**
-   * Set the change spend policy explicitly.
-   */
   changePolicy(policy: ChangeSpendPolicy): void;
-  /**
-   * Set the assumed current block height (for relative timelock evaluation).
-   */
   currentHeight(height: /*u32*/ number): void;
-  /**
-   * Forbid spending from change outputs.
-   */
   doNotSpendChange(): void;
-  /**
-   * Set the script to receive the remaining change (use with drain_wallet).
-   */
   drainTo(address: string): /*throws*/ void;
-  /**
-   * Spend all spendable UTXOs (send remaining to the drain_to address).
-   */
   drainWallet(): void;
-  /**
-   * Enable RBF signalling with the default nSequence (0xFFFFFFFD).
-   */
   enableRbf(): void;
-  /**
-   * Enable RBF signalling with a specific nSequence value (must be < 0xFFFFFFFE).
-   */
   enableRbfWithSequence(nsequence: /*u32*/ number): void;
-  /**
-   * Exclude UTXOs with fewer than min_confirms confirmations.
-   */
   excludeBelowConfirmations(minConfirms: /*u32*/ number): void;
-  /**
-   * Exclude all unconfirmed UTXOs.
-   */
   excludeUnconfirmed(): void;
-  /**
-   * Set an absolute fee in satoshis (overrides fee_rate).
-   */
   feeAbsolute(feeSats: /*u64*/ bigint): void;
-  /**
-   * Set a fee rate target in sat/vbyte.
-   */
   feeRate(satPerVbyte: /*f64*/ number): void;
   /**
-   * Build the transaction into a PSBT. The wallet is used for coin
-   * selection and script resolution — the PSBT is NOT signed here.
+   * Build the transaction into a PSBT (async — runs on background thread).
    */
-  finish(wallet: WalletLike): /*throws*/ PsbtLike;
-  /**
-   * Include the redeemScript / witnessScript in PSBT outputs.
-   */
+  finish(
+    wallet: WalletLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<PsbtLike>;
   includeOutputRedeemWitnessScript(): void;
-  /**
-   * Only use the UTXOs explicitly added with add_utxo / add_utxos.
-   */
   manuallySelectedOnly(): void;
-  /**
-   * Set an explicit nLockTime (as a block height).
-   */
   nlocktime(lockHeight: /*u32*/ number): void;
-  /**
-   * Only spend from change outputs.
-   */
   onlySpendChange(): void;
-  /**
-   * Include only witness UTXO in PSBT inputs (reduced size, less validation).
-   */
   onlyWitnessUtxo(): void;
-  /**
-   * Set the input/output ordering strategy.
-   */
   ordering(ordering: TxOrdering): void;
-  /**
-   * Supply a policy path for complex descriptors (multisig, timelocks).
-   * path_map is a JSON-encoded BTreeMap<String, Vec<usize>>.
-   */
   policyPath(pathMapJson: string, keychain: KeychainKind): void;
-  /**
-   * Set an exact nSequence value for all inputs.
-   */
   setExactSequence(nsequence: /*u32*/ number): void;
-  /**
-   * Replace the entire recipient list.
-   */
   setRecipients(recipients: Array<Recipient>): void;
-  /**
-   * Set the sighash type for all inputs.
-   */
   sighash(sighashType: /*u32*/ number): void;
-  /**
-   * Set the transaction version (1 or 2).
-   */
   txVersion(version: /*i32*/ number): void;
-  /**
-   * Mark UTXOs as unspendable (excluded from coin selection).
-   */
   unspendable(outpoints: Array<OutPoint>): void;
 }
 /**
@@ -3817,11 +4927,6 @@ export interface TxBuilderLike {
  */
 export type TxBuilderInterface = TxBuilderLike;
 
-/**
- * Fluent builder for constructing Bitcoin transactions.
- * Create one, configure it, then call finish(wallet) to produce a PSBT.
- * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
- */
 export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
   readonly [uniffiTypeNameSymbol] = "TxBuilder";
   readonly [destructorGuardSymbol]: UniffiGcObject;
@@ -3841,9 +4946,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
       uniffiTypeTxBuilderObjectFactory.bless(pointer);
   }
 
-  /**
-   * Attach OP_RETURN data to the transaction.
-   */
   addData(data: Array</*u8*/ number>): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3857,9 +4959,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Include BIP-32 global xpubs in the PSBT.
-   */
   addGlobalXpubs(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3872,9 +4971,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Add a single recipient (address + amount).
-   */
   addRecipient(address: string, amountSats: /*u64*/ bigint): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3889,9 +4985,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Mark a single UTXO as unspendable.
-   */
   addUnspendable(outpoint: OutPoint): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3905,9 +4998,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Add a specific UTXO to spend.
-   */
   addUtxo(outpoint: OutPoint): void /*throws*/ {
     uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -3924,9 +5014,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Add multiple specific UTXOs to spend.
-   */
   addUtxos(outpoints: Array<OutPoint>): void /*throws*/ {
     uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -3943,9 +5030,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Allow outputs below the dust threshold.
-   */
   allowDust(allow: boolean): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3959,9 +5043,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set the change spend policy explicitly.
-   */
   changePolicy(policy: ChangeSpendPolicy): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3975,9 +5056,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set the assumed current block height (for relative timelock evaluation).
-   */
   currentHeight(height: /*u32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -3991,9 +5069,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Forbid spending from change outputs.
-   */
   doNotSpendChange(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4006,9 +5081,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set the script to receive the remaining change (use with drain_wallet).
-   */
   drainTo(address: string): void /*throws*/ {
     uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -4025,9 +5097,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Spend all spendable UTXOs (send remaining to the drain_to address).
-   */
   drainWallet(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4040,9 +5109,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Enable RBF signalling with the default nSequence (0xFFFFFFFD).
-   */
   enableRbf(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4055,9 +5121,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Enable RBF signalling with a specific nSequence value (must be < 0xFFFFFFFE).
-   */
   enableRbfWithSequence(nsequence: /*u32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4071,9 +5134,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Exclude UTXOs with fewer than min_confirms confirmations.
-   */
   excludeBelowConfirmations(minConfirms: /*u32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4087,9 +5147,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Exclude all unconfirmed UTXOs.
-   */
   excludeUnconfirmed(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4102,9 +5159,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set an absolute fee in satoshis (overrides fee_rate).
-   */
   feeAbsolute(feeSats: /*u64*/ bigint): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4118,9 +5172,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set a fee rate target in sat/vbyte.
-   */
   feeRate(satPerVbyte: /*f64*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4135,30 +5186,42 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
   }
 
   /**
-   * Build the transaction into a PSBT. The wallet is used for coin
-   * selection and script resolution — the PSBT is NOT signed here.
+   * Build the transaction into a PSBT (async — runs on background thread).
    */
-  finish(wallet: WalletLike): PsbtLike /*throws*/ {
-    return FfiConverterTypePsbt.lift(
-      uniffiCaller.rustCallWithError(
-        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
-          FfiConverterTypeBdkError
-        ),
-        /*caller:*/ (callStatus) => {
+  async finish(
+    wallet: WalletLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<PsbtLike> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_txbuilder_finish(
             uniffiTypeTxBuilderObjectFactory.clonePointer(this),
-            FfiConverterTypeWallet.lower(wallet),
-            callStatus
+            FfiConverterTypeWallet.lower(wallet)
           );
         },
-        /*liftString:*/ FfiConverterString.lift
-      )
-    );
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_u64,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_u64,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_u64,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_u64,
+        /*liftFunc:*/ FfiConverterTypePsbt.lift.bind(FfiConverterTypePsbt),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
   }
 
-  /**
-   * Include the redeemScript / witnessScript in PSBT outputs.
-   */
   includeOutputRedeemWitnessScript(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4171,9 +5234,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Only use the UTXOs explicitly added with add_utxo / add_utxos.
-   */
   manuallySelectedOnly(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4186,9 +5246,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set an explicit nLockTime (as a block height).
-   */
   nlocktime(lockHeight: /*u32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4202,9 +5259,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Only spend from change outputs.
-   */
   onlySpendChange(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4217,9 +5271,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Include only witness UTXO in PSBT inputs (reduced size, less validation).
-   */
   onlyWitnessUtxo(): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4232,9 +5283,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set the input/output ordering strategy.
-   */
   ordering(ordering: TxOrdering): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4248,10 +5296,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Supply a policy path for complex descriptors (multisig, timelocks).
-   * path_map is a JSON-encoded BTreeMap<String, Vec<usize>>.
-   */
   policyPath(pathMapJson: string, keychain: KeychainKind): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4266,9 +5310,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set an exact nSequence value for all inputs.
-   */
   setExactSequence(nsequence: /*u32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4282,9 +5323,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Replace the entire recipient list.
-   */
   setRecipients(recipients: Array<Recipient>): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4298,9 +5336,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set the sighash type for all inputs.
-   */
   sighash(sighashType: /*u32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4314,9 +5349,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Set the transaction version (1 or 2).
-   */
   txVersion(version: /*i32*/ number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4330,9 +5362,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
-  /**
-   * Mark UTXOs as unspendable (excluded from coin selection).
-   */
   unspendable(outpoints: Array<OutPoint>): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -4434,204 +5463,73 @@ const FfiConverterTypeTxBuilder = new FfiConverterObject(
 );
 
 export interface WalletLike {
-  /**
-   * Broadcast a finalized PSBT via Electrum. Returns the txid.
-   */
   broadcastWithElectrum(
-    url: string,
+    client: ElectrumClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
-  /**
-   * Broadcast a finalized PSBT via Esplora. Returns the txid.
-   */
   broadcastWithEsplora(
     url: string,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
-  /**
-   * Build an RBF fee-bump PSBT for an unconfirmed transaction.
-   * Mirrors Wallet::build_fee_bump().
-   */
   buildFeeBump(txid: string, newFeeRate: /*f64*/ number): /*throws*/ PsbtLike;
-  /**
-   * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
-   * Mirrors Wallet::calculate_fee().
-   */
   calculateFee(txHex: string): /*throws*/ /*u64*/ bigint;
-  /**
-   * Calculate the fee rate for a raw transaction (hex). Returns sat/vbyte.
-   * Mirrors Wallet::calculate_fee_rate().
-   */
   calculateFeeRate(txHex: string): /*throws*/ /*f64*/ number;
-  /**
-   * Cancel (evict) a transaction from the wallet's view.
-   * Mirrors Wallet::cancel_tx().
-   */
   cancelTx(txHex: string): /*throws*/ void;
-  /**
-   * All checkpoints in the local chain, ordered by height descending.
-   * Mirrors Wallet::checkpoints().
-   */
   checkpoints(): Array<BlockId>;
-  /**
-   * The highest derivation index that has been revealed, or null if none.
-   * Mirrors Wallet::derivation_index().
-   */
   derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
-  /**
-   * Find the keychain and derivation index for a scriptPubKey (hex).
-   * Returns null if the script does not belong to this wallet.
-   * Mirrors Wallet::derivation_of_spk().
-   */
   derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
-  /**
-   * The descriptor checksum for the given keychain.
-   * Mirrors Wallet::descriptor_checksum().
-   */
   descriptorChecksum(keychain: KeychainKind): /*throws*/ string;
-  /**
-   * Drain the entire wallet to an address. Returns txid.
-   */
   drain(
     address: string,
     feeRate: /*f64*/ number,
     esploraUrl: string,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
-  /**
-   * Sign and attempt to finalize all inputs.
-   * Returns true if fully finalized.
-   * Mirrors Wallet::finalize_psbt() with default SignOptions.
-   */
+  drainWithElectrum(
+    address: string,
+    feeRate: /*f64*/ number,
+    client: ElectrumClientLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<string>;
   finalizePsbt(psbt: PsbtLike): /*throws*/ boolean;
-  /**
-   * Full scan via an Electrum TCP/TLS server.
-   */
   fullScanWithElectrum(
-    url: string,
+    client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
-  /**
-   * Full scan via an Esplora HTTP server (discovers all used addresses).
-   * Uses Wallet::start_full_scan() + bdk_esplora client internally.
-   * stop_gap: how many consecutive unused addresses to scan before stopping.
-   */
   fullScanWithEsplora(
     url: string,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
-  /**
-   * Get the wallet balance. Mirrors Wallet::balance().
-   */
   getBalance(): /*throws*/ Balance;
-  /**
-   * Returns the raw transaction hex for a given txid. Null if not found.
-   * Mirrors Wallet::get_tx().
-   */
   getTx(txid: string): /*throws*/ string | undefined;
-  /**
-   * Get a specific UTXO. Returns null if not found. Mirrors Wallet::get_utxo().
-   */
   getUtxo(outpoint: OutPoint): /*throws*/ LocalOutput | undefined;
-  /**
-   * Manually insert a TxOut (e.g. for tracking external outputs).
-   * Mirrors Wallet::insert_txout().
-   */
   insertTxout(outpoint: OutPoint, txout: TxOut): void;
-  /**
-   * Return true if the given scriptPubKey (hex) belongs to this wallet.
-   * Mirrors Wallet::is_mine().
-   */
   isMine(scriptHex: string): boolean;
-  /**
-   * List all keychains and their public descriptors.
-   * Mirrors Wallet::keychains().
-   */
   keychains(): Array<KeychainInfo>;
-  /**
-   * The latest checkpoint (tip of the local chain). Null if no blocks applied yet.
-   * Mirrors Wallet::latest_checkpoint().
-   */
   latestCheckpoint(): BlockId | undefined;
-  /**
-   * List all wallet outputs (spent and unspent). Mirrors Wallet::list_output().
-   */
   listOutput(): /*throws*/ Array<LocalOutput>;
-  /**
-   * List all unspent wallet outputs. Mirrors Wallet::list_unspent().
-   */
   listUnspent(): /*throws*/ Array<LocalOutput>;
-  /**
-   * List all addresses that have been revealed but not yet received funds.
-   * Mirrors Wallet::list_unused_addresses().
-   */
   listUnusedAddresses(keychain: KeychainKind): /*throws*/ Array<AddressInfo>;
-  /**
-   * Mark an address index as used (returns true if previously unused).
-   * Mirrors Wallet::mark_used().
-   */
   markUsed(keychain: KeychainKind, index: /*u32*/ number): boolean;
-  /**
-   * The network this wallet is configured for.
-   * Mirrors Wallet::network().
-   */
   network(): Network;
-  /**
-   * The next derivation index that will be revealed.
-   * Mirrors Wallet::next_derivation_index().
-   */
   nextDerivationIndex(keychain: KeychainKind): /*u32*/ number;
-  /**
-   * Return the next address that has not yet received funds.
-   * Mirrors Wallet::next_unused_address().
-   */
   nextUnusedAddress(keychain: KeychainKind): /*throws*/ AddressInfo;
-  /**
-   * Peek at a specific derivation index without advancing the counter.
-   * Mirrors Wallet::peek_address().
-   */
   peekAddress(
     keychain: KeychainKind,
     index: /*u32*/ number
   ): /*throws*/ AddressInfo;
-  /**
-   * Persist any staged changes to the database.
-   * Our FFI wraps PersistedWallet; this calls persist() internally.
-   */
   persist(): /*throws*/ boolean;
-  /**
-   * Spending policies for a given keychain, returned as a JSON string.
-   * Returns null if the descriptor has no policy.
-   * Mirrors Wallet::policies() — serialized because the Policy tree is complex.
-   */
   policies(keychain: KeychainKind): /*throws*/ string | undefined;
-  /**
-   * The public-only descriptor for the given keychain as a string.
-   * Mirrors Wallet::public_descriptor().
-   */
   publicDescriptor(keychain: KeychainKind): /*throws*/ string;
-  /**
-   * Reveal all addresses up to and including the given derivation index.
-   * Mirrors Wallet::reveal_addresses_to().
-   */
   revealAddressesTo(
     keychain: KeychainKind,
     index: /*u32*/ number
   ): /*throws*/ Array<AddressInfo>;
-  /**
-   * Reveal and return the next address at the next derivation index,
-   * incrementing the index even if previous addresses are unused.
-   * Mirrors Wallet::reveal_next_address().
-   */
   revealNextAddress(keychain: KeychainKind): /*throws*/ AddressInfo;
-  /**
-   * Build, sign, and broadcast a simple payment in one call. Returns txid.
-   * Combines build_tx → sign → broadcast via Esplora.
-   */
   send(
     address: string,
     amountSats: /*u64*/ bigint,
@@ -4639,48 +5537,27 @@ export interface WalletLike {
     esploraUrl: string,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
-  /**
-   * How much was sent from / received into the wallet for a raw tx (hex).
-   * Mirrors Wallet::sent_and_received().
-   */
+  sendWithElectrum(
+    address: string,
+    amountSats: /*u64*/ bigint,
+    feeRate: /*f64*/ number,
+    client: ElectrumClientLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<string>;
   sentAndReceived(txHex: string): /*throws*/ SentAndReceived;
-  /**
-   * Sign all inputs in the PSBT that this wallet can sign.
-   * Returns true if the PSBT is fully finalized after signing.
-   * Mirrors Wallet::sign() with default SignOptions.
-   */
   sign(psbt: PsbtLike): /*throws*/ boolean;
-  /**
-   * Incremental sync via Electrum.
-   */
   syncWithElectrum(
-    url: string,
+    client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
-  /**
-   * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
-   * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
-   */
   syncWithEsplora(
     url: string,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
-  /**
-   * All wallet-relevant canonical transactions.
-   * Mirrors Wallet::transactions() → mapped to TxDetails.
-   */
   transactions(): /*throws*/ Array<TxDetails>;
-  /**
-   * Details for a single transaction. Returns null if not found.
-   * Mirrors Wallet::tx_details().
-   */
   txDetails(txid: string): /*throws*/ TxDetails | undefined;
-  /**
-   * Mark an address index as unused (returns true if previously used).
-   * Mirrors Wallet::unmark_used().
-   */
   unmarkUsed(keychain: KeychainKind, index: /*u32*/ number): boolean;
 }
 /**
@@ -4693,9 +5570,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
   /**
-   * Create or load a persisted wallet.
-   * descriptor / change_descriptor: output descriptor strings (e.g. "wpkh(tprv…/84'/1'/0'/0/*)")
-   * db_path: file path for the SQLite persistence database.
+   * Create or load a persisted wallet (sync — for async use create_wallet()).
    */
   constructor(
     descriptor: string,
@@ -4723,11 +5598,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     this[destructorGuardSymbol] = uniffiTypeWalletObjectFactory.bless(pointer);
   }
 
-  /**
-   * Broadcast a finalized PSBT via Electrum. Returns the txid.
-   */
   async broadcastWithElectrum(
-    url: string,
+    client: ElectrumClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<string> /*throws*/ {
@@ -4738,7 +5610,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
             uniffiTypeWalletObjectFactory.clonePointer(this),
-            FfiConverterString.lower(url),
+            FfiConverterTypeElectrumClient.lower(client),
             FfiConverterTypePsbt.lower(psbt)
           );
         },
@@ -4765,9 +5637,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * Broadcast a finalized PSBT via Esplora. Returns the txid.
-   */
   async broadcastWithEsplora(
     url: string,
     psbt: PsbtLike,
@@ -4807,10 +5676,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * Build an RBF fee-bump PSBT for an unconfirmed transaction.
-   * Mirrors Wallet::build_fee_bump().
-   */
   buildFeeBump(txid: string, newFeeRate: /*f64*/ number): PsbtLike /*throws*/ {
     return FfiConverterTypePsbt.lift(
       uniffiCaller.rustCallWithError(
@@ -4830,10 +5695,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
-   * Mirrors Wallet::calculate_fee().
-   */
   calculateFee(txHex: string): /*u64*/ bigint /*throws*/ {
     return FfiConverterUInt64.lift(
       uniffiCaller.rustCallWithError(
@@ -4852,10 +5713,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Calculate the fee rate for a raw transaction (hex). Returns sat/vbyte.
-   * Mirrors Wallet::calculate_fee_rate().
-   */
   calculateFeeRate(txHex: string): /*f64*/ number /*throws*/ {
     return FfiConverterFloat64.lift(
       uniffiCaller.rustCallWithError(
@@ -4874,10 +5731,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Cancel (evict) a transaction from the wallet's view.
-   * Mirrors Wallet::cancel_tx().
-   */
   cancelTx(txHex: string): void /*throws*/ {
     uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -4894,10 +5747,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * All checkpoints in the local chain, ordered by height descending.
-   * Mirrors Wallet::checkpoints().
-   */
   checkpoints(): Array<BlockId> {
     return FfiConverterArrayTypeBlockId.lift(
       uniffiCaller.rustCall(
@@ -4912,10 +5761,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * The highest derivation index that has been revealed, or null if none.
-   * Mirrors Wallet::derivation_index().
-   */
   derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined {
     return FfiConverterOptionalUInt32.lift(
       uniffiCaller.rustCall(
@@ -4931,11 +5776,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Find the keychain and derivation index for a scriptPubKey (hex).
-   * Returns null if the script does not belong to this wallet.
-   * Mirrors Wallet::derivation_of_spk().
-   */
   derivationOfSpk(scriptHex: string): DerivationInfo | undefined {
     return FfiConverterOptionalTypeDerivationInfo.lift(
       uniffiCaller.rustCall(
@@ -4951,10 +5791,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * The descriptor checksum for the given keychain.
-   * Mirrors Wallet::descriptor_checksum().
-   */
   descriptorChecksum(keychain: KeychainKind): string /*throws*/ {
     return FfiConverterString.lift(
       uniffiCaller.rustCallWithError(
@@ -4973,9 +5809,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Drain the entire wallet to an address. Returns txid.
-   */
   async drain(
     address: string,
     feeRate: /*f64*/ number,
@@ -5017,11 +5850,47 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * Sign and attempt to finalize all inputs.
-   * Returns true if fully finalized.
-   * Mirrors Wallet::finalize_psbt() with default SignOptions.
-   */
+  async drainWithElectrum(
+    address: string,
+    feeRate: /*f64*/ number,
+    client: ElectrumClientLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_drain_with_electrum(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterString.lower(address),
+            FfiConverterFloat64.lower(feeRate),
+            FfiConverterTypeElectrumClient.lower(client)
+          );
+        },
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
   finalizePsbt(psbt: PsbtLike): boolean /*throws*/ {
     return FfiConverterBool.lift(
       uniffiCaller.rustCallWithError(
@@ -5040,11 +5909,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Full scan via an Electrum TCP/TLS server.
-   */
   async fullScanWithElectrum(
-    url: string,
+    client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
@@ -5055,7 +5921,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
             uniffiTypeWalletObjectFactory.clonePointer(this),
-            FfiConverterString.lower(url),
+            FfiConverterTypeElectrumClient.lower(client),
             FfiConverterUInt64.lower(stopGap)
           );
         },
@@ -5079,11 +5945,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * Full scan via an Esplora HTTP server (discovers all used addresses).
-   * Uses Wallet::start_full_scan() + bdk_esplora client internally.
-   * stop_gap: how many consecutive unused addresses to scan before stopping.
-   */
   async fullScanWithEsplora(
     url: string,
     stopGap: /*u64*/ bigint,
@@ -5120,9 +5981,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * Get the wallet balance. Mirrors Wallet::balance().
-   */
   getBalance(): Balance /*throws*/ {
     return FfiConverterTypeBalance.lift(
       uniffiCaller.rustCallWithError(
@@ -5140,10 +5998,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Returns the raw transaction hex for a given txid. Null if not found.
-   * Mirrors Wallet::get_tx().
-   */
   getTx(txid: string): string | undefined /*throws*/ {
     return FfiConverterOptionalString.lift(
       uniffiCaller.rustCallWithError(
@@ -5162,9 +6016,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Get a specific UTXO. Returns null if not found. Mirrors Wallet::get_utxo().
-   */
   getUtxo(outpoint: OutPoint): LocalOutput | undefined /*throws*/ {
     return FfiConverterOptionalTypeLocalOutput.lift(
       uniffiCaller.rustCallWithError(
@@ -5183,10 +6034,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Manually insert a TxOut (e.g. for tracking external outputs).
-   * Mirrors Wallet::insert_txout().
-   */
   insertTxout(outpoint: OutPoint, txout: TxOut): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -5201,10 +6048,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Return true if the given scriptPubKey (hex) belongs to this wallet.
-   * Mirrors Wallet::is_mine().
-   */
   isMine(scriptHex: string): boolean {
     return FfiConverterBool.lift(
       uniffiCaller.rustCall(
@@ -5220,10 +6063,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * List all keychains and their public descriptors.
-   * Mirrors Wallet::keychains().
-   */
   keychains(): Array<KeychainInfo> {
     return FfiConverterArrayTypeKeychainInfo.lift(
       uniffiCaller.rustCall(
@@ -5238,10 +6077,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * The latest checkpoint (tip of the local chain). Null if no blocks applied yet.
-   * Mirrors Wallet::latest_checkpoint().
-   */
   latestCheckpoint(): BlockId | undefined {
     return FfiConverterOptionalTypeBlockId.lift(
       uniffiCaller.rustCall(
@@ -5256,9 +6091,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * List all wallet outputs (spent and unspent). Mirrors Wallet::list_output().
-   */
   listOutput(): Array<LocalOutput> /*throws*/ {
     return FfiConverterArrayTypeLocalOutput.lift(
       uniffiCaller.rustCallWithError(
@@ -5276,9 +6108,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * List all unspent wallet outputs. Mirrors Wallet::list_unspent().
-   */
   listUnspent(): Array<LocalOutput> /*throws*/ {
     return FfiConverterArrayTypeLocalOutput.lift(
       uniffiCaller.rustCallWithError(
@@ -5296,10 +6125,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * List all addresses that have been revealed but not yet received funds.
-   * Mirrors Wallet::list_unused_addresses().
-   */
   listUnusedAddresses(keychain: KeychainKind): Array<AddressInfo> /*throws*/ {
     return FfiConverterArrayTypeAddressInfo.lift(
       uniffiCaller.rustCallWithError(
@@ -5318,10 +6143,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Mark an address index as used (returns true if previously unused).
-   * Mirrors Wallet::mark_used().
-   */
   markUsed(keychain: KeychainKind, index: /*u32*/ number): boolean {
     return FfiConverterBool.lift(
       uniffiCaller.rustCall(
@@ -5338,10 +6159,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * The network this wallet is configured for.
-   * Mirrors Wallet::network().
-   */
   network(): Network {
     return FfiConverterTypeNetwork.lift(
       uniffiCaller.rustCall(
@@ -5356,10 +6173,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * The next derivation index that will be revealed.
-   * Mirrors Wallet::next_derivation_index().
-   */
   nextDerivationIndex(keychain: KeychainKind): /*u32*/ number {
     return FfiConverterUInt32.lift(
       uniffiCaller.rustCall(
@@ -5375,10 +6188,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Return the next address that has not yet received funds.
-   * Mirrors Wallet::next_unused_address().
-   */
   nextUnusedAddress(keychain: KeychainKind): AddressInfo /*throws*/ {
     return FfiConverterTypeAddressInfo.lift(
       uniffiCaller.rustCallWithError(
@@ -5397,10 +6206,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Peek at a specific derivation index without advancing the counter.
-   * Mirrors Wallet::peek_address().
-   */
   peekAddress(
     keychain: KeychainKind,
     index: /*u32*/ number
@@ -5423,10 +6228,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Persist any staged changes to the database.
-   * Our FFI wraps PersistedWallet; this calls persist() internally.
-   */
   persist(): boolean /*throws*/ {
     return FfiConverterBool.lift(
       uniffiCaller.rustCallWithError(
@@ -5444,11 +6245,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Spending policies for a given keychain, returned as a JSON string.
-   * Returns null if the descriptor has no policy.
-   * Mirrors Wallet::policies() — serialized because the Policy tree is complex.
-   */
   policies(keychain: KeychainKind): string | undefined /*throws*/ {
     return FfiConverterOptionalString.lift(
       uniffiCaller.rustCallWithError(
@@ -5467,10 +6263,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * The public-only descriptor for the given keychain as a string.
-   * Mirrors Wallet::public_descriptor().
-   */
   publicDescriptor(keychain: KeychainKind): string /*throws*/ {
     return FfiConverterString.lift(
       uniffiCaller.rustCallWithError(
@@ -5489,10 +6281,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Reveal all addresses up to and including the given derivation index.
-   * Mirrors Wallet::reveal_addresses_to().
-   */
   revealAddressesTo(
     keychain: KeychainKind,
     index: /*u32*/ number
@@ -5515,11 +6303,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Reveal and return the next address at the next derivation index,
-   * incrementing the index even if previous addresses are unused.
-   * Mirrors Wallet::reveal_next_address().
-   */
   revealNextAddress(keychain: KeychainKind): AddressInfo /*throws*/ {
     return FfiConverterTypeAddressInfo.lift(
       uniffiCaller.rustCallWithError(
@@ -5538,10 +6321,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Build, sign, and broadcast a simple payment in one call. Returns txid.
-   * Combines build_tx → sign → broadcast via Esplora.
-   */
   async send(
     address: string,
     amountSats: /*u64*/ bigint,
@@ -5585,10 +6364,49 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * How much was sent from / received into the wallet for a raw tx (hex).
-   * Mirrors Wallet::sent_and_received().
-   */
+  async sendWithElectrum(
+    address: string,
+    amountSats: /*u64*/ bigint,
+    feeRate: /*f64*/ number,
+    client: ElectrumClientLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_send_with_electrum(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterString.lower(address),
+            FfiConverterUInt64.lower(amountSats),
+            FfiConverterFloat64.lower(feeRate),
+            FfiConverterTypeElectrumClient.lower(client)
+          );
+        },
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
   sentAndReceived(txHex: string): SentAndReceived /*throws*/ {
     return FfiConverterTypeSentAndReceived.lift(
       uniffiCaller.rustCallWithError(
@@ -5607,11 +6425,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Sign all inputs in the PSBT that this wallet can sign.
-   * Returns true if the PSBT is fully finalized after signing.
-   * Mirrors Wallet::sign() with default SignOptions.
-   */
   sign(psbt: PsbtLike): boolean /*throws*/ {
     return FfiConverterBool.lift(
       uniffiCaller.rustCallWithError(
@@ -5630,11 +6443,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Incremental sync via Electrum.
-   */
   async syncWithElectrum(
-    url: string,
+    client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
@@ -5645,7 +6455,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
             uniffiTypeWalletObjectFactory.clonePointer(this),
-            FfiConverterString.lower(url),
+            FfiConverterTypeElectrumClient.lower(client),
             FfiConverterUInt64.lower(stopGap)
           );
         },
@@ -5669,10 +6479,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
-   * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
-   */
   async syncWithEsplora(
     url: string,
     stopGap: /*u64*/ bigint,
@@ -5709,10 +6515,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
-  /**
-   * All wallet-relevant canonical transactions.
-   * Mirrors Wallet::transactions() → mapped to TxDetails.
-   */
   transactions(): Array<TxDetails> /*throws*/ {
     return FfiConverterArrayTypeTxDetails.lift(
       uniffiCaller.rustCallWithError(
@@ -5730,10 +6532,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Details for a single transaction. Returns null if not found.
-   * Mirrors Wallet::tx_details().
-   */
   txDetails(txid: string): TxDetails | undefined /*throws*/ {
     return FfiConverterOptionalTypeTxDetails.lift(
       uniffiCaller.rustCallWithError(
@@ -5752,10 +6550,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  /**
-   * Mark an address index as unused (returns true if previously used).
-   * Mirrors Wallet::unmark_used().
-   */
   unmarkUsed(keychain: KeychainKind, index: /*u32*/ number): boolean {
     return FfiConverterBool.lift(
       uniffiCaller.rustCall(
@@ -5985,6 +6779,13 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_single_key_descriptor"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_wallet() !== 63339
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_func_create_wallet"
     );
   }
   if (
@@ -6247,7 +7048,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_finish() !==
-    35410
+    23648
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_finish"
@@ -6351,7 +7152,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum() !==
-    60979
+    26438
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum"
@@ -6437,6 +7238,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain_with_electrum() !==
+    42924
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_drain_with_electrum"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_finalize_psbt() !==
     43414
   ) {
@@ -6446,7 +7255,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum() !==
-    45470
+    40837
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum"
@@ -6627,6 +7436,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum() !==
+    23570
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sent_and_received() !==
     949
   ) {
@@ -6643,7 +7460,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum() !==
-    38866
+    17015
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"
@@ -6679,6 +7496,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_unmark_used"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new() !==
+    63288
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_electrumclient_new"
     );
   }
   if (
@@ -6757,6 +7582,7 @@ export default Object.freeze({
     FfiConverterTypeConfirmationBlockTime,
     FfiConverterTypeDerivationInfo,
     FfiConverterTypeDescriptorTemplate,
+    FfiConverterTypeElectrumClient,
     FfiConverterTypeKeychainInfo,
     FfiConverterTypeKeychainKind,
     FfiConverterTypeLanguage,
