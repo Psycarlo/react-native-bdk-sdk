@@ -16,7 +16,7 @@ impl Mnemonic {
         use bdk_wallet::bitcoin::key::rand::RngCore;
         bdk_wallet::bitcoin::key::rand::thread_rng().fill_bytes(&mut entropy);
         let mnemonic = bip39::Mnemonic::from_entropy(&entropy)
-            .map_err(|_| BdkError::InvalidEntropy)?;
+            .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
         Ok(Self {
             inner: Mutex::new(mnemonic),
         })
@@ -26,7 +26,7 @@ impl Mnemonic {
     pub fn from_string(mnemonic: String) -> Result<Self, BdkError> {
         let m: bip39::Mnemonic = mnemonic
             .parse()
-            .map_err(|_| BdkError::InvalidMnemonic)?;
+            .map_err(|e: bip39::Error| BdkError::InvalidMnemonic { message: e.to_string() })?;
         Ok(Self {
             inner: Mutex::new(m),
         })
@@ -36,7 +36,7 @@ impl Mnemonic {
     pub fn from_string_in(mnemonic: String, language: Language) -> Result<Self, BdkError> {
         let lang: bip39::Language = language.into();
         let m = bip39::Mnemonic::parse_in(lang, &mnemonic)
-            .map_err(|_| BdkError::InvalidMnemonic)?;
+            .map_err(|e| BdkError::InvalidMnemonic { message: e.to_string() })?;
         Ok(Self {
             inner: Mutex::new(m),
         })
@@ -45,7 +45,7 @@ impl Mnemonic {
     /// Create a mnemonic from raw entropy bytes (16–32 bytes).
     pub fn from_entropy(entropy: Vec<u8>) -> Result<Self, BdkError> {
         let m = bip39::Mnemonic::from_entropy(&entropy)
-            .map_err(|_| BdkError::InvalidEntropy)?;
+            .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
         Ok(Self {
             inner: Mutex::new(m),
         })
@@ -55,7 +55,7 @@ impl Mnemonic {
     pub fn from_entropy_in(entropy: Vec<u8>, language: Language) -> Result<Self, BdkError> {
         let lang: bip39::Language = language.into();
         let m = bip39::Mnemonic::from_entropy_in(lang, &entropy)
-            .map_err(|_| BdkError::InvalidEntropy)?;
+            .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
         Ok(Self {
             inner: Mutex::new(m),
         })

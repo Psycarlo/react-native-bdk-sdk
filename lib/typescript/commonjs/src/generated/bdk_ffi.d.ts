@@ -1,24 +1,24 @@
-import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConverterObject, RustBuffer, UniffiAbstractObject, destructorGuardSymbol, pointerLiteralSymbol, uniffiTypeNameSymbol, variantOrdinalSymbol } from "uniffi-bindgen-react-native";
+import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConverterObject, RustBuffer, UniffiAbstractObject, destructorGuardSymbol, pointerLiteralSymbol, uniffiTypeNameSymbol } from "uniffi-bindgen-react-native";
 /**
  * Generate an output descriptor string from a mnemonic using a standard BIP template.
- * Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xprv.../0/*)" for BIP84.
- * Uses Bip44/49/84/86 descriptor templates.
  */
 export declare function createDescriptor(mnemonic: MnemonicLike, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
 /**
- * Generate a public (watch-only) descriptor from an xpub string using a standard BIP template.
- * Returns a descriptor like "wpkh([fingerprint/84'/0'/0']xpub.../0/*)" for BIP84.
- * Uses Bip44Public/49Public/84Public/86Public descriptor templates.
+ * Generate a public (watch-only) descriptor from an xpub string.
  */
 export declare function createPublicDescriptor(xpub: string, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
 /**
  * Generate a single-key descriptor from a key string.
- * Uses P2Pkh, P2Wpkh, P2Wpkh_P2Sh, or P2TR templates.
  */
 export declare function createSingleKeyDescriptor(key: string, template: SingleKeyDescriptorTemplate, network: Network): string;
 /**
+ * Async wallet factory — creates or loads a wallet without blocking the JS thread.
+ */
+export declare function createWallet(descriptor: string, changeDescriptor: string, network: Network, dbPath: string, asyncOpts_?: {
+    signal: AbortSignal;
+}): Promise<WalletLike>;
+/**
  * Export a wallet in FullyNoded-compatible JSON format for backup.
- * Mirrors bdk_wallet::export::FullyNodedExport.
  */
 export declare function exportWallet(wallet: WalletLike, label: string, includeBlockHeight: boolean): string;
 /**
@@ -30,13 +30,9 @@ export declare function isValidAddress(address: string, network: Network): boole
  */
 export declare function version(): string;
 /**
- * Compute a deterministic wallet name from its descriptors (useful for DB naming).
- * Mirrors bdk_wallet::wallet_name_from_descriptor().
+ * Compute a deterministic wallet name from its descriptors.
  */
 export declare function walletNameFromDescriptor(descriptor: string, changeDescriptor: string | undefined, network: Network): string;
-/**
- * A derived address with its derivation index. Mirrors bdk_wallet::AddressInfo.
- */
 export type AddressInfo = {
     index: number;
     address: string;
@@ -50,34 +46,12 @@ export declare const AddressInfo: Readonly<{
     new: (partial: Partial<AddressInfo> & Required<Omit<AddressInfo, never>>) => AddressInfo;
     defaults: () => Partial<AddressInfo>;
 }>;
-/**
- * Wallet balance split into categories. All values in satoshis.
- * Mirrors bdk_wallet::Balance (re-exported from bdk_chain).
- */
 export type Balance = {
-    /**
-     * Coinbase outputs not yet matured (< 100 confirmations).
-     */
     immature: bigint;
-    /**
-     * Unconfirmed UTXOs from transactions we sent ourselves.
-     */
     trustedPending: bigint;
-    /**
-     * Unconfirmed UTXOs received from external wallets.
-     */
     untrustedPending: bigint;
-    /**
-     * Confirmed and immediately spendable.
-     */
     confirmed: bigint;
-    /**
-     * trusted_pending + confirmed (safe to spend without double-spend risk).
-     */
     trustedSpendable: bigint;
-    /**
-     * Sum of all four categories.
-     */
     total: bigint;
 };
 /**
@@ -88,9 +62,6 @@ export declare const Balance: Readonly<{
     new: (partial: Partial<Balance> & Required<Omit<Balance, never>>) => Balance;
     defaults: () => Partial<Balance>;
 }>;
-/**
- * A block identifier (height + hash). Mirrors bdk_chain::BlockId.
- */
 export type BlockId = {
     height: number;
     hash: string;
@@ -103,19 +74,9 @@ export declare const BlockId: Readonly<{
     new: (partial: Partial<BlockId> & Required<Omit<BlockId, never>>) => BlockId;
     defaults: () => Partial<BlockId>;
 }>;
-/**
- * Block position for a confirmed transaction/output.
- * Mirrors bdk_chain::ConfirmationBlockTime.
- */
 export type ConfirmationBlockTime = {
     height: number;
-    /**
-     * Block hash as hex.
-     */
     blockHash: string;
-    /**
-     * Unix timestamp of the block.
-     */
     timestamp: bigint;
 };
 /**
@@ -126,9 +87,6 @@ export declare const ConfirmationBlockTime: Readonly<{
     new: (partial: Partial<ConfirmationBlockTime> & Required<Omit<ConfirmationBlockTime, never>>) => ConfirmationBlockTime;
     defaults: () => Partial<ConfirmationBlockTime>;
 }>;
-/**
- * Derivation info for a scriptPubKey belonging to the wallet.
- */
 export type DerivationInfo = {
     keychain: KeychainKind;
     index: number;
@@ -141,14 +99,8 @@ export declare const DerivationInfo: Readonly<{
     new: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
     defaults: () => Partial<DerivationInfo>;
 }>;
-/**
- * Info about a keychain and its associated descriptor.
- */
 export type KeychainInfo = {
     keychain: KeychainKind;
-    /**
-     * The public descriptor string.
-     */
     descriptor: string;
 };
 /**
@@ -159,18 +111,12 @@ export declare const KeychainInfo: Readonly<{
     new: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
     defaults: () => Partial<KeychainInfo>;
 }>;
-/**
- * A wallet-owned output (spent or unspent). Mirrors bdk_wallet::LocalOutput.
- */
 export type LocalOutput = {
     outpoint: OutPoint;
     txout: TxOut;
     keychain: KeychainKind;
     isSpent: boolean;
     derivationIndex: number;
-    /**
-     * None when the output is unconfirmed.
-     */
     confirmationBlockTime?: ConfirmationBlockTime;
 };
 /**
@@ -181,9 +127,6 @@ export declare const LocalOutput: Readonly<{
     new: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
     defaults: () => Partial<LocalOutput>;
 }>;
-/**
- * Reference to a specific transaction output. Mirrors bitcoin::OutPoint.
- */
 export type OutPoint = {
     txid: string;
     vout: number;
@@ -196,14 +139,8 @@ export declare const OutPoint: Readonly<{
     new: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
     defaults: () => Partial<OutPoint>;
 }>;
-/**
- * A single payment recipient.
- */
 export type Recipient = {
     address: string;
-    /**
-     * Amount in satoshis.
-     */
     amountSats: bigint;
 };
 /**
@@ -214,17 +151,8 @@ export declare const Recipient: Readonly<{
     new: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
     defaults: () => Partial<Recipient>;
 }>;
-/**
- * How much was sent from / received into the wallet for a given transaction.
- */
 export type SentAndReceived = {
-    /**
-     * Satoshis sent (wallet inputs consumed).
-     */
     sent: bigint;
-    /**
-     * Satoshis received (wallet outputs created).
-     */
     received: bigint;
 };
 /**
@@ -235,38 +163,14 @@ export declare const SentAndReceived: Readonly<{
     new: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
     defaults: () => Partial<SentAndReceived>;
 }>;
-/**
- * Full details of a wallet-relevant transaction. Mirrors bdk_wallet::TxDetails.
- */
 export type TxDetails = {
     txid: string;
-    /**
-     * Sum of wallet-owned input amounts (satoshis).
-     */
     sent: bigint;
-    /**
-     * Sum of amounts to wallet-owned outputs (satoshis).
-     */
     received: bigint;
-    /**
-     * Fee paid in satoshis. None if some inputs are unknown.
-     */
     fee?: bigint;
-    /**
-     * Fee rate in sat/vbyte. None if some inputs are unknown.
-     */
     feeRate?: number;
-    /**
-     * Net change to wallet balance in satoshis (positive = received more than sent).
-     */
     balanceDelta: bigint;
-    /**
-     * None when unconfirmed.
-     */
     confirmationBlockTime?: ConfirmationBlockTime;
-    /**
-     * The full serialized transaction as hex.
-     */
     txHex: string;
 };
 /**
@@ -277,17 +181,8 @@ export declare const TxDetails: Readonly<{
     new: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
     defaults: () => Partial<TxDetails>;
 }>;
-/**
- * A transaction output (value + locking script). Mirrors bitcoin::TxOut.
- */
 export type TxOut = {
-    /**
-     * Value in satoshis.
-     */
     value: bigint;
-    /**
-     * Serialized scriptPubKey as lowercase hex.
-     */
     scriptPubkeyHex: string;
 };
 /**
@@ -348,1984 +243,4201 @@ export declare enum BdkError_Tags {
     KeyError = "KeyError",
     Generic = "Generic"
 }
-export declare const BdkError: {
+export declare const BdkError: Readonly<{
+    instanceOf: (obj: any) => obj is BdkError;
     InvalidDescriptor: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidDescriptor;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 1;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidDescriptor;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 1;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidDescriptor;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidDescriptor;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidDescriptor;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     WalletCreationFailed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.WalletCreationFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 2;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.WalletCreationFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 2;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.WalletCreationFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.WalletCreationFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.WalletCreationFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     WalletLoadFailed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.WalletLoadFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 3;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.WalletLoadFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 3;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.WalletLoadFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.WalletLoadFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.WalletLoadFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     WalletLoadMismatch: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.WalletLoadMismatch;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 4;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.WalletLoadMismatch;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 4;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.WalletLoadMismatch;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.WalletLoadMismatch;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.WalletLoadMismatch;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     PersistError: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.PersistError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 5;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.PersistError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 5;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.PersistError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.PersistError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.PersistError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InvalidAddress: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidAddress;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 6;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidAddress;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 6;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidAddress;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidAddress;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidAddress;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InvalidScript: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 7;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 7;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     TransactionBuildFailed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.TransactionBuildFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 8;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.TransactionBuildFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 8;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.TransactionBuildFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.TransactionBuildFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.TransactionBuildFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     NoRecipients: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.NoRecipients;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 9;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.NoRecipients;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 9;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.NoRecipients;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.NoRecipients;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.NoRecipients;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     NoUtxosSelected: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.NoUtxosSelected;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 10;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.NoUtxosSelected;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 10;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.NoUtxosSelected;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.NoUtxosSelected;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.NoUtxosSelected;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     OutputBelowDustLimit: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.OutputBelowDustLimit;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 11;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.OutputBelowDustLimit;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 11;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.OutputBelowDustLimit;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.OutputBelowDustLimit;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.OutputBelowDustLimit;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InsufficientFunds: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InsufficientFunds;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 12;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InsufficientFunds;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 12;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InsufficientFunds;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InsufficientFunds;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InsufficientFunds;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeRateTooLow: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeRateTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 13;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeRateTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 13;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeRateTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeRateTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeRateTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeTooLow: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 14;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 14;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeTooLow;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     LockTimeConflict: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.LockTimeConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 15;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.LockTimeConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 15;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.LockTimeConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.LockTimeConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.LockTimeConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     RbfSequenceConflict: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.RbfSequenceConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 16;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.RbfSequenceConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 16;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.RbfSequenceConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.RbfSequenceConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.RbfSequenceConflict;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     VersionZero: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.VersionZero;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 17;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.VersionZero;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 17;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.VersionZero;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.VersionZero;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.VersionZero;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     VersionOneCsv: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.VersionOneCsv;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 18;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.VersionOneCsv;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 18;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.VersionOneCsv;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.VersionOneCsv;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.VersionOneCsv;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SpendingPolicyRequired: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SpendingPolicyRequired;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 19;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SpendingPolicyRequired;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 19;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SpendingPolicyRequired;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SpendingPolicyRequired;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SpendingPolicyRequired;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     MissingKeyOrigin: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.MissingKeyOrigin;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 20;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.MissingKeyOrigin;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 20;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.MissingKeyOrigin;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.MissingKeyOrigin;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.MissingKeyOrigin;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     MissingNonWitnessUtxo: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.MissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 21;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.MissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 21;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.MissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.MissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.MissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     OutpointNotFound: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.OutpointNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 22;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.OutpointNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 22;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.OutpointNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.OutpointNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.OutpointNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeBumpTargetNotFound: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpTargetNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 23;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpTargetNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 23;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpTargetNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpTargetNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeBumpTargetNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeBumpAlreadyConfirmed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpAlreadyConfirmed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 24;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpAlreadyConfirmed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 24;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpAlreadyConfirmed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpAlreadyConfirmed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeBumpAlreadyConfirmed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeBumpIrreplaceable: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpIrreplaceable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 25;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpIrreplaceable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 25;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpIrreplaceable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpIrreplaceable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeBumpIrreplaceable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeBumpFeeRateUnavailable: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpFeeRateUnavailable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 26;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpFeeRateUnavailable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 26;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpFeeRateUnavailable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpFeeRateUnavailable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeBumpFeeRateUnavailable;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     FeeBumpInvalidOutputIndex: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpInvalidOutputIndex;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 27;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.FeeBumpInvalidOutputIndex;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 27;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpInvalidOutputIndex;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.FeeBumpInvalidOutputIndex;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.FeeBumpInvalidOutputIndex;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InvalidPsbt: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidPsbt;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 28;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidPsbt;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 28;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidPsbt;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidPsbt;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidPsbt;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignFailed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 29;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 29;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerMissingKey: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 30;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 30;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerMissingKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerInvalidKey: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerInvalidKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 31;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerInvalidKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 31;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerInvalidKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerInvalidKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerInvalidKey;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerUserCanceled: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerUserCanceled;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 32;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerUserCanceled;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 32;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerUserCanceled;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerUserCanceled;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerUserCanceled;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerInputIndexOutOfRange: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerInputIndexOutOfRange;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 33;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerInputIndexOutOfRange;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 33;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerInputIndexOutOfRange;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerInputIndexOutOfRange;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerInputIndexOutOfRange;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerMissingNonWitnessUtxo: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 34;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 34;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerMissingNonWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerMissingWitnessUtxo: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 35;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 35;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerMissingWitnessUtxo;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerMissingWitnessScript: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingWitnessScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 36;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerMissingWitnessScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 36;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingWitnessScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerMissingWitnessScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerMissingWitnessScript;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerNonStandardSighash: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerNonStandardSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 37;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerNonStandardSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 37;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerNonStandardSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerNonStandardSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerNonStandardSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SignerInvalidSighash: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerInvalidSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 38;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SignerInvalidSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 38;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerInvalidSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SignerInvalidSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SignerInvalidSighash;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     SyncFailed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SyncFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 39;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.SyncFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 39;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.SyncFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.SyncFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.SyncFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     BroadcastFailed: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.BroadcastFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 40;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.BroadcastFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 40;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.BroadcastFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.BroadcastFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.BroadcastFailed;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InvalidTransaction: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidTransaction;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 41;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidTransaction;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 41;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidTransaction;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidTransaction;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidTransaction;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     TransactionNotFound: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.TransactionNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 42;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.TransactionNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 42;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.TransactionNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.TransactionNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.TransactionNotFound;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     CannotConnect: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.CannotConnect;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 43;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.CannotConnect;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 43;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.CannotConnect;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.CannotConnect;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.CannotConnect;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     CalculateFeeError: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.CalculateFeeError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 44;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.CalculateFeeError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 44;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.CalculateFeeError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.CalculateFeeError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.CalculateFeeError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InvalidMnemonic: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidMnemonic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 45;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidMnemonic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 45;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidMnemonic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidMnemonic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidMnemonic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     InvalidEntropy: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidEntropy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 46;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.InvalidEntropy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 46;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidEntropy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.InvalidEntropy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.InvalidEntropy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     KeyError: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.KeyError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 47;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.KeyError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 47;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.KeyError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.KeyError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.KeyError;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
     Generic: {
-        new (message: string): {
+        new (inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.Generic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 48;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
-        instanceOf(e: any): e is {
+        "new"(inner: {
+            message: string;
+        }): {
             readonly tag: BdkError_Tags.Generic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
             /**
              * @private
-             * This field is private and should not be used.
+             * This field is private and should not be used, use `tag` instead.
              */
-            readonly [uniffiTypeNameSymbol]: string;
-            /**
-             * @private
-             * This field is private and should not be used.
-             */
-            readonly [variantOrdinalSymbol]: 48;
+            readonly [uniffiTypeNameSymbol]: "BdkError";
             name: string;
             message: string;
             stack?: string;
             cause?: unknown;
         };
+        instanceOf(obj: any): obj is {
+            readonly tag: BdkError_Tags.Generic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        hasInner(obj: any): obj is {
+            readonly tag: BdkError_Tags.Generic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        };
+        getInner(obj: {
+            readonly tag: BdkError_Tags.Generic;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "BdkError";
+            name: string;
+            message: string;
+            stack?: string;
+            cause?: unknown;
+        }): Readonly<{
+            message: string;
+        }>;
         isError(error: unknown): error is Error;
         captureStackTrace(targetObject: object, constructorOpt?: Function): void;
         prepareStackTrace(err: Error, stackTraces: NodeJS.CallSite[]): any;
         stackTraceLimit: number;
     };
-    instanceOf: (e: any) => e is BdkError;
-};
+}>;
 export type BdkError = InstanceType<(typeof BdkError)[keyof Omit<typeof BdkError, "instanceOf">]>;
-/**
- * Controls which UTXOs the wallet may spend as change inputs.
- */
 export declare enum ChangeSpendPolicy {
-    /**
-     * Both change and non-change outputs may be spent (default).
-     */
     ChangeAllowed = 0,
-    /**
-     * Only change outputs may be spent as inputs.
-     */
     OnlyChange = 1,
-    /**
-     * Only non-change outputs may be spent as inputs.
-     */
     ChangeForbidden = 2
 }
-/**
- * Standard BIP descriptor templates for generating wallet descriptors
- * from a mnemonic/xprv (also usable for xpub via create_public_descriptor).
- * Mirrors descriptor::template::{Bip44, Bip49, Bip84, Bip86}.
- */
 export declare enum DescriptorTemplate {
-    /**
-     * BIP44 — Legacy P2PKH (1…)
-     */
     Bip44 = 0,
-    /**
-     * BIP49 — Nested SegWit P2SH-P2WPKH (3…)
-     */
     Bip49 = 1,
-    /**
-     * BIP84 — Native SegWit P2WPKH (bc1q…)
-     */
     Bip84 = 2,
-    /**
-     * BIP86 — Taproot P2TR (bc1p…)
-     */
     Bip86 = 3
 }
 export declare enum KeychainKind {
-    /**
-     * External keychain — used for deriving recipient addresses.
-     */
     External = 0,
-    /**
-     * Internal keychain — used for deriving change addresses.
-     */
     Internal = 1
 }
-/**
- * BIP-39 mnemonic language. Mirrors bip39::Language.
- * Requires `all-languages` feature on the bip39 crate.
- */
 export declare enum Language {
     English = 0,
     SimplifiedChinese = 1,
@@ -2344,40 +4456,14 @@ export declare enum Network {
     Signet = 2,
     Regtest = 3
 }
-/**
- * Single-key descriptor templates.
- * Mirrors descriptor::template::{P2Pkh, P2Wpkh, P2Wpkh_P2Sh, P2TR}.
- */
 export declare enum SingleKeyDescriptorTemplate {
-    /**
-     * Pay-to-PubKey-Hash — Legacy (1…)
-     */
     P2Pkh = 0,
-    /**
-     * Pay-to-Witness-PubKey-Hash — Native SegWit (bc1q…)
-     */
     P2Wpkh = 1,
-    /**
-     * P2Wpkh wrapped in P2SH — Nested SegWit (3…)
-     */
     P2WpkhP2Sh = 2,
-    /**
-     * Pay-to-Taproot (bc1p…)
-     */
     P2tr = 3
 }
-/**
- * Ordering applied to inputs and outputs when building a transaction.
- * Note: bdk_wallet also has a Custom variant (with closures) that cannot cross FFI.
- */
 export declare enum TxOrdering {
-    /**
-     * Randomise input and output order (default, good for privacy).
-     */
     Shuffle = 0,
-    /**
-     * Preserve insertion order of recipients and manually added UTXOs.
-     */
     Untouched = 1
 }
 export declare enum WalletEvent_Tags {
@@ -2387,10 +4473,6 @@ export declare enum WalletEvent_Tags {
     TxReplaced = "TxReplaced",
     TxDropped = "TxDropped"
 }
-/**
- * Events emitted when applying chain updates to the wallet.
- * Mirrors bdk_wallet::event::WalletEvent (non-exhaustive in upstream).
- */
 export declare const WalletEvent: Readonly<{
     instanceOf: (obj: any) => obj is WalletEvent;
     ChainTipChanged: {
@@ -2604,14 +4686,7 @@ export declare const WalletEvent: Readonly<{
         };
     };
 }>;
-/**
- * Events emitted when applying chain updates to the wallet.
- * Mirrors bdk_wallet::event::WalletEvent (non-exhaustive in upstream).
- */
 export type WalletEvent = InstanceType<(typeof WalletEvent)[keyof Omit<typeof WalletEvent, "instanceOf">]>;
-/**
- * BIP-39 mnemonic word count (determines entropy length).
- */
 export declare enum WordCount {
     Words12 = 0,
     Words15 = 1,
@@ -2620,82 +4695,55 @@ export declare enum WordCount {
     Words24 = 4
 }
 /**
- * BIP-39 mnemonic phrase for key generation.
- * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
+ * A reusable Electrum client that holds a persistent TCP/TLS connection.
  */
+export interface ElectrumClientLike {
+}
+/**
+ * @deprecated Use `ElectrumClientLike` instead.
+ */
+export type ElectrumClientInterface = ElectrumClientLike;
+/**
+ * A reusable Electrum client that holds a persistent TCP/TLS connection.
+ */
+export declare class ElectrumClient extends UniffiAbstractObject implements ElectrumClientLike {
+    readonly [uniffiTypeNameSymbol] = "ElectrumClient";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Connect to an Electrum server.
+     */
+    constructor(url: string);
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is ElectrumClient;
+}
 export interface MnemonicLike {
-    /**
-     * The language of this mnemonic.
-     */
     language(): Language;
-    /**
-     * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
-     */
     toSeedHex(passphrase: string): string;
-    /**
-     * The mnemonic as a space-separated word string.
-     */
     toString(): string;
-    /**
-     * Number of words (12, 15, 18, 21, or 24).
-     */
     wordCount(): number;
-    /**
-     * List the individual words.
-     */
     words(): Array<string>;
 }
 /**
  * @deprecated Use `MnemonicLike` instead.
  */
 export type MnemonicInterface = MnemonicLike;
-/**
- * BIP-39 mnemonic phrase for key generation.
- * Backed by bdk_wallet::keys::bip39::Mnemonic (requires `keys-bip39` feature).
- */
 export declare class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     readonly [uniffiTypeNameSymbol] = "Mnemonic";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
-    /**
-     * Generate a new random mnemonic with the given word count (English).
-     */
     constructor(wordCount: WordCount);
-    /**
-     * Create a mnemonic from raw entropy bytes (16–32 bytes).
-     */
     static fromEntropy(entropy: Array</*u8*/ number>): MnemonicLike;
-    /**
-     * Create a mnemonic from raw entropy bytes in a specific language.
-     */
     static fromEntropyIn(entropy: Array</*u8*/ number>, language: Language): MnemonicLike;
-    /**
-     * Parse an existing mnemonic string (auto-detects language).
-     */
     static fromString(mnemonic: string): MnemonicLike;
-    /**
-     * Parse a mnemonic string in a specific language.
-     */
     static fromStringIn(mnemonic: string, language: Language): MnemonicLike;
-    /**
-     * The language of this mnemonic.
-     */
     language(): Language;
-    /**
-     * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
-     */
     toSeedHex(passphrase: string): string;
-    /**
-     * The mnemonic as a space-separated word string.
-     */
     toString(): string;
-    /**
-     * Number of words (12, 15, 18, 21, or 24).
-     */
     wordCount(): number;
-    /**
-     * List the individual words.
-     */
     words(): Array<string>;
     /**
      * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
@@ -2703,83 +4751,28 @@ export declare class Mnemonic extends UniffiAbstractObject implements MnemonicLi
     uniffiDestroy(): void;
     static instanceOf(obj: any): obj is Mnemonic;
 }
-/**
- * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
- * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
- */
 export interface PsbtLike {
-    /**
-     * Extract the fully-signed transaction as raw hex.
-     * Only valid after all inputs are finalized.
-     */
     extractTxHex(): string;
-    /**
-     * Total fee in satoshis. None if any input UTXO value is unknown.
-     * From PsbtUtils::fee_amount().
-     */
     feeAmount(): /*u64*/ bigint | undefined;
-    /**
-     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
-     * From PsbtUtils::fee_rate().
-     */
     feeRate(): /*f64*/ number | undefined;
-    /**
-     * Retrieve the UTXO for a given input index. Returns None if unavailable.
-     * From PsbtUtils::get_utxo_for().
-     */
     getUtxoFor(inputIndex: bigint): TxOut | undefined;
-    /**
-     * Serialize to a base64-encoded string.
-     */
     toBase64(): string;
-    /**
-     * The unsigned txid (available before finalization).
-     */
     txid(): string;
 }
 /**
  * @deprecated Use `PsbtLike` instead.
  */
 export type PsbtInterface = PsbtLike;
-/**
- * A Partially Signed Bitcoin Transaction (BIP-174 / BIP-370).
- * Mirrors bitcoin::Psbt with added PsbtUtils trait methods.
- */
 export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     readonly [uniffiTypeNameSymbol] = "Psbt";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
-    /**
-     * Deserialize from a base64-encoded string.
-     */
     constructor(psbtBase64: string);
-    /**
-     * Extract the fully-signed transaction as raw hex.
-     * Only valid after all inputs are finalized.
-     */
     extractTxHex(): string;
-    /**
-     * Total fee in satoshis. None if any input UTXO value is unknown.
-     * From PsbtUtils::fee_amount().
-     */
     feeAmount(): /*u64*/ bigint | undefined;
-    /**
-     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
-     * From PsbtUtils::fee_rate().
-     */
     feeRate(): /*f64*/ number | undefined;
-    /**
-     * Retrieve the UTXO for a given input index. Returns None if unavailable.
-     * From PsbtUtils::get_utxo_for().
-     */
     getUtxoFor(inputIndex: bigint): TxOut | undefined;
-    /**
-     * Serialize to a base64-encoded string.
-     */
     toBase64(): string;
-    /**
-     * The unsigned txid (available before finalization).
-     */
     txid(): string;
     /**
      * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
@@ -2787,278 +4780,88 @@ export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     uniffiDestroy(): void;
     static instanceOf(obj: any): obj is Psbt;
 }
-/**
- * Fluent builder for constructing Bitcoin transactions.
- * Create one, configure it, then call finish(wallet) to produce a PSBT.
- * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
- */
 export interface TxBuilderLike {
-    /**
-     * Attach OP_RETURN data to the transaction.
-     */
     addData(data: Array</*u8*/ number>): void;
-    /**
-     * Include BIP-32 global xpubs in the PSBT.
-     */
     addGlobalXpubs(): void;
-    /**
-     * Add a single recipient (address + amount).
-     */
     addRecipient(address: string, amountSats: bigint): void;
-    /**
-     * Mark a single UTXO as unspendable.
-     */
     addUnspendable(outpoint: OutPoint): void;
-    /**
-     * Add a specific UTXO to spend.
-     */
     addUtxo(outpoint: OutPoint): void;
-    /**
-     * Add multiple specific UTXOs to spend.
-     */
     addUtxos(outpoints: Array<OutPoint>): void;
-    /**
-     * Allow outputs below the dust threshold.
-     */
     allowDust(allow: boolean): void;
-    /**
-     * Set the change spend policy explicitly.
-     */
     changePolicy(policy: ChangeSpendPolicy): void;
-    /**
-     * Set the assumed current block height (for relative timelock evaluation).
-     */
     currentHeight(height: number): void;
-    /**
-     * Forbid spending from change outputs.
-     */
     doNotSpendChange(): void;
-    /**
-     * Set the script to receive the remaining change (use with drain_wallet).
-     */
     drainTo(address: string): void;
-    /**
-     * Spend all spendable UTXOs (send remaining to the drain_to address).
-     */
     drainWallet(): void;
-    /**
-     * Enable RBF signalling with the default nSequence (0xFFFFFFFD).
-     */
     enableRbf(): void;
-    /**
-     * Enable RBF signalling with a specific nSequence value (must be < 0xFFFFFFFE).
-     */
     enableRbfWithSequence(nsequence: number): void;
-    /**
-     * Exclude UTXOs with fewer than min_confirms confirmations.
-     */
     excludeBelowConfirmations(minConfirms: number): void;
-    /**
-     * Exclude all unconfirmed UTXOs.
-     */
     excludeUnconfirmed(): void;
-    /**
-     * Set an absolute fee in satoshis (overrides fee_rate).
-     */
     feeAbsolute(feeSats: bigint): void;
-    /**
-     * Set a fee rate target in sat/vbyte.
-     */
     feeRate(satPerVbyte: number): void;
     /**
-     * Build the transaction into a PSBT. The wallet is used for coin
-     * selection and script resolution — the PSBT is NOT signed here.
+     * Build the transaction into a PSBT (async — runs on background thread).
      */
-    finish(wallet: WalletLike): PsbtLike;
-    /**
-     * Include the redeemScript / witnessScript in PSBT outputs.
-     */
+    finish(wallet: WalletLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<PsbtLike>;
     includeOutputRedeemWitnessScript(): void;
-    /**
-     * Only use the UTXOs explicitly added with add_utxo / add_utxos.
-     */
     manuallySelectedOnly(): void;
-    /**
-     * Set an explicit nLockTime (as a block height).
-     */
     nlocktime(lockHeight: number): void;
-    /**
-     * Only spend from change outputs.
-     */
     onlySpendChange(): void;
-    /**
-     * Include only witness UTXO in PSBT inputs (reduced size, less validation).
-     */
     onlyWitnessUtxo(): void;
-    /**
-     * Set the input/output ordering strategy.
-     */
     ordering(ordering: TxOrdering): void;
-    /**
-     * Supply a policy path for complex descriptors (multisig, timelocks).
-     * path_map is a JSON-encoded BTreeMap<String, Vec<usize>>.
-     */
     policyPath(pathMapJson: string, keychain: KeychainKind): void;
-    /**
-     * Set an exact nSequence value for all inputs.
-     */
     setExactSequence(nsequence: number): void;
-    /**
-     * Replace the entire recipient list.
-     */
     setRecipients(recipients: Array<Recipient>): void;
-    /**
-     * Set the sighash type for all inputs.
-     */
     sighash(sighashType: number): void;
-    /**
-     * Set the transaction version (1 or 2).
-     */
     txVersion(version: number): void;
-    /**
-     * Mark UTXOs as unspendable (excluded from coin selection).
-     */
     unspendable(outpoints: Array<OutPoint>): void;
 }
 /**
  * @deprecated Use `TxBuilderLike` instead.
  */
 export type TxBuilderInterface = TxBuilderLike;
-/**
- * Fluent builder for constructing Bitcoin transactions.
- * Create one, configure it, then call finish(wallet) to produce a PSBT.
- * Mirrors bdk_wallet::TxBuilder (without lifetime / generic coin selection).
- */
 export declare class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     readonly [uniffiTypeNameSymbol] = "TxBuilder";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
     constructor();
-    /**
-     * Attach OP_RETURN data to the transaction.
-     */
     addData(data: Array</*u8*/ number>): void;
-    /**
-     * Include BIP-32 global xpubs in the PSBT.
-     */
     addGlobalXpubs(): void;
-    /**
-     * Add a single recipient (address + amount).
-     */
     addRecipient(address: string, amountSats: bigint): void;
-    /**
-     * Mark a single UTXO as unspendable.
-     */
     addUnspendable(outpoint: OutPoint): void;
-    /**
-     * Add a specific UTXO to spend.
-     */
     addUtxo(outpoint: OutPoint): void;
-    /**
-     * Add multiple specific UTXOs to spend.
-     */
     addUtxos(outpoints: Array<OutPoint>): void;
-    /**
-     * Allow outputs below the dust threshold.
-     */
     allowDust(allow: boolean): void;
-    /**
-     * Set the change spend policy explicitly.
-     */
     changePolicy(policy: ChangeSpendPolicy): void;
-    /**
-     * Set the assumed current block height (for relative timelock evaluation).
-     */
     currentHeight(height: number): void;
-    /**
-     * Forbid spending from change outputs.
-     */
     doNotSpendChange(): void;
-    /**
-     * Set the script to receive the remaining change (use with drain_wallet).
-     */
     drainTo(address: string): void;
-    /**
-     * Spend all spendable UTXOs (send remaining to the drain_to address).
-     */
     drainWallet(): void;
-    /**
-     * Enable RBF signalling with the default nSequence (0xFFFFFFFD).
-     */
     enableRbf(): void;
-    /**
-     * Enable RBF signalling with a specific nSequence value (must be < 0xFFFFFFFE).
-     */
     enableRbfWithSequence(nsequence: number): void;
-    /**
-     * Exclude UTXOs with fewer than min_confirms confirmations.
-     */
     excludeBelowConfirmations(minConfirms: number): void;
-    /**
-     * Exclude all unconfirmed UTXOs.
-     */
     excludeUnconfirmed(): void;
-    /**
-     * Set an absolute fee in satoshis (overrides fee_rate).
-     */
     feeAbsolute(feeSats: bigint): void;
-    /**
-     * Set a fee rate target in sat/vbyte.
-     */
     feeRate(satPerVbyte: number): void;
     /**
-     * Build the transaction into a PSBT. The wallet is used for coin
-     * selection and script resolution — the PSBT is NOT signed here.
+     * Build the transaction into a PSBT (async — runs on background thread).
      */
-    finish(wallet: WalletLike): PsbtLike;
-    /**
-     * Include the redeemScript / witnessScript in PSBT outputs.
-     */
+    finish(wallet: WalletLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<PsbtLike>;
     includeOutputRedeemWitnessScript(): void;
-    /**
-     * Only use the UTXOs explicitly added with add_utxo / add_utxos.
-     */
     manuallySelectedOnly(): void;
-    /**
-     * Set an explicit nLockTime (as a block height).
-     */
     nlocktime(lockHeight: number): void;
-    /**
-     * Only spend from change outputs.
-     */
     onlySpendChange(): void;
-    /**
-     * Include only witness UTXO in PSBT inputs (reduced size, less validation).
-     */
     onlyWitnessUtxo(): void;
-    /**
-     * Set the input/output ordering strategy.
-     */
     ordering(ordering: TxOrdering): void;
-    /**
-     * Supply a policy path for complex descriptors (multisig, timelocks).
-     * path_map is a JSON-encoded BTreeMap<String, Vec<usize>>.
-     */
     policyPath(pathMapJson: string, keychain: KeychainKind): void;
-    /**
-     * Set an exact nSequence value for all inputs.
-     */
     setExactSequence(nsequence: number): void;
-    /**
-     * Replace the entire recipient list.
-     */
     setRecipients(recipients: Array<Recipient>): void;
-    /**
-     * Set the sighash type for all inputs.
-     */
     sighash(sighashType: number): void;
-    /**
-     * Set the transaction version (1 or 2).
-     */
     txVersion(version: number): void;
-    /**
-     * Mark UTXOs as unspendable (excluded from coin selection).
-     */
     unspendable(outpoints: Array<OutPoint>): void;
     /**
      * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
@@ -3067,228 +4870,69 @@ export declare class TxBuilder extends UniffiAbstractObject implements TxBuilder
     static instanceOf(obj: any): obj is TxBuilder;
 }
 export interface WalletLike {
-    /**
-     * Broadcast a finalized PSBT via Electrum. Returns the txid.
-     */
-    broadcastWithElectrum(url: string, psbt: PsbtLike, asyncOpts_?: {
+    broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * Broadcast a finalized PSBT via Esplora. Returns the txid.
-     */
     broadcastWithEsplora(url: string, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * Build an RBF fee-bump PSBT for an unconfirmed transaction.
-     * Mirrors Wallet::build_fee_bump().
-     */
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
-    /**
-     * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
-     * Mirrors Wallet::calculate_fee().
-     */
     calculateFee(txHex: string): bigint;
-    /**
-     * Calculate the fee rate for a raw transaction (hex). Returns sat/vbyte.
-     * Mirrors Wallet::calculate_fee_rate().
-     */
     calculateFeeRate(txHex: string): number;
-    /**
-     * Cancel (evict) a transaction from the wallet's view.
-     * Mirrors Wallet::cancel_tx().
-     */
     cancelTx(txHex: string): void;
-    /**
-     * All checkpoints in the local chain, ordered by height descending.
-     * Mirrors Wallet::checkpoints().
-     */
     checkpoints(): Array<BlockId>;
-    /**
-     * The highest derivation index that has been revealed, or null if none.
-     * Mirrors Wallet::derivation_index().
-     */
     derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
-    /**
-     * Find the keychain and derivation index for a scriptPubKey (hex).
-     * Returns null if the script does not belong to this wallet.
-     * Mirrors Wallet::derivation_of_spk().
-     */
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
-    /**
-     * The descriptor checksum for the given keychain.
-     * Mirrors Wallet::descriptor_checksum().
-     */
     descriptorChecksum(keychain: KeychainKind): string;
-    /**
-     * Drain the entire wallet to an address. Returns txid.
-     */
     drain(address: string, feeRate: number, esploraUrl: string, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * Sign and attempt to finalize all inputs.
-     * Returns true if fully finalized.
-     * Mirrors Wallet::finalize_psbt() with default SignOptions.
-     */
+    drainWithElectrum(address: string, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     finalizePsbt(psbt: PsbtLike): boolean;
-    /**
-     * Full scan via an Electrum TCP/TLS server.
-     */
-    fullScanWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * Full scan via an Esplora HTTP server (discovers all used addresses).
-     * Uses Wallet::start_full_scan() + bdk_esplora client internally.
-     * stop_gap: how many consecutive unused addresses to scan before stopping.
-     */
     fullScanWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * Get the wallet balance. Mirrors Wallet::balance().
-     */
     getBalance(): Balance;
-    /**
-     * Returns the raw transaction hex for a given txid. Null if not found.
-     * Mirrors Wallet::get_tx().
-     */
     getTx(txid: string): /*throws*/ string | undefined;
-    /**
-     * Get a specific UTXO. Returns null if not found. Mirrors Wallet::get_utxo().
-     */
     getUtxo(outpoint: OutPoint): /*throws*/ LocalOutput | undefined;
-    /**
-     * Manually insert a TxOut (e.g. for tracking external outputs).
-     * Mirrors Wallet::insert_txout().
-     */
     insertTxout(outpoint: OutPoint, txout: TxOut): void;
-    /**
-     * Return true if the given scriptPubKey (hex) belongs to this wallet.
-     * Mirrors Wallet::is_mine().
-     */
     isMine(scriptHex: string): boolean;
-    /**
-     * List all keychains and their public descriptors.
-     * Mirrors Wallet::keychains().
-     */
     keychains(): Array<KeychainInfo>;
-    /**
-     * The latest checkpoint (tip of the local chain). Null if no blocks applied yet.
-     * Mirrors Wallet::latest_checkpoint().
-     */
     latestCheckpoint(): BlockId | undefined;
-    /**
-     * List all wallet outputs (spent and unspent). Mirrors Wallet::list_output().
-     */
     listOutput(): Array<LocalOutput>;
-    /**
-     * List all unspent wallet outputs. Mirrors Wallet::list_unspent().
-     */
     listUnspent(): Array<LocalOutput>;
-    /**
-     * List all addresses that have been revealed but not yet received funds.
-     * Mirrors Wallet::list_unused_addresses().
-     */
     listUnusedAddresses(keychain: KeychainKind): Array<AddressInfo>;
-    /**
-     * Mark an address index as used (returns true if previously unused).
-     * Mirrors Wallet::mark_used().
-     */
     markUsed(keychain: KeychainKind, index: number): boolean;
-    /**
-     * The network this wallet is configured for.
-     * Mirrors Wallet::network().
-     */
     network(): Network;
-    /**
-     * The next derivation index that will be revealed.
-     * Mirrors Wallet::next_derivation_index().
-     */
     nextDerivationIndex(keychain: KeychainKind): number;
-    /**
-     * Return the next address that has not yet received funds.
-     * Mirrors Wallet::next_unused_address().
-     */
     nextUnusedAddress(keychain: KeychainKind): AddressInfo;
-    /**
-     * Peek at a specific derivation index without advancing the counter.
-     * Mirrors Wallet::peek_address().
-     */
     peekAddress(keychain: KeychainKind, index: number): AddressInfo;
-    /**
-     * Persist any staged changes to the database.
-     * Our FFI wraps PersistedWallet; this calls persist() internally.
-     */
     persist(): boolean;
-    /**
-     * Spending policies for a given keychain, returned as a JSON string.
-     * Returns null if the descriptor has no policy.
-     * Mirrors Wallet::policies() — serialized because the Policy tree is complex.
-     */
     policies(keychain: KeychainKind): /*throws*/ string | undefined;
-    /**
-     * The public-only descriptor for the given keychain as a string.
-     * Mirrors Wallet::public_descriptor().
-     */
     publicDescriptor(keychain: KeychainKind): string;
-    /**
-     * Reveal all addresses up to and including the given derivation index.
-     * Mirrors Wallet::reveal_addresses_to().
-     */
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
-    /**
-     * Reveal and return the next address at the next derivation index,
-     * incrementing the index even if previous addresses are unused.
-     * Mirrors Wallet::reveal_next_address().
-     */
     revealNextAddress(keychain: KeychainKind): AddressInfo;
-    /**
-     * Build, sign, and broadcast a simple payment in one call. Returns txid.
-     * Combines build_tx → sign → broadcast via Esplora.
-     */
     send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * How much was sent from / received into the wallet for a raw tx (hex).
-     * Mirrors Wallet::sent_and_received().
-     */
+    sendWithElectrum(address: string, amountSats: bigint, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     sentAndReceived(txHex: string): SentAndReceived;
-    /**
-     * Sign all inputs in the PSBT that this wallet can sign.
-     * Returns true if the PSBT is fully finalized after signing.
-     * Mirrors Wallet::sign() with default SignOptions.
-     */
     sign(psbt: PsbtLike): boolean;
-    /**
-     * Incremental sync via Electrum.
-     */
-    syncWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
-     * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
-     */
     syncWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * All wallet-relevant canonical transactions.
-     * Mirrors Wallet::transactions() → mapped to TxDetails.
-     */
     transactions(): Array<TxDetails>;
-    /**
-     * Details for a single transaction. Returns null if not found.
-     * Mirrors Wallet::tx_details().
-     */
     txDetails(txid: string): /*throws*/ TxDetails | undefined;
-    /**
-     * Mark an address index as unused (returns true if previously used).
-     * Mirrors Wallet::unmark_used().
-     */
     unmarkUsed(keychain: KeychainKind, index: number): boolean;
 }
 /**
@@ -3300,233 +4944,72 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
     /**
-     * Create or load a persisted wallet.
-     * descriptor / change_descriptor: output descriptor strings (e.g. "wpkh(tprv…/84'/1'/0'/0/*)")
-     * db_path: file path for the SQLite persistence database.
+     * Create or load a persisted wallet (sync — for async use create_wallet()).
      */
     constructor(descriptor: string, changeDescriptor: string, network: Network, dbPath: string);
-    /**
-     * Broadcast a finalized PSBT via Electrum. Returns the txid.
-     */
-    broadcastWithElectrum(url: string, psbt: PsbtLike, asyncOpts_?: {
+    broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * Broadcast a finalized PSBT via Esplora. Returns the txid.
-     */
     broadcastWithEsplora(url: string, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * Build an RBF fee-bump PSBT for an unconfirmed transaction.
-     * Mirrors Wallet::build_fee_bump().
-     */
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
-    /**
-     * Calculate the fee paid by a raw transaction (hex). Returns satoshis.
-     * Mirrors Wallet::calculate_fee().
-     */
     calculateFee(txHex: string): bigint;
-    /**
-     * Calculate the fee rate for a raw transaction (hex). Returns sat/vbyte.
-     * Mirrors Wallet::calculate_fee_rate().
-     */
     calculateFeeRate(txHex: string): number;
-    /**
-     * Cancel (evict) a transaction from the wallet's view.
-     * Mirrors Wallet::cancel_tx().
-     */
     cancelTx(txHex: string): void;
-    /**
-     * All checkpoints in the local chain, ordered by height descending.
-     * Mirrors Wallet::checkpoints().
-     */
     checkpoints(): Array<BlockId>;
-    /**
-     * The highest derivation index that has been revealed, or null if none.
-     * Mirrors Wallet::derivation_index().
-     */
     derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
-    /**
-     * Find the keychain and derivation index for a scriptPubKey (hex).
-     * Returns null if the script does not belong to this wallet.
-     * Mirrors Wallet::derivation_of_spk().
-     */
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
-    /**
-     * The descriptor checksum for the given keychain.
-     * Mirrors Wallet::descriptor_checksum().
-     */
     descriptorChecksum(keychain: KeychainKind): string;
-    /**
-     * Drain the entire wallet to an address. Returns txid.
-     */
     drain(address: string, feeRate: number, esploraUrl: string, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * Sign and attempt to finalize all inputs.
-     * Returns true if fully finalized.
-     * Mirrors Wallet::finalize_psbt() with default SignOptions.
-     */
+    drainWithElectrum(address: string, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     finalizePsbt(psbt: PsbtLike): boolean;
-    /**
-     * Full scan via an Electrum TCP/TLS server.
-     */
-    fullScanWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * Full scan via an Esplora HTTP server (discovers all used addresses).
-     * Uses Wallet::start_full_scan() + bdk_esplora client internally.
-     * stop_gap: how many consecutive unused addresses to scan before stopping.
-     */
     fullScanWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * Get the wallet balance. Mirrors Wallet::balance().
-     */
     getBalance(): Balance;
-    /**
-     * Returns the raw transaction hex for a given txid. Null if not found.
-     * Mirrors Wallet::get_tx().
-     */
     getTx(txid: string): string | undefined;
-    /**
-     * Get a specific UTXO. Returns null if not found. Mirrors Wallet::get_utxo().
-     */
     getUtxo(outpoint: OutPoint): LocalOutput | undefined;
-    /**
-     * Manually insert a TxOut (e.g. for tracking external outputs).
-     * Mirrors Wallet::insert_txout().
-     */
     insertTxout(outpoint: OutPoint, txout: TxOut): void;
-    /**
-     * Return true if the given scriptPubKey (hex) belongs to this wallet.
-     * Mirrors Wallet::is_mine().
-     */
     isMine(scriptHex: string): boolean;
-    /**
-     * List all keychains and their public descriptors.
-     * Mirrors Wallet::keychains().
-     */
     keychains(): Array<KeychainInfo>;
-    /**
-     * The latest checkpoint (tip of the local chain). Null if no blocks applied yet.
-     * Mirrors Wallet::latest_checkpoint().
-     */
     latestCheckpoint(): BlockId | undefined;
-    /**
-     * List all wallet outputs (spent and unspent). Mirrors Wallet::list_output().
-     */
     listOutput(): Array<LocalOutput>;
-    /**
-     * List all unspent wallet outputs. Mirrors Wallet::list_unspent().
-     */
     listUnspent(): Array<LocalOutput>;
-    /**
-     * List all addresses that have been revealed but not yet received funds.
-     * Mirrors Wallet::list_unused_addresses().
-     */
     listUnusedAddresses(keychain: KeychainKind): Array<AddressInfo>;
-    /**
-     * Mark an address index as used (returns true if previously unused).
-     * Mirrors Wallet::mark_used().
-     */
     markUsed(keychain: KeychainKind, index: number): boolean;
-    /**
-     * The network this wallet is configured for.
-     * Mirrors Wallet::network().
-     */
     network(): Network;
-    /**
-     * The next derivation index that will be revealed.
-     * Mirrors Wallet::next_derivation_index().
-     */
     nextDerivationIndex(keychain: KeychainKind): number;
-    /**
-     * Return the next address that has not yet received funds.
-     * Mirrors Wallet::next_unused_address().
-     */
     nextUnusedAddress(keychain: KeychainKind): AddressInfo;
-    /**
-     * Peek at a specific derivation index without advancing the counter.
-     * Mirrors Wallet::peek_address().
-     */
     peekAddress(keychain: KeychainKind, index: number): AddressInfo;
-    /**
-     * Persist any staged changes to the database.
-     * Our FFI wraps PersistedWallet; this calls persist() internally.
-     */
     persist(): boolean;
-    /**
-     * Spending policies for a given keychain, returned as a JSON string.
-     * Returns null if the descriptor has no policy.
-     * Mirrors Wallet::policies() — serialized because the Policy tree is complex.
-     */
     policies(keychain: KeychainKind): string | undefined;
-    /**
-     * The public-only descriptor for the given keychain as a string.
-     * Mirrors Wallet::public_descriptor().
-     */
     publicDescriptor(keychain: KeychainKind): string;
-    /**
-     * Reveal all addresses up to and including the given derivation index.
-     * Mirrors Wallet::reveal_addresses_to().
-     */
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
-    /**
-     * Reveal and return the next address at the next derivation index,
-     * incrementing the index even if previous addresses are unused.
-     * Mirrors Wallet::reveal_next_address().
-     */
     revealNextAddress(keychain: KeychainKind): AddressInfo;
-    /**
-     * Build, sign, and broadcast a simple payment in one call. Returns txid.
-     * Combines build_tx → sign → broadcast via Esplora.
-     */
     send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    /**
-     * How much was sent from / received into the wallet for a raw tx (hex).
-     * Mirrors Wallet::sent_and_received().
-     */
+    sendWithElectrum(address: string, amountSats: bigint, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     sentAndReceived(txHex: string): SentAndReceived;
-    /**
-     * Sign all inputs in the PSBT that this wallet can sign.
-     * Returns true if the PSBT is fully finalized after signing.
-     * Mirrors Wallet::sign() with default SignOptions.
-     */
     sign(psbt: PsbtLike): boolean;
-    /**
-     * Incremental sync via Electrum.
-     */
-    syncWithElectrum(url: string, stopGap: bigint, asyncOpts_?: {
+    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * Incremental sync via Esplora (only checks revealed SPKs + UTXOs + unconfirmed).
-     * Uses Wallet::start_sync_with_revealed_spks() + bdk_esplora client internally.
-     */
     syncWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    /**
-     * All wallet-relevant canonical transactions.
-     * Mirrors Wallet::transactions() → mapped to TxDetails.
-     */
     transactions(): Array<TxDetails>;
-    /**
-     * Details for a single transaction. Returns null if not found.
-     * Mirrors Wallet::tx_details().
-     */
     txDetails(txid: string): TxDetails | undefined;
-    /**
-     * Mark an address index as unused (returns true if previously used).
-     * Mirrors Wallet::unmark_used().
-     */
     unmarkUsed(keychain: KeychainKind, index: number): boolean;
     /**
      * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
@@ -3604,6 +5087,7 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): DescriptorTemplate;
             lower(value: DescriptorTemplate): UniffiByteArray;
         };
+        FfiConverterTypeElectrumClient: FfiConverterObject<ElectrumClientLike>;
         FfiConverterTypeKeychainInfo: {
             read(from: RustBuffer): KeychainInfo;
             write(value: KeychainInfo, into: RustBuffer): void;

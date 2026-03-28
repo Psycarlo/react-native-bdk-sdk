@@ -16,7 +16,9 @@ impl Psbt {
     pub fn new(psbt_base64: String) -> Result<Self, BdkError> {
         let psbt: bitcoin::Psbt = psbt_base64
             .parse()
-            .map_err(|_| BdkError::InvalidPsbt)?;
+            .map_err(|e: bitcoin::psbt::PsbtParseError| BdkError::InvalidPsbt {
+                message: format!("Failed to parse PSBT base64: {}", e),
+            })?;
         Ok(Self {
             inner: Mutex::new(psbt),
         })
@@ -60,7 +62,9 @@ impl Psbt {
         let tx = inner
             .clone()
             .extract_tx()
-            .map_err(|_| BdkError::InvalidPsbt)?;
+            .map_err(|e| BdkError::InvalidPsbt {
+                message: format!("Failed to extract transaction: {}", e),
+            })?;
         Ok(types::hex::encode(&consensus::encode::serialize(&tx)))
     }
 }
