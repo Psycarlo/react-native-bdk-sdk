@@ -21,11 +21,12 @@ impl Wallet {
     /// Create or load a persisted wallet (sync — for async use create_wallet()).
     pub fn new(
         descriptor: String,
-        change_descriptor: String,
+        change_descriptor: Option<String>,
         network: Network,
         db_path: String,
     ) -> Result<Self, BdkError> {
         let net: bitcoin::Network = network.into();
+        let change_desc = change_descriptor.unwrap_or_else(|| descriptor.clone());
         let mut conn = Connection::open(&db_path)?;
 
         let load_result = bdk_wallet::Wallet::load()
@@ -35,7 +36,7 @@ impl Wallet {
         let wallet = match load_result {
             Ok(Some(w)) => w,
             Ok(None) => {
-                bdk_wallet::Wallet::create(descriptor, change_descriptor)
+                bdk_wallet::Wallet::create(descriptor, change_desc)
                     .network(net)
                     .create_wallet(&mut conn)?
             }
@@ -680,7 +681,35 @@ impl Wallet {
     }
 
     fn convert_tx_details(&self, td: &bdk_wallet::TxDetails) -> TxDetails {
-        let tx_bytes = consensus::encode::serialize(td.tx.deref());
+        let tx = &td.tx;
+        let tx_bytes = consensus::encode::serialize(tx.deref());
+        let network = {
+            let w = self.inner.lock().unwrap();
+            w.network()
+        };
+
+        let inputs: Vec<TxInput> = tx.input.iter().map(|inp| {
+            TxInput {
+                previous_txid: inp.previous_output.txid.to_string(),
+                previous_vout: inp.previous_output.vout,
+                sequence: inp.sequence.0,
+                script_sig_hex: hex::encode(inp.script_sig.as_bytes()),
+                witness: inp.witness.iter().map(|w| hex::encode(w)).collect(),
+            }
+        }).collect();
+
+        let outputs: Vec<TxOutput> = tx.output.iter().map(|out| {
+            let script_hex = hex::encode(out.script_pubkey.as_bytes());
+            let address = bitcoin::Address::from_script(&out.script_pubkey, network)
+                .ok()
+                .map(|a| a.to_string());
+            TxOutput {
+                value: out.value.to_sat(),
+                script_pubkey_hex: script_hex,
+                address,
+            }
+        }).collect();
+
         TxDetails {
             txid: td.txid.to_string(),
             sent: td.sent.to_sat(),
@@ -690,6 +719,10 @@ impl Wallet {
             balance_delta: td.balance_delta.to_sat(),
             confirmation_block_time: chain_position_to_confirmation(&td.chain_position),
             tx_hex: hex::encode(&tx_bytes),
+            version: tx.version.0,
+            locktime: tx.lock_time.to_consensus_u32(),
+            inputs,
+            outputs,
         }
     }
 

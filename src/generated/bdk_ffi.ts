@@ -77,6 +77,29 @@ const uniffiIsDebug =
 // Public interface members begin here.
 
 /**
+ * Convert a scriptPubKey (hex) to an address string for the given network.
+ */
+export function addressFromScript(
+  scriptHex: string,
+  network: Network
+): string /*throws*/ {
+  return FfiConverterString.lift(
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_address_from_script(
+          FfiConverterString.lower(scriptHex),
+          FfiConverterTypeNetwork.lower(network),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    )
+  );
+}
+/**
  * Generate an output descriptor string from a mnemonic using a standard BIP template.
  */
 export function createDescriptor(
@@ -93,6 +116,33 @@ export function createDescriptor(
       /*caller:*/ (callStatus) => {
         return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_create_descriptor(
           FfiConverterTypeMnemonic.lower(mnemonic),
+          FfiConverterTypeDescriptorTemplate.lower(template),
+          FfiConverterTypeKeychainKind.lower(keychain),
+          FfiConverterTypeNetwork.lower(network),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    )
+  );
+}
+/**
+ * Generate an output descriptor from a mnemonic string directly (convenience).
+ */
+export function createDescriptorFromString(
+  mnemonic: string,
+  template: DescriptorTemplate,
+  keychain: KeychainKind,
+  network: Network
+): string /*throws*/ {
+  return FfiConverterString.lift(
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_create_descriptor_from_string(
+          FfiConverterString.lower(mnemonic),
           FfiConverterTypeDescriptorTemplate.lower(template),
           FfiConverterTypeKeychainKind.lower(keychain),
           FfiConverterTypeNetwork.lower(network),
@@ -157,10 +207,11 @@ export function createSingleKeyDescriptor(
 }
 /**
  * Async wallet factory — creates or loads a wallet without blocking the JS thread.
+ * Pass null for change_descriptor to use the main descriptor for both keychains.
  */
 export async function createWallet(
   descriptor: string,
-  changeDescriptor: string,
+  changeDescriptor: string | undefined,
   network: Network,
   dbPath: string,
   asyncOpts_?: { signal: AbortSignal }
@@ -172,7 +223,7 @@ export async function createWallet(
       /*rustFutureFunc:*/ () => {
         return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_create_wallet(
           FfiConverterString.lower(descriptor),
-          FfiConverterString.lower(changeDescriptor),
+          FfiConverterOptionalString.lower(changeDescriptor),
           FfiConverterTypeNetwork.lower(network),
           FfiConverterString.lower(dbPath)
         );
@@ -230,6 +281,26 @@ export function isValidAddress(address: string, network: Network): boolean {
       /*caller:*/ (callStatus) => {
         return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_is_valid_address(
           FfiConverterString.lower(address),
+          FfiConverterTypeNetwork.lower(network),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    )
+  );
+}
+/**
+ * Validate a descriptor string for the given network without creating a wallet.
+ */
+export function validateDescriptor(
+  descriptor: string,
+  network: Network
+): boolean {
+  return FfiConverterBool.lift(
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor(
+          FfiConverterString.lower(descriptor),
           FfiConverterTypeNetwork.lower(network),
           callStatus
         );
@@ -775,6 +846,10 @@ export type TxDetails = {
   balanceDelta: /*i64*/ bigint;
   confirmationBlockTime?: ConfirmationBlockTime;
   txHex: string;
+  version: /*i32*/ number;
+  locktime: /*u32*/ number;
+  inputs: Array<TxInput>;
+  outputs: Array<TxOutput>;
 };
 
 /**
@@ -806,6 +881,10 @@ const FfiConverterTypeTxDetails = (() => {
         confirmationBlockTime:
           FfiConverterOptionalTypeConfirmationBlockTime.read(from),
         txHex: FfiConverterString.read(from),
+        version: FfiConverterInt32.read(from),
+        locktime: FfiConverterUInt32.read(from),
+        inputs: FfiConverterArrayTypeTxInput.read(from),
+        outputs: FfiConverterArrayTypeTxOutput.read(from),
       };
     }
     write(value: TypeName, into: RustBuffer): void {
@@ -820,6 +899,10 @@ const FfiConverterTypeTxDetails = (() => {
         into
       );
       FfiConverterString.write(value.txHex, into);
+      FfiConverterInt32.write(value.version, into);
+      FfiConverterUInt32.write(value.locktime, into);
+      FfiConverterArrayTypeTxInput.write(value.inputs, into);
+      FfiConverterArrayTypeTxOutput.write(value.outputs, into);
     }
     allocationSize(value: TypeName): number {
       return (
@@ -832,7 +915,66 @@ const FfiConverterTypeTxDetails = (() => {
         FfiConverterOptionalTypeConfirmationBlockTime.allocationSize(
           value.confirmationBlockTime
         ) +
-        FfiConverterString.allocationSize(value.txHex)
+        FfiConverterString.allocationSize(value.txHex) +
+        FfiConverterInt32.allocationSize(value.version) +
+        FfiConverterUInt32.allocationSize(value.locktime) +
+        FfiConverterArrayTypeTxInput.allocationSize(value.inputs) +
+        FfiConverterArrayTypeTxOutput.allocationSize(value.outputs)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type TxInput = {
+  previousTxid: string;
+  previousVout: /*u32*/ number;
+  sequence: /*u32*/ number;
+  scriptSigHex: string;
+  witness: Array<string>;
+};
+
+/**
+ * Generated factory for {@link TxInput} record objects.
+ */
+export const TxInput = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<TxInput, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<TxInput>,
+  });
+})();
+
+const FfiConverterTypeTxInput = (() => {
+  type TypeName = TxInput;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    read(from: RustBuffer): TypeName {
+      return {
+        previousTxid: FfiConverterString.read(from),
+        previousVout: FfiConverterUInt32.read(from),
+        sequence: FfiConverterUInt32.read(from),
+        scriptSigHex: FfiConverterString.read(from),
+        witness: FfiConverterArrayString.read(from),
+      };
+    }
+    write(value: TypeName, into: RustBuffer): void {
+      FfiConverterString.write(value.previousTxid, into);
+      FfiConverterUInt32.write(value.previousVout, into);
+      FfiConverterUInt32.write(value.sequence, into);
+      FfiConverterString.write(value.scriptSigHex, into);
+      FfiConverterArrayString.write(value.witness, into);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterString.allocationSize(value.previousTxid) +
+        FfiConverterUInt32.allocationSize(value.previousVout) +
+        FfiConverterUInt32.allocationSize(value.sequence) +
+        FfiConverterString.allocationSize(value.scriptSigHex) +
+        FfiConverterArrayString.allocationSize(value.witness)
       );
     }
   }
@@ -876,6 +1018,53 @@ const FfiConverterTypeTxOut = (() => {
       return (
         FfiConverterUInt64.allocationSize(value.value) +
         FfiConverterString.allocationSize(value.scriptPubkeyHex)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type TxOutput = {
+  value: /*u64*/ bigint;
+  scriptPubkeyHex: string;
+  address?: string;
+};
+
+/**
+ * Generated factory for {@link TxOutput} record objects.
+ */
+export const TxOutput = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<TxOutput, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<TxOutput>,
+  });
+})();
+
+const FfiConverterTypeTxOutput = (() => {
+  type TypeName = TxOutput;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    read(from: RustBuffer): TypeName {
+      return {
+        value: FfiConverterUInt64.read(from),
+        scriptPubkeyHex: FfiConverterString.read(from),
+        address: FfiConverterOptionalString.read(from),
+      };
+    }
+    write(value: TypeName, into: RustBuffer): void {
+      FfiConverterUInt64.write(value.value, into);
+      FfiConverterString.write(value.scriptPubkeyHex, into);
+      FfiConverterOptionalString.write(value.address, into);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterUInt64.allocationSize(value.value) +
+        FfiConverterString.allocationSize(value.scriptPubkeyHex) +
+        FfiConverterOptionalString.allocationSize(value.address)
       );
     }
   }
@@ -5574,7 +5763,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
    */
   constructor(
     descriptor: string,
-    changeDescriptor: string,
+    changeDescriptor: string | undefined,
     network: Network,
     dbPath: string
   ) /*throws*/ {
@@ -5586,7 +5775,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
       /*caller:*/ (callStatus) => {
         return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(
           FfiConverterString.lower(descriptor),
-          FfiConverterString.lower(changeDescriptor),
+          FfiConverterOptionalString.lower(changeDescriptor),
           FfiConverterTypeNetwork.lower(network),
           FfiConverterString.lower(dbPath),
           callStatus
@@ -6730,6 +6919,16 @@ const FfiConverterArrayTypeTxDetails = new FfiConverterArray(
   FfiConverterTypeTxDetails
 );
 
+// FfiConverter for Array<TxInput>
+const FfiConverterArrayTypeTxInput = new FfiConverterArray(
+  FfiConverterTypeTxInput
+);
+
+// FfiConverter for Array<TxOutput>
+const FfiConverterArrayTypeTxOutput = new FfiConverterArray(
+  FfiConverterTypeTxOutput
+);
+
 // FfiConverter for Array<string>
 const FfiConverterArrayString = new FfiConverterArray(FfiConverterString);
 
@@ -6759,10 +6958,26 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_address_from_script() !==
+    50547
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_func_address_from_script"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor() !== 166
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_descriptor"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string() !==
+    29727
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_func_create_descriptor_from_string"
     );
   }
   if (
@@ -6782,7 +6997,7 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_wallet() !== 63339
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_wallet() !== 59494
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_wallet"
@@ -6801,6 +7016,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_is_valid_address"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor() !==
+    44572
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_func_validate_descriptor"
     );
   }
   if (nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_version() !== 5205) {
@@ -7563,7 +7786,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new() !==
-    38801
+    64812
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_wallet_new"
@@ -7596,8 +7819,10 @@ export default Object.freeze({
     FfiConverterTypeSingleKeyDescriptorTemplate,
     FfiConverterTypeTxBuilder,
     FfiConverterTypeTxDetails,
+    FfiConverterTypeTxInput,
     FfiConverterTypeTxOrdering,
     FfiConverterTypeTxOut,
+    FfiConverterTypeTxOutput,
     FfiConverterTypeWallet,
     FfiConverterTypeWalletEvent,
     FfiConverterTypeWordCount,

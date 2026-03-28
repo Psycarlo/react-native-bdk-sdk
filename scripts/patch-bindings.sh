@@ -50,4 +50,22 @@ else
   echo "  bdk_ffi.cpp not found, skipping"
 fi
 
+# ----------------------------------------------------------------------------
+#    Re-add wrapper export to index.tsx (codegen overwrites it each time).
+# ----------------------------------------------------------------------------
+INDEX_TSX="$PROJECT_DIR/src/index.tsx"
+if [ -f "$INDEX_TSX" ]; then
+  if ! grep -q "from './wrapper'" "$INDEX_TSX"; then
+    echo "  Patching index.tsx (adding wrapper export)..."
+    sed -i.bak "/export \* from '\.\/generated\/bdk_ffi';/a\\
+\\
+// Export number-friendly wrappers (lives outside generated/ so codegen won't overwrite).\\
+export * from './wrapper';" "$INDEX_TSX"
+    rm -f "$INDEX_TSX.bak"
+    echo "  index.tsx patched"
+  else
+    echo "  index.tsx already has wrapper export, skipping"
+  fi
+fi
+
 echo "Done."

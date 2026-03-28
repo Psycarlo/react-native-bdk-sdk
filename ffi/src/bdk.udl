@@ -5,13 +5,25 @@ namespace bdk_ffi {
     /// Returns true if the address string is valid for the given network.
     boolean is_valid_address(string address, Network network);
 
+    /// Convert a scriptPubKey (hex) to an address string for the given network.
+    [Throws=BdkError]
+    string address_from_script(string script_hex, Network network);
+
+    /// Validate a descriptor string for the given network without creating a wallet.
+    boolean validate_descriptor(string descriptor, Network network);
+
     /// Async wallet factory — creates or loads a wallet without blocking the JS thread.
+    /// Pass null for change_descriptor to use the main descriptor for both keychains.
     [Async, Throws=BdkError]
-    Wallet create_wallet(string descriptor, string change_descriptor, Network network, string db_path);
+    Wallet create_wallet(string descriptor, string? change_descriptor, Network network, string db_path);
 
     /// Generate an output descriptor string from a mnemonic using a standard BIP template.
     [Throws=BdkError]
     string create_descriptor(Mnemonic mnemonic, DescriptorTemplate template, KeychainKind keychain, Network network);
+
+    /// Generate an output descriptor from a mnemonic string directly (convenience).
+    [Throws=BdkError]
+    string create_descriptor_from_string(string mnemonic, DescriptorTemplate template, KeychainKind keychain, Network network);
 
     /// Generate a public (watch-only) descriptor from an xpub string.
     [Throws=BdkError]
@@ -228,6 +240,20 @@ dictionary Balance {
     u64 total;
 };
 
+dictionary TxInput {
+    string previous_txid;
+    u32 previous_vout;
+    u32 sequence;
+    string script_sig_hex;
+    sequence<string> witness;
+};
+
+dictionary TxOutput {
+    u64 value;
+    string script_pubkey_hex;
+    string? address;
+};
+
 dictionary TxDetails {
     string txid;
     u64 sent;
@@ -237,6 +263,10 @@ dictionary TxDetails {
     i64 balance_delta;
     ConfirmationBlockTime? confirmation_block_time;
     string tx_hex;
+    i32 version;
+    u32 locktime;
+    sequence<TxInput> inputs;
+    sequence<TxOutput> outputs;
 };
 
 dictionary SentAndReceived {
@@ -379,7 +409,7 @@ interface Wallet {
     [Throws=BdkError]
     constructor(
         string descriptor,
-        string change_descriptor,
+        string? change_descriptor,
         Network network,
         string db_path
     );
