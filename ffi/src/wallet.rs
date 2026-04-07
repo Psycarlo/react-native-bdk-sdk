@@ -241,23 +241,24 @@ impl Wallet {
     pub async fn full_scan_with_esplora(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
-        let client = bdk_esplora::esplora_client::Builder::new(&url)
-            .build_async()
-            .map_err(|e| BdkError::SyncFailed {
-                message: format!("Failed to build Esplora client for '{}': {}", url, e),
-            })?;
-
         let request = {
             let w = self.inner.lock().unwrap();
             w.start_full_scan().build()
         };
 
-        let update = client
-            .full_scan(request, stop_gap as usize, 1)
-            .await
-            .map_err(|e| BdkError::SyncFailed {
-                message: format!("Esplora full scan failed: {}", e),
-            })?;
+        let update = crate::run_async(async move {
+            let client = bdk_esplora::esplora_client::Builder::new(&url)
+                .build_async()
+                .map_err(|e| BdkError::SyncFailed {
+                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
+                })?;
+            client
+                .full_scan(request, stop_gap as usize, 1)
+                .await
+                .map_err(|e| BdkError::SyncFailed {
+                    message: format!("Esplora full scan failed: {}", e),
+                })
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         w.apply_update(update)?;
@@ -268,23 +269,24 @@ impl Wallet {
     pub async fn sync_with_esplora(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
-        let client = bdk_esplora::esplora_client::Builder::new(&url)
-            .build_async()
-            .map_err(|e| BdkError::SyncFailed {
-                message: format!("Failed to build Esplora client for '{}': {}", url, e),
-            })?;
-
         let request = {
             let w = self.inner.lock().unwrap();
             w.start_sync_with_revealed_spks().build()
         };
 
-        let update = client
-            .sync(request, 1)
-            .await
-            .map_err(|e| BdkError::SyncFailed {
-                message: format!("Esplora sync failed: {}", e),
-            })?;
+        let update = crate::run_async(async move {
+            let client = bdk_esplora::esplora_client::Builder::new(&url)
+                .build_async()
+                .map_err(|e| BdkError::SyncFailed {
+                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
+                })?;
+            client
+                .sync(request, 1)
+                .await
+                .map_err(|e| BdkError::SyncFailed {
+                    message: format!("Esplora sync failed: {}", e),
+                })
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         w.apply_update(update)?;
@@ -304,17 +306,19 @@ impl Wallet {
             w.start_full_scan().build()
         };
 
-        let update = tokio::task::spawn_blocking(move || {
-            let c = client.inner.lock().unwrap();
-            c.full_scan(request, stop_gap as usize, 1, false)
-                .map_err(|e| BdkError::SyncFailed {
-                    message: format!("Electrum full scan failed: {}", e),
-                })
-        })
-        .await
-        .map_err(|e| BdkError::SyncFailed {
-            message: format!("Electrum full scan task panicked: {}", e),
-        })??;
+        let update = crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                let c = client.inner.lock().unwrap();
+                c.full_scan(request, stop_gap as usize, 1, false)
+                    .map_err(|e| BdkError::SyncFailed {
+                        message: format!("Electrum full scan failed: {}", e),
+                    })
+            })
+            .await
+            .map_err(|e| BdkError::SyncFailed {
+                message: format!("Electrum full scan task panicked: {}", e),
+            })?
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         w.apply_update(update)?;
@@ -332,17 +336,19 @@ impl Wallet {
             w.start_sync_with_revealed_spks().build()
         };
 
-        let update = tokio::task::spawn_blocking(move || {
-            let c = client.inner.lock().unwrap();
-            c.sync(request, 1, false)
-                .map_err(|e| BdkError::SyncFailed {
-                    message: format!("Electrum sync failed: {}", e),
-                })
-        })
-        .await
-        .map_err(|e| BdkError::SyncFailed {
-            message: format!("Electrum sync task panicked: {}", e),
-        })??;
+        let update = crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                let c = client.inner.lock().unwrap();
+                c.sync(request, 1, false)
+                    .map_err(|e| BdkError::SyncFailed {
+                        message: format!("Electrum sync failed: {}", e),
+                    })
+            })
+            .await
+            .map_err(|e| BdkError::SyncFailed {
+                message: format!("Electrum sync task panicked: {}", e),
+            })?
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         w.apply_update(update)?;
@@ -363,20 +369,22 @@ impl Wallet {
                 })?
         };
 
-        let client = bdk_esplora::esplora_client::Builder::new(&url)
-            .build_async()
-            .map_err(|e| BdkError::BroadcastFailed {
-                message: format!("Failed to build Esplora client for '{}': {}", url, e),
-            })?;
+        let txid = tx.compute_txid().to_string();
+        crate::run_async(async move {
+            let client = bdk_esplora::esplora_client::Builder::new(&url)
+                .build_async()
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
+                })?;
+            client
+                .broadcast(&tx)
+                .await
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Esplora broadcast failed: {}", e),
+                })
+        }).await?;
 
-        client
-            .broadcast(&tx)
-            .await
-            .map_err(|e| BdkError::BroadcastFailed {
-                message: format!("Esplora broadcast failed: {}", e),
-            })?;
-
-        Ok(tx.compute_txid().to_string())
+        Ok(txid)
     }
 
     // ── Broadcast (Electrum) ─────────────────────────────────────────────────
@@ -397,21 +405,22 @@ impl Wallet {
         };
 
         let txid = tx.compute_txid().to_string();
-
-        tokio::task::spawn_blocking(move || {
-            use bdk_electrum::electrum_client::ElectrumApi;
-            let c = client.inner.lock().unwrap();
-            c.inner
-                .transaction_broadcast(&tx)
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Electrum broadcast failed: {}", e),
-                })?;
-            Ok::<_, BdkError>(())
-        })
-        .await
-        .map_err(|e| BdkError::BroadcastFailed {
-            message: format!("Electrum broadcast task panicked: {}", e),
-        })??;
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                use bdk_electrum::electrum_client::ElectrumApi;
+                let c = client.inner.lock().unwrap();
+                c.inner
+                    .transaction_broadcast(&tx)
+                    .map_err(|e| BdkError::BroadcastFailed {
+                        message: format!("Electrum broadcast failed: {}", e),
+                    })?;
+                Ok::<_, BdkError>(())
+            })
+            .await
+            .map_err(|e| BdkError::BroadcastFailed {
+                message: format!("Electrum broadcast task panicked: {}", e),
+            })?
+        }).await?;
 
         Ok(txid)
     }
@@ -427,22 +436,25 @@ impl Wallet {
         esplora_url: String,
     ) -> Result<String, BdkError> {
         let tx = self.build_send_tx(&address, amount_sats, fee_rate)?;
+        let txid = tx.compute_txid().to_string();
 
-        let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-            .build_async()
-            .map_err(|e| BdkError::BroadcastFailed {
-                message: format!("Failed to build Esplora client: {}", e),
-            })?;
-        client
-            .broadcast(&tx)
-            .await
-            .map_err(|e| BdkError::BroadcastFailed {
-                message: format!("Esplora broadcast failed: {}", e),
-            })?;
+        crate::run_async(async move {
+            let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
+                .build_async()
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Failed to build Esplora client: {}", e),
+                })?;
+            client
+                .broadcast(&tx)
+                .await
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Esplora broadcast failed: {}", e),
+                })
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         self.persist_wallet(&mut w)?;
-        Ok(tx.compute_txid().to_string())
+        Ok(txid)
     }
 
     #[allow(deprecated)]
@@ -453,22 +465,25 @@ impl Wallet {
         esplora_url: String,
     ) -> Result<String, BdkError> {
         let tx = self.build_drain_tx(&address, fee_rate)?;
+        let txid = tx.compute_txid().to_string();
 
-        let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-            .build_async()
-            .map_err(|e| BdkError::BroadcastFailed {
-                message: format!("Failed to build Esplora client: {}", e),
-            })?;
-        client
-            .broadcast(&tx)
-            .await
-            .map_err(|e| BdkError::BroadcastFailed {
-                message: format!("Esplora broadcast failed: {}", e),
-            })?;
+        crate::run_async(async move {
+            let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
+                .build_async()
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Failed to build Esplora client: {}", e),
+                })?;
+            client
+                .broadcast(&tx)
+                .await
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Esplora broadcast failed: {}", e),
+                })
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         self.persist_wallet(&mut w)?;
-        Ok(tx.compute_txid().to_string())
+        Ok(txid)
     }
 
     // ── Convenience (Electrum) ───────────────────────────────────────────────
@@ -484,20 +499,22 @@ impl Wallet {
         let tx = self.build_send_tx(&address, amount_sats, fee_rate)?;
         let txid = tx.compute_txid().to_string();
 
-        tokio::task::spawn_blocking(move || {
-            use bdk_electrum::electrum_client::ElectrumApi;
-            let c = client.inner.lock().unwrap();
-            c.inner
-                .transaction_broadcast(&tx)
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Electrum broadcast failed: {}", e),
-                })?;
-            Ok::<_, BdkError>(())
-        })
-        .await
-        .map_err(|e| BdkError::BroadcastFailed {
-            message: format!("Electrum broadcast task panicked: {}", e),
-        })??;
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                use bdk_electrum::electrum_client::ElectrumApi;
+                let c = client.inner.lock().unwrap();
+                c.inner
+                    .transaction_broadcast(&tx)
+                    .map_err(|e| BdkError::BroadcastFailed {
+                        message: format!("Electrum broadcast failed: {}", e),
+                    })?;
+                Ok::<_, BdkError>(())
+            })
+            .await
+            .map_err(|e| BdkError::BroadcastFailed {
+                message: format!("Electrum broadcast task panicked: {}", e),
+            })?
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         self.persist_wallet(&mut w)?;
@@ -514,20 +531,22 @@ impl Wallet {
         let tx = self.build_drain_tx(&address, fee_rate)?;
         let txid = tx.compute_txid().to_string();
 
-        tokio::task::spawn_blocking(move || {
-            use bdk_electrum::electrum_client::ElectrumApi;
-            let c = client.inner.lock().unwrap();
-            c.inner
-                .transaction_broadcast(&tx)
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Electrum broadcast failed: {}", e),
-                })?;
-            Ok::<_, BdkError>(())
-        })
-        .await
-        .map_err(|e| BdkError::BroadcastFailed {
-            message: format!("Electrum broadcast task panicked: {}", e),
-        })??;
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                use bdk_electrum::electrum_client::ElectrumApi;
+                let c = client.inner.lock().unwrap();
+                c.inner
+                    .transaction_broadcast(&tx)
+                    .map_err(|e| BdkError::BroadcastFailed {
+                        message: format!("Electrum broadcast failed: {}", e),
+                    })?;
+                Ok::<_, BdkError>(())
+            })
+            .await
+            .map_err(|e| BdkError::BroadcastFailed {
+                message: format!("Electrum broadcast task panicked: {}", e),
+            })?
+        }).await?;
 
         let mut w = self.inner.lock().unwrap();
         self.persist_wallet(&mut w)?;

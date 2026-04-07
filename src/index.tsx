@@ -15,7 +15,6 @@ export * from './generated/bdk_ffi';
 
 // Export number-friendly wrappers (lives outside generated/ so codegen won't overwrite).
 export * from './wrapper';
-
 // Now import the bindings so we can:
 // - intialize them
 // - export them as namespaced objects as the default export.
