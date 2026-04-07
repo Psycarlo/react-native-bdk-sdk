@@ -16,6 +16,11 @@ A modern, lightweight, descriptor-based wallet library written in Rust! And now,
   <a href="https://docs.rs/bdk_wallet/latest/bdk_wallet/">BDK Wallet</a>
 </div>
 
+## Requirements
+
+- React Native **0.74+**
+- **New Architecture enabled** (`newArchEnabled=true`) — this library uses TurboModules via JSI and does not support the old bridge. React Native 0.76+ has New Architecture on by default.
+
 ## Installation
 
 ### Expo

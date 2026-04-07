@@ -211,13 +211,15 @@ impl TxBuilder {
     pub async fn finish(&self, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
         let params = self.params.lock().unwrap().clone();
 
-        tokio::task::spawn_blocking(move || {
-            Self::finish_inner(params, wallet)
-        })
-        .await
-        .map_err(|e| BdkError::TransactionBuildFailed {
-            message: format!("Transaction build task panicked: {}", e),
-        })?
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                Self::finish_inner(params, wallet)
+            })
+            .await
+            .map_err(|e| BdkError::TransactionBuildFailed {
+                message: format!("Transaction build task panicked: {}", e),
+            })?
+        }).await
     }
 
     fn finish_inner(params: TxBuilderParams, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {

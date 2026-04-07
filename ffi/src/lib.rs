@@ -14,7 +14,26 @@ pub use tx_builder::*;
 pub use types::*;
 pub use wallet::*;
 
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
+
+/// Global Tokio runtime for async methods.
+/// uniffi polls Rust futures without entering a Tokio runtime context,
+/// so spawn_blocking() and async I/O (reqwest) would panic without this.
+pub static RUNTIME: LazyLock<tokio::runtime::Runtime> = LazyLock::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .expect("Failed to create Tokio runtime")
+});
+
+/// Run an async future on the global Tokio runtime.
+pub async fn run_async<F, T>(future: F) -> T
+where
+    F: std::future::Future<Output = T> + Send + 'static,
+    T: Send + 'static,
+{
+    RUNTIME.spawn(future).await.expect("Tokio task panicked")
+}
 
 use bdk_wallet::bitcoin::{self, Address};
 use bdk_wallet::descriptor::IntoWalletDescriptor;
@@ -74,13 +93,15 @@ pub async fn create_wallet(
     network: Network,
     db_path: String,
 ) -> Result<Arc<Wallet>, BdkError> {
-    tokio::task::spawn_blocking(move || {
-        Wallet::new(descriptor, change_descriptor, network, db_path).map(Arc::new)
-    })
-    .await
-    .map_err(|e| BdkError::WalletCreationFailed {
-        message: format!("Wallet creation task panicked: {}", e),
-    })?
+    run_async(async move {
+        tokio::task::spawn_blocking(move || {
+            Wallet::new(descriptor, change_descriptor, network, db_path).map(Arc::new)
+        })
+        .await
+        .map_err(|e| BdkError::WalletCreationFailed {
+            message: format!("Wallet creation task panicked: {}", e),
+        })?
+    }).await
 }
 
 /// Generate an output descriptor string from a mnemonic using a standard BIP template.
