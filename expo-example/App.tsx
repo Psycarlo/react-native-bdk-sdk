@@ -12,16 +12,18 @@ import {
 } from 'react-native';
 import {
   version,
-  Mnemonic,
-  WordCount,
   Network,
   KeychainKind,
   DescriptorTemplate,
   BdkWallet,
-  createDescriptor,
+  createDescriptorFromString,
 } from 'react-native-bdk-sdk';
 
-const ESPLORA_URL = 'https://mempool.space/signet/api';
+const ELECTRUM_URL = 'ssl://mempool.space:60602';
+
+// WARNING: This is a TEST seed for signet only. Do NOT use on mainnet.
+const TEST_SEED =
+  'surprise winter sausage nation grape nerve cereal because price rally pride gym';
 
 type LogEntry = { text: string; type: 'info' | 'success' | 'error' };
 
@@ -73,38 +75,33 @@ export default function App() {
     clearLogs();
 
     try {
-      // 1. Generate mnemonic
-      log('Generating mnemonic...');
-      const mnemonic = new Mnemonic(WordCount.Words12);
-      log(`Mnemonic: ${mnemonic.words().slice(0, 3).join(' ')}...`, 'success');
-
-      // 2. Create descriptors
-      log('Creating descriptors...');
-      const descriptor = createDescriptor(
-        mnemonic,
+      // 1. Create descriptors from known test seed
+      log('Creating descriptors from test seed...');
+      const descriptor = createDescriptorFromString(
+        TEST_SEED,
         DescriptorTemplate.Bip84,
         KeychainKind.External,
         Network.Signet
       );
-      const changeDescriptor = createDescriptor(
-        mnemonic,
+      const changeDescriptor = createDescriptorFromString(
+        TEST_SEED,
         DescriptorTemplate.Bip84,
         KeychainKind.Internal,
         Network.Signet
       );
       log('Descriptors created', 'success');
 
-      // 3. Create wallet (uses BdkWallet wrapper)
+      // 2. Create wallet
       log('Creating wallet...');
       const wallet = new BdkWallet(
         descriptor,
         changeDescriptor,
         Network.Signet,
-        '/tmp/bdk-test-wallet.db'
+        '/tmp/bdk-signet-test.db'
       );
       log('Wallet created', 'success');
 
-      // 4. Test sync methods (should work)
+      // 3. Test sync methods (should work)
       log('Testing sync methods...');
       const balance = wallet.getBalance();
       log(`Balance: ${balance.total} sats`, 'success');
@@ -115,22 +112,42 @@ export default function App() {
       const checkpoint = wallet.latestCheckpoint();
       log(`Checkpoint: height=${checkpoint?.height}`, 'success');
 
-      // 5. Test async method via native async bridge
+      // 4. Full scan with Electrum
       log('');
-      log('=== ASYNC TEST: fullScanWithEsplora ===');
-      log(`URL: ${ESPLORA_URL}`);
-      log('Calling fullScanWithEsplora...');
+      log('=== ASYNC TEST: fullScanWithElectrum ===');
+      log(`URL: ${ELECTRUM_URL}`);
+      log('Calling fullScanWithElectrum...');
       log('(watch the counter above — if it keeps ticking, UI is NOT blocked)');
 
       const start = Date.now();
-      await wallet.fullScanWithEsplora(ESPLORA_URL, 20);
+      await wallet.fullScanWithElectrum(ELECTRUM_URL, 20);
       const elapsed = Date.now() - start;
 
-      log(`fullScanWithEsplora completed in ${elapsed}ms`, 'success');
+      log(`fullScanWithElectrum completed in ${elapsed}ms`, 'success');
 
-      // 6. Check balance after scan
+      // 5. Check balance after scan
       const newBalance = wallet.getBalance();
       log(`Balance after scan: ${newBalance.total} sats`, 'success');
+
+      // 6. Test transactions() — previously caused deadlock
+      log('');
+      log('=== DEADLOCK REGRESSION TEST ===');
+      log('Calling wallet.transactions()...');
+      const txs = wallet.transactions();
+      log(`transactions() returned ${txs.length} txs`, 'success');
+
+      if (txs.length > 0) {
+        const first = txs[0];
+        log(`First tx: ${first.txid.slice(0, 16)}...`, 'success');
+
+        // 7. Test txDetails() — also previously caused deadlock
+        log('Calling wallet.txDetails()...');
+        const detail = wallet.txDetails(first.txid);
+        log(
+          `txDetails() returned: sent=${detail?.sent} received=${detail?.received}`,
+          'success'
+        );
+      }
     } catch (e: any) {
       const message = e?.message ?? String(e);
       log(`ERROR: ${message}`, 'error');
@@ -162,7 +179,7 @@ export default function App() {
         disabled={running}
       >
         <Text style={styles.buttonText}>
-          {running ? 'Running...' : 'Test Async Scan'}
+          {running ? 'Running...' : 'Run Tests'}
         </Text>
       </TouchableOpacity>
 
@@ -233,6 +250,7 @@ const styles = StyleSheet.create({
   logContainer: {
     flex: 1,
     marginTop: 16,
+    marginBottom: 20,
     backgroundColor: '#1a1a2e',
     borderRadius: 8,
     padding: 12,
