@@ -13,13 +13,17 @@
 pnpm install
 ```
 
-2. Generate
+2. Update `VERSION` in `justfile` and run:
+
+```bash
+just release
+```
+
+3. Generate bindings
 
 ```bash
 just generate
 ```
-
-3. Bump version in `package.json`
 
 4. Create `release/v{version}` branch and PR
 
