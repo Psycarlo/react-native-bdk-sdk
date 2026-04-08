@@ -136,8 +136,8 @@ export default function App() {
       const txs = wallet.transactions();
       log(`transactions() returned ${txs.length} txs`, 'success');
 
-      if (txs.length > 0) {
-        const first = txs[0];
+      const first = txs[0];
+      if (first) {
         log(`First tx: ${first.txid.slice(0, 16)}...`, 'success');
 
         // 7. Test txDetails() — also previously caused deadlock
