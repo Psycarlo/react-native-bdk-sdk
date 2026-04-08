@@ -152,10 +152,11 @@ impl Wallet {
 
     pub fn transactions(&self) -> Result<Vec<TxDetails>, BdkError> {
         let w = self.inner.lock().unwrap();
+        let network = w.network();
         let mut details = Vec::new();
         for wallet_tx in w.transactions() {
             if let Some(td) = w.tx_details(wallet_tx.tx_node.txid) {
-                details.push(self.convert_tx_details(&td));
+                details.push(Self::convert_tx_details(&td, network));
             }
         }
         Ok(details)
@@ -166,7 +167,8 @@ impl Wallet {
             message: format!("Invalid txid '{}': {}", txid, e),
         })?;
         let w = self.inner.lock().unwrap();
-        Ok(w.tx_details(tid).map(|td| self.convert_tx_details(&td)))
+        let network = w.network();
+        Ok(w.tx_details(tid).map(|td| Self::convert_tx_details(&td, network)))
     }
 
     pub fn get_tx(&self, txid: String) -> Result<Option<String>, BdkError> {
@@ -699,13 +701,9 @@ impl Wallet {
         })
     }
 
-    fn convert_tx_details(&self, td: &bdk_wallet::TxDetails) -> TxDetails {
+    fn convert_tx_details(td: &bdk_wallet::TxDetails, network: bitcoin::Network) -> TxDetails {
         let tx = &td.tx;
         let tx_bytes = consensus::encode::serialize(tx.deref());
-        let network = {
-            let w = self.inner.lock().unwrap();
-            w.network()
-        };
 
         let inputs: Vec<TxInput> = tx.input.iter().map(|inp| {
             TxInput {
