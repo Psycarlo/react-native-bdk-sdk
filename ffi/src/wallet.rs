@@ -30,6 +30,9 @@ impl Wallet {
         let mut conn = Connection::open(&db_path)?;
 
         let load_result = bdk_wallet::Wallet::load()
+            .descriptor(bdk_wallet::KeychainKind::External, Some(descriptor.clone()))
+            .descriptor(bdk_wallet::KeychainKind::Internal, Some(change_desc.clone()))
+            .extract_keys()
             .check_network(net)
             .load_wallet(&mut conn);
 
