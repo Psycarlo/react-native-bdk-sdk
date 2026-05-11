@@ -5,12 +5,15 @@ use bip39;
 use crate::error::BdkError;
 use crate::types::{Language, WordCount};
 
+#[derive(uniffi::Object)]
 pub struct Mnemonic {
     inner: Mutex<bip39::Mnemonic>,
 }
 
+#[uniffi::export]
 impl Mnemonic {
     /// Generate a new random mnemonic with the given word count (English).
+    #[uniffi::constructor]
     pub fn new(word_count: WordCount) -> Result<Self, BdkError> {
         let mut entropy = vec![0u8; word_count.entropy_bytes()];
         use bdk_wallet::bitcoin::key::rand::RngCore;
@@ -23,6 +26,7 @@ impl Mnemonic {
     }
 
     /// Parse an existing mnemonic string (auto-detects language).
+    #[uniffi::constructor]
     pub fn from_string(mnemonic: String) -> Result<Self, BdkError> {
         let m: bip39::Mnemonic = mnemonic
             .parse()
@@ -33,6 +37,7 @@ impl Mnemonic {
     }
 
     /// Parse a mnemonic string in a specific language.
+    #[uniffi::constructor]
     pub fn from_string_in(mnemonic: String, language: Language) -> Result<Self, BdkError> {
         let lang: bip39::Language = language.into();
         let m = bip39::Mnemonic::parse_in(lang, &mnemonic)
@@ -43,6 +48,7 @@ impl Mnemonic {
     }
 
     /// Create a mnemonic from raw entropy bytes (16–32 bytes).
+    #[uniffi::constructor]
     pub fn from_entropy(entropy: Vec<u8>) -> Result<Self, BdkError> {
         let m = bip39::Mnemonic::from_entropy(&entropy)
             .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
@@ -52,6 +58,7 @@ impl Mnemonic {
     }
 
     /// Create a mnemonic from raw entropy bytes in a specific language.
+    #[uniffi::constructor]
     pub fn from_entropy_in(entropy: Vec<u8>, language: Language) -> Result<Self, BdkError> {
         let lang: bip39::Language = language.into();
         let m = bip39::Mnemonic::from_entropy_in(lang, &entropy)
@@ -94,7 +101,9 @@ impl Mnemonic {
             .map(|w| w.to_string())
             .collect()
     }
+}
 
+impl Mnemonic {
     /// Get a reference to the inner bip39::Mnemonic (for internal use).
     pub(crate) fn inner(&self) -> std::sync::MutexGuard<'_, bip39::Mnemonic> {
         self.inner.lock().unwrap()

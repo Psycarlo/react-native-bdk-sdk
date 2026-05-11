@@ -337,10 +337,6 @@ export class BdkWallet {
     return this.inner.calculateFeeRate(txHex);
   }
 
-  cancelTx(txHex: string): void {
-    this.inner.cancelTx(txHex);
-  }
-
   // ── PSBT / Signing ──────────────────────────────────────────────────────
 
   sign(psbt: PsbtLike): boolean {
@@ -590,10 +586,6 @@ export class BdkTxBuilder {
 
   onlyWitnessUtxo(): void {
     this.inner.onlyWitnessUtxo();
-  }
-
-  includeOutputRedeemWitnessScript(): void {
-    this.inner.includeOutputRedeemWitnessScript();
   }
 
   addGlobalXpubs(): void {

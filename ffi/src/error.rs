@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, uniffi::Error)]
 pub enum BdkError {
     // Wallet lifecycle
     InvalidDescriptor { message: String },
@@ -177,7 +177,6 @@ impl From<bdk_wallet::error::BuildFeeBumpError> for BdkError {
     }
 }
 
-#[allow(deprecated)]
 impl From<bdk_wallet::signer::SignerError> for BdkError {
     fn from(e: bdk_wallet::signer::SignerError) -> Self {
         use bdk_wallet::signer::SignerError::*;
@@ -186,7 +185,7 @@ impl From<bdk_wallet::signer::SignerError> for BdkError {
             MissingKey => Self::SignerMissingKey { message: msg },
             InvalidKey => Self::SignerInvalidKey { message: msg },
             UserCanceled => Self::SignerUserCanceled { message: msg },
-            InputIndexOutOfRange => Self::SignerInputIndexOutOfRange { message: msg },
+            InputIndexOutOfRange(_) => Self::SignerInputIndexOutOfRange { message: msg },
             MissingNonWitnessUtxo => Self::SignerMissingNonWitnessUtxo { message: msg },
             InvalidNonWitnessUtxo => Self::SignerMissingNonWitnessUtxo { message: msg },
             MissingWitnessUtxo => Self::SignerMissingWitnessUtxo { message: msg },
