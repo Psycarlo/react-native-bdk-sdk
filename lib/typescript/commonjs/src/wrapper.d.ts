@@ -99,7 +99,6 @@ export declare class BdkWallet {
     sentAndReceived(txHex: string): SentAndReceivedN;
     calculateFee(txHex: string): number;
     calculateFeeRate(txHex: string): number;
-    cancelTx(txHex: string): void;
     sign(psbt: PsbtLike): boolean;
     finalizePsbt(psbt: PsbtLike): boolean;
     fullScanWithEsplora(url: string, stopGap: number): Promise<void>;
@@ -159,7 +158,6 @@ export declare class BdkTxBuilder {
     allowDust(allow: boolean): void;
     currentHeight(height: number): void;
     onlyWitnessUtxo(): void;
-    includeOutputRedeemWitnessScript(): void;
     addGlobalXpubs(): void;
     sighash(sighashType: number): void;
     policyPath(pathMapJson: string, keychain: KeychainKind): void;

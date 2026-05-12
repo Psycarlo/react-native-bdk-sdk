@@ -493,7 +493,7 @@ export class BdkTxBuilder {
   }
 
   addData(data: Array<number>): void {
-    this.inner.addData(data);
+    this.inner.addData(new Uint8Array(data).buffer);
   }
 
   feeRate(satPerVbyte: number): void {

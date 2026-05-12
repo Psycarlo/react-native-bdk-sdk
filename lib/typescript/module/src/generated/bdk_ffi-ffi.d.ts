@@ -49,7 +49,6 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_absolute(ptr: bigint, feeSats: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_rate(ptr: bigint, satPerVbyte: number, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_finish(ptr: bigint, wallet: bigint): bigint;
-    ubrn_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_nlocktime(ptr: bigint, lockHeight: number, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_txbuilder_only_spend_change(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
@@ -69,7 +68,6 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(ptr: bigint, txid: Uint8Array, newFeeRate: number, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): number;
-    ubrn_uniffi_bdk_ffi_fn_method_wallet_cancel_tx(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_checkpoints(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_index(ptr: bigint, keychain: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_of_spk(ptr: bigint, scriptHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
@@ -208,7 +206,6 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_fee_absolute(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_fee_rate(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_finish(): number;
-    ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_only_spend_change(): number;
@@ -225,7 +222,6 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(): number;
-    ubrn_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_checkpoints(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_index(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk(): number;
