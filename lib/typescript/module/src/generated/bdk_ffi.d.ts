@@ -1,6 +1,7 @@
 import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConverterObject, RustBuffer, UniffiAbstractObject, destructorGuardSymbol, pointerLiteralSymbol, uniffiTypeNameSymbol } from "uniffi-bindgen-react-native";
 /**
  * Convert a scriptPubKey (hex) to an address string for the given network.
+ * Returns the address string, or an error if the script cannot be converted.
  */
 export declare function addressFromScript(scriptHex: string, network: Network): string;
 /**
@@ -8,7 +9,7 @@ export declare function addressFromScript(scriptHex: string, network: Network): 
  */
 export declare function createDescriptor(mnemonic: MnemonicLike, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
 /**
- * Generate an output descriptor from a mnemonic string directly (convenience).
+ * Generate an output descriptor from a mnemonic string (convenience overload).
  */
 export declare function createDescriptorFromString(mnemonic: string, template: DescriptorTemplate, keychain: KeychainKind, network: Network): string;
 /**
@@ -21,7 +22,7 @@ export declare function createPublicDescriptor(xpub: string, template: Descripto
 export declare function createSingleKeyDescriptor(key: string, template: SingleKeyDescriptorTemplate, network: Network): string;
 /**
  * Async wallet factory — creates or loads a wallet without blocking the JS thread.
- * Pass null for change_descriptor to use the main descriptor for both keychains.
+ * Pass null/undefined for change_descriptor to use the main descriptor for both keychains.
  */
 export declare function createWallet(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string, asyncOpts_?: {
     signal: AbortSignal;
@@ -4511,227 +4512,6 @@ export declare enum TxOrdering {
     Shuffle = 0,
     Untouched = 1
 }
-export declare enum WalletEvent_Tags {
-    ChainTipChanged = "ChainTipChanged",
-    TxConfirmed = "TxConfirmed",
-    TxUnconfirmed = "TxUnconfirmed",
-    TxReplaced = "TxReplaced",
-    TxDropped = "TxDropped"
-}
-export declare const WalletEvent: Readonly<{
-    instanceOf: (obj: any) => obj is WalletEvent;
-    ChainTipChanged: {
-        new (inner: {
-            oldTip: BlockId;
-            newTip: BlockId;
-        }): {
-            readonly tag: WalletEvent_Tags.ChainTipChanged;
-            readonly inner: Readonly<{
-                oldTip: BlockId;
-                newTip: BlockId;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        "new"(inner: {
-            oldTip: BlockId;
-            newTip: BlockId;
-        }): {
-            readonly tag: WalletEvent_Tags.ChainTipChanged;
-            readonly inner: Readonly<{
-                oldTip: BlockId;
-                newTip: BlockId;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        instanceOf(obj: any): obj is {
-            readonly tag: WalletEvent_Tags.ChainTipChanged;
-            readonly inner: Readonly<{
-                oldTip: BlockId;
-                newTip: BlockId;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-    };
-    TxConfirmed: {
-        new (inner: {
-            txid: string;
-            blockTime: ConfirmationBlockTime;
-        }): {
-            readonly tag: WalletEvent_Tags.TxConfirmed;
-            readonly inner: Readonly<{
-                txid: string;
-                blockTime: ConfirmationBlockTime;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        "new"(inner: {
-            txid: string;
-            blockTime: ConfirmationBlockTime;
-        }): {
-            readonly tag: WalletEvent_Tags.TxConfirmed;
-            readonly inner: Readonly<{
-                txid: string;
-                blockTime: ConfirmationBlockTime;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        instanceOf(obj: any): obj is {
-            readonly tag: WalletEvent_Tags.TxConfirmed;
-            readonly inner: Readonly<{
-                txid: string;
-                blockTime: ConfirmationBlockTime;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-    };
-    TxUnconfirmed: {
-        new (inner: {
-            txid: string;
-        }): {
-            readonly tag: WalletEvent_Tags.TxUnconfirmed;
-            readonly inner: Readonly<{
-                txid: string;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        "new"(inner: {
-            txid: string;
-        }): {
-            readonly tag: WalletEvent_Tags.TxUnconfirmed;
-            readonly inner: Readonly<{
-                txid: string;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        instanceOf(obj: any): obj is {
-            readonly tag: WalletEvent_Tags.TxUnconfirmed;
-            readonly inner: Readonly<{
-                txid: string;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-    };
-    TxReplaced: {
-        new (inner: {
-            txid: string;
-            conflictingTxids: Array<string>;
-        }): {
-            readonly tag: WalletEvent_Tags.TxReplaced;
-            readonly inner: Readonly<{
-                txid: string;
-                conflictingTxids: Array<string>;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        "new"(inner: {
-            txid: string;
-            conflictingTxids: Array<string>;
-        }): {
-            readonly tag: WalletEvent_Tags.TxReplaced;
-            readonly inner: Readonly<{
-                txid: string;
-                conflictingTxids: Array<string>;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        instanceOf(obj: any): obj is {
-            readonly tag: WalletEvent_Tags.TxReplaced;
-            readonly inner: Readonly<{
-                txid: string;
-                conflictingTxids: Array<string>;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-    };
-    TxDropped: {
-        new (inner: {
-            txid: string;
-        }): {
-            readonly tag: WalletEvent_Tags.TxDropped;
-            readonly inner: Readonly<{
-                txid: string;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        "new"(inner: {
-            txid: string;
-        }): {
-            readonly tag: WalletEvent_Tags.TxDropped;
-            readonly inner: Readonly<{
-                txid: string;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-        instanceOf(obj: any): obj is {
-            readonly tag: WalletEvent_Tags.TxDropped;
-            readonly inner: Readonly<{
-                txid: string;
-            }>;
-            /**
-             * @private
-             * This field is private and should not be used, use `tag` instead.
-             */
-            readonly [uniffiTypeNameSymbol]: "WalletEvent";
-        };
-    };
-}>;
-export type WalletEvent = InstanceType<(typeof WalletEvent)[keyof Omit<typeof WalletEvent, "instanceOf">]>;
 export declare enum WordCount {
     Words12 = 0,
     Words15 = 1,
@@ -4741,6 +4521,7 @@ export declare enum WordCount {
 }
 /**
  * A reusable Electrum client that holds a persistent TCP/TLS connection.
+ * Create once, pass to multiple wallet methods to avoid reconnecting each time.
  */
 export interface ElectrumClientLike {
 }
@@ -4750,6 +4531,7 @@ export interface ElectrumClientLike {
 export type ElectrumClientInterface = ElectrumClientLike;
 /**
  * A reusable Electrum client that holds a persistent TCP/TLS connection.
+ * Create once, pass to multiple wallet methods to avoid reconnecting each time.
  */
 export declare class ElectrumClient extends UniffiAbstractObject implements ElectrumClientLike {
     readonly [uniffiTypeNameSymbol] = "ElectrumClient";
@@ -4757,6 +4539,7 @@ export declare class ElectrumClient extends UniffiAbstractObject implements Elec
     readonly [pointerLiteralSymbol]: UniffiHandle;
     /**
      * Connect to an Electrum server.
+     * url: e.g. "ssl://electrum.blockstream.info:60002" or "tcp://localhost:50001"
      */
     constructor(url: string);
     /**
@@ -4766,10 +4549,25 @@ export declare class ElectrumClient extends UniffiAbstractObject implements Elec
     static instanceOf(obj: any): obj is ElectrumClient;
 }
 export interface MnemonicLike {
+    /**
+     * The language of this mnemonic.
+     */
     language(): Language;
+    /**
+     * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
+     */
     toSeedHex(passphrase: string): string;
+    /**
+     * The mnemonic as a space-separated word string.
+     */
     toString(): string;
+    /**
+     * Number of words (12, 15, 18, 21, or 24).
+     */
     wordCount(): number;
+    /**
+     * List the individual words.
+     */
     words(): Array<string>;
 }
 /**
@@ -4780,15 +4578,45 @@ export declare class Mnemonic extends UniffiAbstractObject implements MnemonicLi
     readonly [uniffiTypeNameSymbol] = "Mnemonic";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Generate a new random mnemonic with the given word count (English).
+     */
     constructor(wordCount: WordCount);
-    static fromEntropy(entropy: Array</*u8*/ number>): MnemonicLike;
-    static fromEntropyIn(entropy: Array</*u8*/ number>, language: Language): MnemonicLike;
+    /**
+     * Create a mnemonic from raw entropy bytes (16–32 bytes).
+     */
+    static fromEntropy(entropy: ArrayBuffer): MnemonicLike;
+    /**
+     * Create a mnemonic from raw entropy bytes in a specific language.
+     */
+    static fromEntropyIn(entropy: ArrayBuffer, language: Language): MnemonicLike;
+    /**
+     * Parse an existing mnemonic string (auto-detects language).
+     */
     static fromString(mnemonic: string): MnemonicLike;
+    /**
+     * Parse a mnemonic string in a specific language.
+     */
     static fromStringIn(mnemonic: string, language: Language): MnemonicLike;
+    /**
+     * The language of this mnemonic.
+     */
     language(): Language;
+    /**
+     * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
+     */
     toSeedHex(passphrase: string): string;
+    /**
+     * The mnemonic as a space-separated word string.
+     */
     toString(): string;
+    /**
+     * Number of words (12, 15, 18, 21, or 24).
+     */
     wordCount(): number;
+    /**
+     * List the individual words.
+     */
     words(): Array<string>;
     /**
      * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
@@ -4797,11 +4625,29 @@ export declare class Mnemonic extends UniffiAbstractObject implements MnemonicLi
     static instanceOf(obj: any): obj is Mnemonic;
 }
 export interface PsbtLike {
+    /**
+     * Extract the fully-signed transaction as raw hex.
+     */
     extractTxHex(): string;
+    /**
+     * Total fee in satoshis. None if any input UTXO value is unknown.
+     */
     feeAmount(): /*u64*/ bigint | undefined;
+    /**
+     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+     */
     feeRate(): /*f64*/ number | undefined;
+    /**
+     * Retrieve the UTXO for a given input index. Returns None if unavailable.
+     */
     getUtxoFor(inputIndex: bigint): TxOut | undefined;
+    /**
+     * Serialize to a base64-encoded string.
+     */
     toBase64(): string;
+    /**
+     * The unsigned txid.
+     */
     txid(): string;
 }
 /**
@@ -4812,12 +4658,33 @@ export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     readonly [uniffiTypeNameSymbol] = "Psbt";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Deserialize from a base64-encoded string.
+     */
     constructor(psbtBase64: string);
+    /**
+     * Extract the fully-signed transaction as raw hex.
+     */
     extractTxHex(): string;
+    /**
+     * Total fee in satoshis. None if any input UTXO value is unknown.
+     */
     feeAmount(): /*u64*/ bigint | undefined;
+    /**
+     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+     */
     feeRate(): /*f64*/ number | undefined;
+    /**
+     * Retrieve the UTXO for a given input index. Returns None if unavailable.
+     */
     getUtxoFor(inputIndex: bigint): TxOut | undefined;
+    /**
+     * Serialize to a base64-encoded string.
+     */
     toBase64(): string;
+    /**
+     * The unsigned txid.
+     */
     txid(): string;
     /**
      * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
@@ -4826,7 +4693,7 @@ export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     static instanceOf(obj: any): obj is Psbt;
 }
 export interface TxBuilderLike {
-    addData(data: Array</*u8*/ number>): void;
+    addData(data: ArrayBuffer): void;
     addGlobalXpubs(): void;
     addRecipient(address: string, amountSats: bigint): void;
     addUnspendable(outpoint: OutPoint): void;
@@ -4845,12 +4712,12 @@ export interface TxBuilderLike {
     feeAbsolute(feeSats: bigint): void;
     feeRate(satPerVbyte: number): void;
     /**
-     * Build the transaction into a PSBT (async — runs on background thread).
+     * Build the transaction into a PSBT using the wallet.
+     * Runs on a background thread to avoid blocking the JS thread.
      */
     finish(wallet: WalletLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<PsbtLike>;
-    includeOutputRedeemWitnessScript(): void;
     manuallySelectedOnly(): void;
     nlocktime(lockHeight: number): void;
     onlySpendChange(): void;
@@ -4872,7 +4739,7 @@ export declare class TxBuilder extends UniffiAbstractObject implements TxBuilder
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
     constructor();
-    addData(data: Array</*u8*/ number>): void;
+    addData(data: ArrayBuffer): void;
     addGlobalXpubs(): void;
     addRecipient(address: string, amountSats: bigint): void;
     addUnspendable(outpoint: OutPoint): void;
@@ -4891,12 +4758,12 @@ export declare class TxBuilder extends UniffiAbstractObject implements TxBuilder
     feeAbsolute(feeSats: bigint): void;
     feeRate(satPerVbyte: number): void;
     /**
-     * Build the transaction into a PSBT (async — runs on background thread).
+     * Build the transaction into a PSBT using the wallet.
+     * Runs on a background thread to avoid blocking the JS thread.
      */
     finish(wallet: WalletLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<PsbtLike>;
-    includeOutputRedeemWitnessScript(): void;
     manuallySelectedOnly(): void;
     nlocktime(lockHeight: number): void;
     onlySpendChange(): void;
@@ -4924,7 +4791,6 @@ export interface WalletLike {
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     calculateFee(txHex: string): bigint;
     calculateFeeRate(txHex: string): number;
-    cancelTx(txHex: string): void;
     checkpoints(): Array<BlockId>;
     derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
@@ -5001,7 +4867,6 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     calculateFee(txHex: string): bigint;
     calculateFeeRate(txHex: string): number;
-    cancelTx(txHex: string): void;
     checkpoints(): Array<BlockId>;
     derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
@@ -5235,13 +5100,6 @@ declare const _default: Readonly<{
             lower(value: TxOutput): UniffiByteArray;
         };
         FfiConverterTypeWallet: FfiConverterObject<WalletLike>;
-        FfiConverterTypeWalletEvent: {
-            read(from: RustBuffer): WalletEvent;
-            write(value: WalletEvent, into: RustBuffer): void;
-            allocationSize(value: WalletEvent): number;
-            lift(value: UniffiByteArray): WalletEvent;
-            lower(value: WalletEvent): UniffiByteArray;
-        };
         FfiConverterTypeWordCount: {
             read(from: RustBuffer): WordCount;
             write(value: WordCount, into: RustBuffer): void;

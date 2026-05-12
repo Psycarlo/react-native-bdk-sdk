@@ -48,11 +48,13 @@ use bdk_wallet::template::{
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// Runtime version of the bdk_wallet crate.
+#[uniffi::export]
 pub fn version() -> String {
     bdk_wallet::version().to_string()
 }
 
 /// Returns true if the address string is valid for the given network.
+#[uniffi::export]
 pub fn is_valid_address(address: String, network: Network) -> bool {
     let net: bitcoin::Network = network.into();
     address
@@ -63,6 +65,7 @@ pub fn is_valid_address(address: String, network: Network) -> bool {
 
 /// Convert a scriptPubKey (hex) to an address string for the given network.
 /// Returns the address string, or an error if the script cannot be converted.
+#[uniffi::export]
 pub fn address_from_script(script_hex: String, network: Network) -> Result<String, BdkError> {
     let net: bitcoin::Network = network.into();
     let bytes = types::hex::decode(&script_hex).map_err(|_| BdkError::InvalidScript {
@@ -76,17 +79,19 @@ pub fn address_from_script(script_hex: String, network: Network) -> Result<Strin
 }
 
 /// Validate a descriptor string for the given network without creating a wallet.
+#[uniffi::export]
 pub fn validate_descriptor(descriptor: String, network: Network) -> bool {
     let net: bitcoin::Network = network.into();
     let secp = bitcoin::secp256k1::Secp256k1::new();
     descriptor
         .as_str()
-        .into_wallet_descriptor(&secp, net)
+        .into_wallet_descriptor(&secp, net.into())
         .is_ok()
 }
 
 /// Async wallet factory — creates or loads a wallet without blocking the JS thread.
 /// Pass null/undefined for change_descriptor to use the main descriptor for both keychains.
+#[uniffi::export(async_runtime = "tokio")]
 pub async fn create_wallet(
     descriptor: String,
     change_descriptor: Option<String>,
@@ -105,6 +110,7 @@ pub async fn create_wallet(
 }
 
 /// Generate an output descriptor string from a mnemonic using a standard BIP template.
+#[uniffi::export]
 pub fn create_descriptor(
     mnemonic: Arc<Mnemonic>,
     template: DescriptorTemplate,
@@ -117,7 +123,7 @@ pub fn create_descriptor(
         message: format!("Failed to derive extended key: {}", e),
     })?;
     let xprv = xkey
-        .into_xprv(net)
+        .into_xprv(net.into())
         .ok_or(BdkError::KeyError {
             message: "Cannot derive xprv from extended key".into(),
         })?;
@@ -127,19 +133,19 @@ pub fn create_descriptor(
 
     let descriptor_str = match (template, kc) {
         (DescriptorTemplate::BIP44, bdk_wallet::KeychainKind::External) => {
-            Bip44(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip44(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP44, _) => {
-            Bip44(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip44(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP49, _) => {
-            Bip49(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip49(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP84, _) => {
-            Bip84(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip84(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP86, _) => {
-            Bip86(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip86(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
     };
 
@@ -147,6 +153,7 @@ pub fn create_descriptor(
 }
 
 /// Generate an output descriptor from a mnemonic string (convenience overload).
+#[uniffi::export]
 pub fn create_descriptor_from_string(
     mnemonic: String,
     template: DescriptorTemplate,
@@ -161,7 +168,7 @@ pub fn create_descriptor_from_string(
         message: format!("Failed to derive extended key: {}", e),
     })?;
     let xprv = xkey
-        .into_xprv(net)
+        .into_xprv(net.into())
         .ok_or(BdkError::KeyError {
             message: "Cannot derive xprv from extended key".into(),
         })?;
@@ -171,16 +178,16 @@ pub fn create_descriptor_from_string(
 
     let descriptor_str = match (template, kc) {
         (DescriptorTemplate::BIP44, _) => {
-            Bip44(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip44(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP49, _) => {
-            Bip49(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip49(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP84, _) => {
-            Bip84(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip84(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         (DescriptorTemplate::BIP86, _) => {
-            Bip86(xprv, kc).into_wallet_descriptor(&secp, net)?.0.to_string()
+            Bip86(xprv, kc).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
     };
 
@@ -188,6 +195,7 @@ pub fn create_descriptor_from_string(
 }
 
 /// Generate a public (watch-only) descriptor from an xpub string.
+#[uniffi::export]
 pub fn create_public_descriptor(
     xpub: String,
     template: DescriptorTemplate,
@@ -207,19 +215,19 @@ pub fn create_public_descriptor(
     let descriptor_str = match template {
         DescriptorTemplate::BIP44 => {
             Bip44Public(xpub_key, Default::default(), kc)
-                .into_wallet_descriptor(&secp, net)?.0.to_string()
+                .into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         DescriptorTemplate::BIP49 => {
             Bip49Public(xpub_key, Default::default(), kc)
-                .into_wallet_descriptor(&secp, net)?.0.to_string()
+                .into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         DescriptorTemplate::BIP84 => {
             Bip84Public(xpub_key, Default::default(), kc)
-                .into_wallet_descriptor(&secp, net)?.0.to_string()
+                .into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         DescriptorTemplate::BIP86 => {
             Bip86Public(xpub_key, Default::default(), kc)
-                .into_wallet_descriptor(&secp, net)?.0.to_string()
+                .into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
     };
 
@@ -227,6 +235,7 @@ pub fn create_public_descriptor(
 }
 
 /// Generate a single-key descriptor from a key string.
+#[uniffi::export]
 pub fn create_single_key_descriptor(
     key: String,
     template: SingleKeyDescriptorTemplate,
@@ -241,16 +250,16 @@ pub fn create_single_key_descriptor(
 
     let descriptor_str = match template {
         SingleKeyDescriptorTemplate::P2Pkh => {
-            P2Pkh(pk).into_wallet_descriptor(&secp, net)?.0.to_string()
+            P2Pkh(pk).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         SingleKeyDescriptorTemplate::P2Wpkh => {
-            P2Wpkh(pk).into_wallet_descriptor(&secp, net)?.0.to_string()
+            P2Wpkh(pk).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         SingleKeyDescriptorTemplate::P2Wpkh_P2Sh => {
-            P2Wpkh_P2Sh(pk).into_wallet_descriptor(&secp, net)?.0.to_string()
+            P2Wpkh_P2Sh(pk).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
         SingleKeyDescriptorTemplate::P2TR => {
-            P2TR(pk).into_wallet_descriptor(&secp, net)?.0.to_string()
+            P2TR(pk).into_wallet_descriptor(&secp, net.into())?.0.to_string()
         }
     };
 
@@ -258,6 +267,7 @@ pub fn create_single_key_descriptor(
 }
 
 /// Compute a deterministic wallet name from its descriptors.
+#[uniffi::export]
 pub fn wallet_name_from_descriptor(
     descriptor: String,
     change_descriptor: Option<String>,
@@ -269,7 +279,7 @@ pub fn wallet_name_from_descriptor(
     let name = bdk_wallet::wallet_name_from_descriptor(
         &descriptor,
         change_descriptor.as_ref(),
-        net,
+        net.into(),
         &secp,
     )
     .map_err(|e| BdkError::InvalidDescriptor {
@@ -280,6 +290,7 @@ pub fn wallet_name_from_descriptor(
 }
 
 /// Export a wallet in FullyNoded-compatible JSON format for backup.
+#[uniffi::export]
 pub fn export_wallet(
     wallet: Arc<Wallet>,
     label: String,
@@ -297,4 +308,4 @@ pub fn export_wallet(
 //  UNIFFI SCAFFOLDING
 // ═══════════════════════════════════════════════════════════════════════════════
 
-uniffi::include_scaffolding!("bdk");
+uniffi::setup_scaffolding!();

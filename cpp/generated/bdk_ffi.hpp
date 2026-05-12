@@ -67,7 +67,6 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_fee_absolute(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_finish(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
-    jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_nlocktime(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_txbuilder_only_spend_change(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -87,7 +86,6 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
-    jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_cancel_tx(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_checkpoints(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_derivation_index(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_derivation_of_spk(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -226,7 +224,6 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_fee_absolute(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_finish(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
-    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_only_spend_change(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -243,7 +240,6 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
-    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_checkpoints(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_derivation_index(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);

@@ -29,7 +29,6 @@ struct TxBuilderParams {
     allow_dust: Option<bool>,
     current_height: Option<u32>,
     only_witness_utxo: bool,
-    include_output_redeem_witness_script: bool,
     add_global_xpubs: bool,
     sighash: Option<u32>,
     policy_path: Vec<(String, KeychainKind)>,
@@ -38,11 +37,14 @@ struct TxBuilderParams {
     exclude_unconfirmed: bool,
 }
 
+#[derive(uniffi::Object)]
 pub struct TxBuilder {
     params: Mutex<TxBuilderParams>,
 }
 
+#[uniffi::export]
 impl TxBuilder {
+    #[uniffi::constructor]
     pub fn new() -> Self {
         Self {
             params: Mutex::new(TxBuilderParams::default()),
@@ -186,11 +188,6 @@ impl TxBuilder {
         p.only_witness_utxo = true;
     }
 
-    pub fn include_output_redeem_witness_script(&self) {
-        let mut p = self.params.lock().unwrap();
-        p.include_output_redeem_witness_script = true;
-    }
-
     pub fn add_global_xpubs(&self) {
         let mut p = self.params.lock().unwrap();
         p.add_global_xpubs = true;
@@ -208,6 +205,7 @@ impl TxBuilder {
 
     /// Build the transaction into a PSBT using the wallet.
     /// Runs on a background thread to avoid blocking the JS thread.
+    #[uniffi::method(async_runtime = "tokio")]
     pub async fn finish(&self, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
         let params = self.params.lock().unwrap().clone();
 
@@ -221,7 +219,9 @@ impl TxBuilder {
             })?
         }).await
     }
+}
 
+impl TxBuilder {
     fn finish_inner(params: TxBuilderParams, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
         let network = {
             let w = wallet.inner.lock().unwrap();
@@ -340,9 +340,6 @@ impl TxBuilder {
         }
         if params.only_witness_utxo {
             builder.only_witness_utxo();
-        }
-        if params.include_output_redeem_witness_script {
-            builder.include_output_redeem_witness_script();
         }
         if params.add_global_xpubs {
             builder.add_global_xpubs();

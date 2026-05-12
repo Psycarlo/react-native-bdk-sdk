@@ -329,10 +329,6 @@ extern "C" {
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t wallet
     );
-    void uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(
-        /*handle*/ uint64_t ptr, 
-        RustCallStatus *uniffi_out_err
-    );
     void uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(
         /*handle*/ uint64_t ptr, 
         RustCallStatus *uniffi_out_err
@@ -423,11 +419,6 @@ extern "C" {
         RustCallStatus *uniffi_out_err
     );
     double uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(
-        /*handle*/ uint64_t ptr, 
-        RustBuffer tx_hex, 
-        RustCallStatus *uniffi_out_err
-    );
-    void uniffi_bdk_ffi_fn_method_wallet_cancel_tx(
         /*handle*/ uint64_t ptr, 
         RustBuffer tx_hex, 
         RustCallStatus *uniffi_out_err
@@ -602,12 +593,12 @@ extern "C" {
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t client, 
-        uint64_t stop_gap
+        uint64_t _stop_gap
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
         /*handle*/ uint64_t ptr, 
         RustBuffer url, 
-        uint64_t stop_gap
+        uint64_t _stop_gap
     );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_transactions(
         /*handle*/ uint64_t ptr, 
@@ -965,8 +956,6 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_finish(
     );
-    uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script(
-    );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime(
@@ -998,8 +987,6 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(
-    );
-    uint16_t uniffi_bdk_ffi_checksum_method_wallet_cancel_tx(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_checkpoints(
     );
@@ -2895,14 +2882,6 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_txbuilder_finish(rt, thisVal, args, count);
         }
     );
-    props["ubrn_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script"] = jsi::Function::createFromHostFunction(
-        rt,
-        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script"),
-        1,
-        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
-            return this->cpp_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(rt, thisVal, args, count);
-        }
-    );
     props["ubrn_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only"),
@@ -3053,14 +3032,6 @@ NativeBdkFfi::NativeBdkFfi(
         2,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(rt, thisVal, args, count);
-        }
-    );
-    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_cancel_tx"] = jsi::Function::createFromHostFunction(
-        rt,
-        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_cancel_tx"),
-        2,
-        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
-            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_cancel_tx(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_checkpoints"] = jsi::Function::createFromHostFunction(
@@ -4167,14 +4138,6 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_txbuilder_finish(rt, thisVal, args, count);
         }
     );
-    props["ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script"] = jsi::Function::createFromHostFunction(
-        rt,
-        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script"),
-        0,
-        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
-            return this->cpp_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script(rt, thisVal, args, count);
-        }
-    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only"),
@@ -4301,14 +4264,6 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(rt, thisVal, args, count);
-        }
-    );
-    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx"] = jsi::Function::createFromHostFunction(
-        rt,
-        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx"),
-        0,
-        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
-            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_checkpoints"] = jsi::Function::createFromHostFunction(
@@ -5293,16 +5248,6 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_txbuilder_finish(jsi::Runt
         
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
-jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
-        uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
-            &status
-        );
-        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
-
-        
-        return jsi::Value::undefined();
-}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
@@ -5486,16 +5431,6 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(
 
         
         return uniffi_jsi::Bridging<double>::toJs(rt, callInvoker, value);
-}
-jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_cancel_tx(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
-        uniffi_bdk_ffi_fn_method_wallet_cancel_tx(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
-            &status
-        );
-        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
-
-        
-        return jsi::Value::undefined();
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_checkpoints(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
@@ -6618,13 +6553,6 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_finish(jsi
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
-jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        auto value = uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script(
-        );
-
-        
-        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
-}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only(
         );
@@ -6732,13 +6660,6 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(
-        );
-
-        
-        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
-}
-jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
-        auto value = uniffi_bdk_ffi_checksum_method_wallet_cancel_tx(
         );
 
         

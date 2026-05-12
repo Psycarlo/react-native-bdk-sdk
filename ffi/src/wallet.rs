@@ -3,7 +3,6 @@ use std::sync::{Arc, Mutex};
 
 use bdk_wallet::bitcoin::{self, consensus, Amount, FeeRate, ScriptBuf, Transaction, Txid};
 use bdk_wallet::rusqlite::Connection;
-#[allow(deprecated)]
 use bdk_wallet::SignOptions;
 use bdk_wallet::PersistedWallet;
 
@@ -12,13 +11,16 @@ use crate::error::BdkError;
 use crate::psbt::Psbt;
 use crate::types::*;
 
+#[derive(uniffi::Object)]
 pub struct Wallet {
     pub(crate) inner: Mutex<PersistedWallet<Connection>>,
     conn: Mutex<Connection>,
 }
 
+#[uniffi::export(async_runtime = "tokio")]
 impl Wallet {
     /// Create or load a persisted wallet (sync — for async use create_wallet()).
+    #[uniffi::constructor]
     pub fn new(
         descriptor: String,
         change_descriptor: Option<String>,
@@ -215,17 +217,8 @@ impl Wallet {
         Ok(rate.to_sat_per_vb_ceil() as f64)
     }
 
-    pub fn cancel_tx(&self, tx_hex: String) -> Result<(), BdkError> {
-        let tx = self.decode_tx(&tx_hex)?;
-        let mut w = self.inner.lock().unwrap();
-        w.cancel_tx(&tx);
-        self.auto_persist(&mut w);
-        Ok(())
-    }
-
     // ── PSBT / Signing ────────────────────────────────────────────────────────
 
-    #[allow(deprecated)]
     pub fn sign(&self, psbt: Arc<Psbt>) -> Result<bool, BdkError> {
         let w = self.inner.lock().unwrap();
         let mut psbt_inner = psbt.inner.lock().unwrap();
@@ -233,7 +226,6 @@ impl Wallet {
         Ok(finalized)
     }
 
-    #[allow(deprecated)]
     pub fn finalize_psbt(&self, psbt: Arc<Psbt>) -> Result<bool, BdkError> {
         let w = self.inner.lock().unwrap();
         let mut psbt_inner = psbt.inner.lock().unwrap();
@@ -432,7 +424,6 @@ impl Wallet {
 
     // ── Convenience (Esplora) ────────────────────────────────────────────────
 
-    #[allow(deprecated)]
     pub async fn send(
         &self,
         address: String,
@@ -462,7 +453,6 @@ impl Wallet {
         Ok(txid)
     }
 
-    #[allow(deprecated)]
     pub async fn drain(
         &self,
         address: String,
@@ -493,7 +483,6 @@ impl Wallet {
 
     // ── Convenience (Electrum) ───────────────────────────────────────────────
 
-    #[allow(deprecated)]
     pub async fn send_with_electrum(
         &self,
         address: String,
@@ -526,7 +515,6 @@ impl Wallet {
         Ok(txid)
     }
 
-    #[allow(deprecated)]
     pub async fn drain_with_electrum(
         &self,
         address: String,
@@ -676,9 +664,10 @@ impl Wallet {
         let w = self.inner.lock().unwrap();
         w.network().into()
     }
+}
 
-    // ── Private helpers ───────────────────────────────────────────────────────
-
+// Private helpers — NOT exported via uniffi.
+impl Wallet {
     fn persist_wallet(
         &self,
         wallet: &mut PersistedWallet<Connection>,
@@ -747,7 +736,6 @@ impl Wallet {
     }
 
     /// Shared tx-building logic for send / send_with_electrum.
-    #[allow(deprecated)]
     fn build_send_tx(
         &self,
         address: &str,
@@ -784,7 +772,6 @@ impl Wallet {
     }
 
     /// Shared tx-building logic for drain / drain_with_electrum.
-    #[allow(deprecated)]
     fn build_drain_tx(
         &self,
         address: &str,

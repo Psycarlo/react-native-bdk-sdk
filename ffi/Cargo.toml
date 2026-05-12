@@ -9,7 +9,7 @@ name = "bdk_ffi"
 crate-type = ["cdylib", "staticlib", "lib"]
 
 [dependencies]
-bdk_wallet = { version = "2.3.0", features = ["all-keys", "keys-bip39", "rusqlite"] }
+bdk_wallet = { version = "3.0.0", features = ["all-keys", "keys-bip39", "rusqlite"] }
 bdk_esplora = { version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls", "async-https-rustls", "tokio"] }
 bdk_electrum = { version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
 bdk_kyoto = { version = "0.15.4" }
@@ -17,10 +17,4 @@ bip39 = { version = "2.2", features = ["all-languages"] }
 serde_json = "1.0"
 
 tokio = { version = "1", features = ["rt-multi-thread"] }
-uniffi = { version = "=0.31.0", features = ["cli"] }
-
-[dev-dependencies]
-uniffi = { version = "=0.31.0", features = ["bindgen-tests"] }
-
-[build-dependencies]
-uniffi = { version = "=0.31.0", features = ["build"] }
+uniffi = { version = "=0.31.0", features = ["tokio"] }

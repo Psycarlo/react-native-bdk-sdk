@@ -41,6 +41,7 @@ import {
   type UniffiObjectFactory,
   AbstractFfiConverterByteArray,
   FfiConverterArray,
+  FfiConverterArrayBuffer,
   FfiConverterBool,
   FfiConverterFloat64,
   FfiConverterInt32,
@@ -49,10 +50,8 @@ import {
   FfiConverterOptional,
   FfiConverterUInt32,
   FfiConverterUInt64,
-  FfiConverterUInt8,
   RustBuffer,
   UniffiAbstractObject,
-  UniffiEnum,
   UniffiError,
   UniffiInternalError,
   UniffiRustCaller,
@@ -78,6 +77,7 @@ const uniffiIsDebug =
 
 /**
  * Convert a scriptPubKey (hex) to an address string for the given network.
+ * Returns the address string, or an error if the script cannot be converted.
  */
 export function addressFromScript(
   scriptHex: string,
@@ -127,7 +127,7 @@ export function createDescriptor(
   );
 }
 /**
- * Generate an output descriptor from a mnemonic string directly (convenience).
+ * Generate an output descriptor from a mnemonic string (convenience overload).
  */
 export function createDescriptorFromString(
   mnemonic: string,
@@ -207,7 +207,7 @@ export function createSingleKeyDescriptor(
 }
 /**
  * Async wallet factory — creates or loads a wallet without blocking the JS thread.
- * Pass null for change_descriptor to use the main descriptor for both keychains.
+ * Pass null/undefined for change_descriptor to use the main descriptor for both keychains.
  */
 export async function createWallet(
   descriptor: string,
@@ -4129,301 +4129,6 @@ const FfiConverterTypeTxOrdering = (() => {
   return new FFIConverter();
 })();
 
-// Enum: WalletEvent
-export enum WalletEvent_Tags {
-  ChainTipChanged = "ChainTipChanged",
-  TxConfirmed = "TxConfirmed",
-  TxUnconfirmed = "TxUnconfirmed",
-  TxReplaced = "TxReplaced",
-  TxDropped = "TxDropped",
-}
-export const WalletEvent = (() => {
-  type ChainTipChanged__interface = {
-    tag: WalletEvent_Tags.ChainTipChanged;
-    inner: Readonly<{ oldTip: BlockId; newTip: BlockId }>;
-  };
-
-  class ChainTipChanged_
-    extends UniffiEnum
-    implements ChainTipChanged__interface
-  {
-    /**
-     * @private
-     * This field is private and should not be used, use `tag` instead.
-     */
-    readonly [uniffiTypeNameSymbol] = "WalletEvent";
-    readonly tag = WalletEvent_Tags.ChainTipChanged;
-    readonly inner: Readonly<{ oldTip: BlockId; newTip: BlockId }>;
-    constructor(inner: { oldTip: BlockId; newTip: BlockId }) {
-      super("WalletEvent", "ChainTipChanged");
-      this.inner = Object.freeze(inner);
-    }
-
-    static new(inner: { oldTip: BlockId; newTip: BlockId }): ChainTipChanged_ {
-      return new ChainTipChanged_(inner);
-    }
-
-    static instanceOf(obj: any): obj is ChainTipChanged_ {
-      return obj.tag === WalletEvent_Tags.ChainTipChanged;
-    }
-  }
-
-  type TxConfirmed__interface = {
-    tag: WalletEvent_Tags.TxConfirmed;
-    inner: Readonly<{ txid: string; blockTime: ConfirmationBlockTime }>;
-  };
-
-  class TxConfirmed_ extends UniffiEnum implements TxConfirmed__interface {
-    /**
-     * @private
-     * This field is private and should not be used, use `tag` instead.
-     */
-    readonly [uniffiTypeNameSymbol] = "WalletEvent";
-    readonly tag = WalletEvent_Tags.TxConfirmed;
-    readonly inner: Readonly<{
-      txid: string;
-      blockTime: ConfirmationBlockTime;
-    }>;
-    constructor(inner: { txid: string; blockTime: ConfirmationBlockTime }) {
-      super("WalletEvent", "TxConfirmed");
-      this.inner = Object.freeze(inner);
-    }
-
-    static new(inner: {
-      txid: string;
-      blockTime: ConfirmationBlockTime;
-    }): TxConfirmed_ {
-      return new TxConfirmed_(inner);
-    }
-
-    static instanceOf(obj: any): obj is TxConfirmed_ {
-      return obj.tag === WalletEvent_Tags.TxConfirmed;
-    }
-  }
-
-  type TxUnconfirmed__interface = {
-    tag: WalletEvent_Tags.TxUnconfirmed;
-    inner: Readonly<{ txid: string }>;
-  };
-
-  class TxUnconfirmed_ extends UniffiEnum implements TxUnconfirmed__interface {
-    /**
-     * @private
-     * This field is private and should not be used, use `tag` instead.
-     */
-    readonly [uniffiTypeNameSymbol] = "WalletEvent";
-    readonly tag = WalletEvent_Tags.TxUnconfirmed;
-    readonly inner: Readonly<{ txid: string }>;
-    constructor(inner: { txid: string }) {
-      super("WalletEvent", "TxUnconfirmed");
-      this.inner = Object.freeze(inner);
-    }
-
-    static new(inner: { txid: string }): TxUnconfirmed_ {
-      return new TxUnconfirmed_(inner);
-    }
-
-    static instanceOf(obj: any): obj is TxUnconfirmed_ {
-      return obj.tag === WalletEvent_Tags.TxUnconfirmed;
-    }
-  }
-
-  type TxReplaced__interface = {
-    tag: WalletEvent_Tags.TxReplaced;
-    inner: Readonly<{ txid: string; conflictingTxids: Array<string> }>;
-  };
-
-  class TxReplaced_ extends UniffiEnum implements TxReplaced__interface {
-    /**
-     * @private
-     * This field is private and should not be used, use `tag` instead.
-     */
-    readonly [uniffiTypeNameSymbol] = "WalletEvent";
-    readonly tag = WalletEvent_Tags.TxReplaced;
-    readonly inner: Readonly<{ txid: string; conflictingTxids: Array<string> }>;
-    constructor(inner: { txid: string; conflictingTxids: Array<string> }) {
-      super("WalletEvent", "TxReplaced");
-      this.inner = Object.freeze(inner);
-    }
-
-    static new(inner: {
-      txid: string;
-      conflictingTxids: Array<string>;
-    }): TxReplaced_ {
-      return new TxReplaced_(inner);
-    }
-
-    static instanceOf(obj: any): obj is TxReplaced_ {
-      return obj.tag === WalletEvent_Tags.TxReplaced;
-    }
-  }
-
-  type TxDropped__interface = {
-    tag: WalletEvent_Tags.TxDropped;
-    inner: Readonly<{ txid: string }>;
-  };
-
-  class TxDropped_ extends UniffiEnum implements TxDropped__interface {
-    /**
-     * @private
-     * This field is private and should not be used, use `tag` instead.
-     */
-    readonly [uniffiTypeNameSymbol] = "WalletEvent";
-    readonly tag = WalletEvent_Tags.TxDropped;
-    readonly inner: Readonly<{ txid: string }>;
-    constructor(inner: { txid: string }) {
-      super("WalletEvent", "TxDropped");
-      this.inner = Object.freeze(inner);
-    }
-
-    static new(inner: { txid: string }): TxDropped_ {
-      return new TxDropped_(inner);
-    }
-
-    static instanceOf(obj: any): obj is TxDropped_ {
-      return obj.tag === WalletEvent_Tags.TxDropped;
-    }
-  }
-
-  function instanceOf(obj: any): obj is WalletEvent {
-    return obj[uniffiTypeNameSymbol] === "WalletEvent";
-  }
-
-  return Object.freeze({
-    instanceOf,
-    ChainTipChanged: ChainTipChanged_,
-    TxConfirmed: TxConfirmed_,
-    TxUnconfirmed: TxUnconfirmed_,
-    TxReplaced: TxReplaced_,
-    TxDropped: TxDropped_,
-  });
-})();
-
-export type WalletEvent = InstanceType<
-  (typeof WalletEvent)[keyof Omit<typeof WalletEvent, "instanceOf">]
->;
-
-// FfiConverter for enum WalletEvent
-const FfiConverterTypeWalletEvent = (() => {
-  const ordinalConverter = FfiConverterInt32;
-  type TypeName = WalletEvent;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    read(from: RustBuffer): TypeName {
-      switch (ordinalConverter.read(from)) {
-        case 1:
-          return new WalletEvent.ChainTipChanged({
-            oldTip: FfiConverterTypeBlockId.read(from),
-            newTip: FfiConverterTypeBlockId.read(from),
-          });
-        case 2:
-          return new WalletEvent.TxConfirmed({
-            txid: FfiConverterString.read(from),
-            blockTime: FfiConverterTypeConfirmationBlockTime.read(from),
-          });
-        case 3:
-          return new WalletEvent.TxUnconfirmed({
-            txid: FfiConverterString.read(from),
-          });
-        case 4:
-          return new WalletEvent.TxReplaced({
-            txid: FfiConverterString.read(from),
-            conflictingTxids: FfiConverterArrayString.read(from),
-          });
-        case 5:
-          return new WalletEvent.TxDropped({
-            txid: FfiConverterString.read(from),
-          });
-        default:
-          throw new UniffiInternalError.UnexpectedEnumCase();
-      }
-    }
-    write(value: TypeName, into: RustBuffer): void {
-      switch (value.tag) {
-        case WalletEvent_Tags.ChainTipChanged: {
-          ordinalConverter.write(1, into);
-          const inner = value.inner;
-          FfiConverterTypeBlockId.write(inner.oldTip, into);
-          FfiConverterTypeBlockId.write(inner.newTip, into);
-          return;
-        }
-        case WalletEvent_Tags.TxConfirmed: {
-          ordinalConverter.write(2, into);
-          const inner = value.inner;
-          FfiConverterString.write(inner.txid, into);
-          FfiConverterTypeConfirmationBlockTime.write(inner.blockTime, into);
-          return;
-        }
-        case WalletEvent_Tags.TxUnconfirmed: {
-          ordinalConverter.write(3, into);
-          const inner = value.inner;
-          FfiConverterString.write(inner.txid, into);
-          return;
-        }
-        case WalletEvent_Tags.TxReplaced: {
-          ordinalConverter.write(4, into);
-          const inner = value.inner;
-          FfiConverterString.write(inner.txid, into);
-          FfiConverterArrayString.write(inner.conflictingTxids, into);
-          return;
-        }
-        case WalletEvent_Tags.TxDropped: {
-          ordinalConverter.write(5, into);
-          const inner = value.inner;
-          FfiConverterString.write(inner.txid, into);
-          return;
-        }
-        default:
-          // Throwing from here means that WalletEvent_Tags hasn't matched an ordinal.
-          throw new UniffiInternalError.UnexpectedEnumCase();
-      }
-    }
-    allocationSize(value: TypeName): number {
-      switch (value.tag) {
-        case WalletEvent_Tags.ChainTipChanged: {
-          const inner = value.inner;
-          let size = ordinalConverter.allocationSize(1);
-          size += FfiConverterTypeBlockId.allocationSize(inner.oldTip);
-          size += FfiConverterTypeBlockId.allocationSize(inner.newTip);
-          return size;
-        }
-        case WalletEvent_Tags.TxConfirmed: {
-          const inner = value.inner;
-          let size = ordinalConverter.allocationSize(2);
-          size += FfiConverterString.allocationSize(inner.txid);
-          size += FfiConverterTypeConfirmationBlockTime.allocationSize(
-            inner.blockTime
-          );
-          return size;
-        }
-        case WalletEvent_Tags.TxUnconfirmed: {
-          const inner = value.inner;
-          let size = ordinalConverter.allocationSize(3);
-          size += FfiConverterString.allocationSize(inner.txid);
-          return size;
-        }
-        case WalletEvent_Tags.TxReplaced: {
-          const inner = value.inner;
-          let size = ordinalConverter.allocationSize(4);
-          size += FfiConverterString.allocationSize(inner.txid);
-          size += FfiConverterArrayString.allocationSize(
-            inner.conflictingTxids
-          );
-          return size;
-        }
-        case WalletEvent_Tags.TxDropped: {
-          const inner = value.inner;
-          let size = ordinalConverter.allocationSize(5);
-          size += FfiConverterString.allocationSize(inner.txid);
-          return size;
-        }
-        default:
-          throw new UniffiInternalError.UnexpectedEnumCase();
-      }
-    }
-  }
-  return new FFIConverter();
-})();
-
 export enum WordCount {
   Words12,
   Words15,
@@ -4475,6 +4180,7 @@ const FfiConverterTypeWordCount = (() => {
 
 /**
  * A reusable Electrum client that holds a persistent TCP/TLS connection.
+ * Create once, pass to multiple wallet methods to avoid reconnecting each time.
  */
 export interface ElectrumClientLike {}
 /**
@@ -4484,6 +4190,7 @@ export type ElectrumClientInterface = ElectrumClientLike;
 
 /**
  * A reusable Electrum client that holds a persistent TCP/TLS connection.
+ * Create once, pass to multiple wallet methods to avoid reconnecting each time.
  */
 export class ElectrumClient
   extends UniffiAbstractObject
@@ -4494,6 +4201,7 @@ export class ElectrumClient
   readonly [pointerLiteralSymbol]: UniffiHandle;
   /**
    * Connect to an Electrum server.
+   * url: e.g. "ssl://electrum.blockstream.info:60002" or "tcp://localhost:50001"
    */
   constructor(url: string) /*throws*/ {
     super();
@@ -4602,10 +4310,25 @@ const FfiConverterTypeElectrumClient = new FfiConverterObject(
 );
 
 export interface MnemonicLike {
+  /**
+   * The language of this mnemonic.
+   */
   language(): Language;
+  /**
+   * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
+   */
   toSeedHex(passphrase: string): string;
+  /**
+   * The mnemonic as a space-separated word string.
+   */
   toString(): string;
+  /**
+   * Number of words (12, 15, 18, 21, or 24).
+   */
   wordCount(): /*u32*/ number;
+  /**
+   * List the individual words.
+   */
   words(): Array<string>;
 }
 /**
@@ -4617,6 +4340,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
   readonly [uniffiTypeNameSymbol] = "Mnemonic";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Generate a new random mnemonic with the given word count (English).
+   */
   constructor(wordCount: WordCount) /*throws*/ {
     super();
     const pointer = uniffiCaller.rustCallWithError(
@@ -4636,7 +4362,10 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
       uniffiTypeMnemonicObjectFactory.bless(pointer);
   }
 
-  static fromEntropy(entropy: Array</*u8*/ number>): MnemonicLike /*throws*/ {
+  /**
+   * Create a mnemonic from raw entropy bytes (16–32 bytes).
+   */
+  static fromEntropy(entropy: ArrayBuffer): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
         /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -4644,7 +4373,7 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
         ),
         /*caller:*/ (callStatus) => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(
-            FfiConverterArrayUInt8.lower(entropy),
+            FfiConverterArrayBuffer.lower(entropy),
             callStatus
           );
         },
@@ -4653,8 +4382,11 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * Create a mnemonic from raw entropy bytes in a specific language.
+   */
   static fromEntropyIn(
-    entropy: Array</*u8*/ number>,
+    entropy: ArrayBuffer,
     language: Language
   ): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
@@ -4664,7 +4396,7 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
         ),
         /*caller:*/ (callStatus) => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy_in(
-            FfiConverterArrayUInt8.lower(entropy),
+            FfiConverterArrayBuffer.lower(entropy),
             FfiConverterTypeLanguage.lower(language),
             callStatus
           );
@@ -4674,6 +4406,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * Parse an existing mnemonic string (auto-detects language).
+   */
   static fromString(mnemonic: string): MnemonicLike /*throws*/ {
     return FfiConverterTypeMnemonic.lift(
       uniffiCaller.rustCallWithError(
@@ -4691,6 +4426,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * Parse a mnemonic string in a specific language.
+   */
   static fromStringIn(
     mnemonic: string,
     language: Language
@@ -4712,6 +4450,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * The language of this mnemonic.
+   */
   language(): Language {
     return FfiConverterTypeLanguage.lift(
       uniffiCaller.rustCall(
@@ -4726,6 +4467,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
+   */
   toSeedHex(passphrase: string): string {
     return FfiConverterString.lift(
       uniffiCaller.rustCall(
@@ -4741,6 +4485,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * The mnemonic as a space-separated word string.
+   */
   toString(): string {
     return FfiConverterString.lift(
       uniffiCaller.rustCall(
@@ -4755,6 +4502,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * Number of words (12, 15, 18, 21, or 24).
+   */
   wordCount(): /*u32*/ number {
     return FfiConverterUInt32.lift(
       uniffiCaller.rustCall(
@@ -4769,6 +4519,9 @@ export class Mnemonic extends UniffiAbstractObject implements MnemonicLike {
     );
   }
 
+  /**
+   * List the individual words.
+   */
   words(): Array<string> {
     return FfiConverterArrayString.lift(
       uniffiCaller.rustCall(
@@ -4870,11 +4623,29 @@ const FfiConverterTypeMnemonic = new FfiConverterObject(
 );
 
 export interface PsbtLike {
+  /**
+   * Extract the fully-signed transaction as raw hex.
+   */
   extractTxHex(): /*throws*/ string;
+  /**
+   * Total fee in satoshis. None if any input UTXO value is unknown.
+   */
   feeAmount(): /*u64*/ bigint | undefined;
+  /**
+   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+   */
   feeRate(): /*f64*/ number | undefined;
+  /**
+   * Retrieve the UTXO for a given input index. Returns None if unavailable.
+   */
   getUtxoFor(inputIndex: /*u64*/ bigint): TxOut | undefined;
+  /**
+   * Serialize to a base64-encoded string.
+   */
   toBase64(): string;
+  /**
+   * The unsigned txid.
+   */
   txid(): /*throws*/ string;
 }
 /**
@@ -4886,6 +4657,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
   readonly [uniffiTypeNameSymbol] = "Psbt";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Deserialize from a base64-encoded string.
+   */
   constructor(psbtBase64: string) /*throws*/ {
     super();
     const pointer = uniffiCaller.rustCallWithError(
@@ -4904,6 +4678,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     this[destructorGuardSymbol] = uniffiTypePsbtObjectFactory.bless(pointer);
   }
 
+  /**
+   * Extract the fully-signed transaction as raw hex.
+   */
   extractTxHex(): string /*throws*/ {
     return FfiConverterString.lift(
       uniffiCaller.rustCallWithError(
@@ -4921,6 +4698,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
+  /**
+   * Total fee in satoshis. None if any input UTXO value is unknown.
+   */
   feeAmount(): /*u64*/ bigint | undefined {
     return FfiConverterOptionalUInt64.lift(
       uniffiCaller.rustCall(
@@ -4935,6 +4715,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
+  /**
+   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+   */
   feeRate(): /*f64*/ number | undefined {
     return FfiConverterOptionalFloat64.lift(
       uniffiCaller.rustCall(
@@ -4949,6 +4732,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
+  /**
+   * Retrieve the UTXO for a given input index. Returns None if unavailable.
+   */
   getUtxoFor(inputIndex: /*u64*/ bigint): TxOut | undefined {
     return FfiConverterOptionalTypeTxOut.lift(
       uniffiCaller.rustCall(
@@ -4964,6 +4750,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
+  /**
+   * Serialize to a base64-encoded string.
+   */
   toBase64(): string {
     return FfiConverterString.lift(
       uniffiCaller.rustCall(
@@ -4978,6 +4767,9 @@ export class Psbt extends UniffiAbstractObject implements PsbtLike {
     );
   }
 
+  /**
+   * The unsigned txid.
+   */
   txid(): string /*throws*/ {
     return FfiConverterString.lift(
       uniffiCaller.rustCallWithError(
@@ -5073,7 +4865,7 @@ const FfiConverterTypePsbt = new FfiConverterObject(
 );
 
 export interface TxBuilderLike {
-  addData(data: Array</*u8*/ number>): void;
+  addData(data: ArrayBuffer): void;
   addGlobalXpubs(): void;
   addRecipient(address: string, amountSats: /*u64*/ bigint): void;
   addUnspendable(outpoint: OutPoint): void;
@@ -5092,13 +4884,13 @@ export interface TxBuilderLike {
   feeAbsolute(feeSats: /*u64*/ bigint): void;
   feeRate(satPerVbyte: /*f64*/ number): void;
   /**
-   * Build the transaction into a PSBT (async — runs on background thread).
+   * Build the transaction into a PSBT using the wallet.
+   * Runs on a background thread to avoid blocking the JS thread.
    */
   finish(
     wallet: WalletLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<PsbtLike>;
-  includeOutputRedeemWitnessScript(): void;
   manuallySelectedOnly(): void;
   nlocktime(lockHeight: /*u32*/ number): void;
   onlySpendChange(): void;
@@ -5135,12 +4927,12 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
       uniffiTypeTxBuilderObjectFactory.bless(pointer);
   }
 
-  addData(data: Array</*u8*/ number>): void {
+  addData(data: ArrayBuffer): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
         nativeModule().ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_data(
           uniffiTypeTxBuilderObjectFactory.clonePointer(this),
-          FfiConverterArrayUInt8.lower(data),
+          FfiConverterArrayBuffer.lower(data),
           callStatus
         );
       },
@@ -5375,7 +5167,8 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
   }
 
   /**
-   * Build the transaction into a PSBT (async — runs on background thread).
+   * Build the transaction into a PSBT using the wallet.
+   * Runs on a background thread to avoid blocking the JS thread.
    */
   async finish(
     wallet: WalletLike,
@@ -5409,18 +5202,6 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
       }
       throw __error;
     }
-  }
-
-  includeOutputRedeemWitnessScript(): void {
-    uniffiCaller.rustCall(
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_txbuilder_include_output_redeem_witness_script(
-          uniffiTypeTxBuilderObjectFactory.clonePointer(this),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
-    );
   }
 
   manuallySelectedOnly(): void {
@@ -5665,7 +5446,6 @@ export interface WalletLike {
   buildFeeBump(txid: string, newFeeRate: /*f64*/ number): /*throws*/ PsbtLike;
   calculateFee(txHex: string): /*throws*/ /*u64*/ bigint;
   calculateFeeRate(txHex: string): /*throws*/ /*f64*/ number;
-  cancelTx(txHex: string): /*throws*/ void;
   checkpoints(): Array<BlockId>;
   derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
   derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
@@ -5917,22 +5697,6 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         },
         /*liftString:*/ FfiConverterString.lift
       )
-    );
-  }
-
-  cancelTx(txHex: string): void /*throws*/ {
-    uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
-        FfiConverterTypeBdkError
-      ),
-      /*caller:*/ (callStatus) => {
-        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_cancel_tx(
-          uniffiTypeWalletObjectFactory.clonePointer(this),
-          FfiConverterString.lower(txHex),
-          callStatus
-        );
-      },
-      /*liftString:*/ FfiConverterString.lift
     );
   }
 
@@ -6932,9 +6696,6 @@ const FfiConverterArrayTypeTxOutput = new FfiConverterArray(
 // FfiConverter for Array<string>
 const FfiConverterArrayString = new FfiConverterArray(FfiConverterString);
 
-// FfiConverter for Array</*u8*/number>
-const FfiConverterArrayUInt8 = new FfiConverterArray(FfiConverterUInt8);
-
 /**
  * This should be called before anything else.
  *
@@ -6959,14 +6720,15 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_address_from_script() !==
-    50547
+    39396
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_address_from_script"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor() !== 166
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor() !==
+    15263
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_descriptor"
@@ -6974,7 +6736,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string() !==
-    29727
+    1662
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_descriptor_from_string"
@@ -6982,7 +6744,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_public_descriptor() !==
-    10610
+    9931
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_public_descriptor"
@@ -6990,21 +6752,21 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_single_key_descriptor() !==
-    56046
+    61717
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_single_key_descriptor"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_wallet() !== 59494
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_wallet() !== 45258
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_create_wallet"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_export_wallet() !== 53701
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_export_wallet() !== 61696
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_export_wallet"
@@ -7012,7 +6774,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_is_valid_address() !==
-    14593
+    31052
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_is_valid_address"
@@ -7020,20 +6782,20 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor() !==
-    44572
+    36838
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_validate_descriptor"
     );
   }
-  if (nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_version() !== 5205) {
+  if (nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_version() !== 1034) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_version"
     );
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor() !==
-    14974
+    49703
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor"
@@ -7041,7 +6803,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language() !==
-    59902
+    16692
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_language"
@@ -7049,7 +6811,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex() !==
-    33743
+    51397
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex"
@@ -7057,7 +6819,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_string() !==
-    8571
+    40512
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_to_string"
@@ -7065,7 +6827,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_word_count() !==
-    23669
+    488
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_word_count"
@@ -7073,7 +6835,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_words() !==
-    27352
+    51339
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_mnemonic_words"
@@ -7081,7 +6843,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_extract_tx_hex() !==
-    11167
+    64035
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_extract_tx_hex"
@@ -7089,14 +6851,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_amount() !==
-    44530
+    47400
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_fee_amount"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_rate() !== 7329
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_rate() !== 53916
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_fee_rate"
@@ -7104,7 +6866,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for() !==
-    1731
+    51581
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for"
@@ -7112,14 +6874,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_to_base64() !==
-    47613
+    26797
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_to_base64"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid() !== 56652
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid() !== 52614
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_txid"
@@ -7127,7 +6889,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_data() !==
-    57070
+    6110
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_data"
@@ -7135,7 +6897,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs() !==
-    53720
+    1787
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs"
@@ -7143,7 +6905,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_recipient() !==
-    55150
+    12594
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_recipient"
@@ -7151,7 +6913,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_unspendable() !==
-    56609
+    52996
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_unspendable"
@@ -7159,7 +6921,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_utxo() !==
-    10770
+    42826
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_utxo"
@@ -7167,7 +6929,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_utxos() !==
-    8534
+    32062
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_add_utxos"
@@ -7175,7 +6937,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_allow_dust() !==
-    43752
+    14341
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_allow_dust"
@@ -7183,7 +6945,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_change_policy() !==
-    6977
+    65098
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_change_policy"
@@ -7191,7 +6953,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_current_height() !==
-    62295
+    4465
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_current_height"
@@ -7199,7 +6961,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_do_not_spend_change() !==
-    13462
+    22162
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_do_not_spend_change"
@@ -7207,7 +6969,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_drain_to() !==
-    33773
+    46015
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_drain_to"
@@ -7215,7 +6977,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_drain_wallet() !==
-    48711
+    16971
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_drain_wallet"
@@ -7223,7 +6985,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf() !==
-    31683
+    15080
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf"
@@ -7231,7 +6993,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf_with_sequence() !==
-    7301
+    1958
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_enable_rbf_with_sequence"
@@ -7239,7 +7001,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_exclude_below_confirmations() !==
-    61197
+    33257
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_exclude_below_confirmations"
@@ -7247,7 +7009,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_exclude_unconfirmed() !==
-    59334
+    55927
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_exclude_unconfirmed"
@@ -7255,7 +7017,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_fee_absolute() !==
-    38654
+    35900
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_fee_absolute"
@@ -7263,7 +7025,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_fee_rate() !==
-    2789
+    30180
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_fee_rate"
@@ -7271,23 +7033,15 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_finish() !==
-    23648
+    19754
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_finish"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script() !==
-    1428
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      "uniffi_bdk_ffi_checksum_method_txbuilder_include_output_redeem_witness_script"
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only() !==
-    15817
+    10522
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_manually_selected_only"
@@ -7295,7 +7049,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime() !==
-    5541
+    34758
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_nlocktime"
@@ -7303,7 +7057,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_only_spend_change() !==
-    34933
+    53841
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_only_spend_change"
@@ -7311,7 +7065,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_only_witness_utxo() !==
-    50325
+    21662
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_only_witness_utxo"
@@ -7319,7 +7073,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_ordering() !==
-    27106
+    2839
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_ordering"
@@ -7327,7 +7081,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_policy_path() !==
-    18350
+    20272
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_policy_path"
@@ -7335,7 +7089,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence() !==
-    25054
+    41481
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence"
@@ -7343,7 +7097,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_recipients() !==
-    45616
+    64498
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_set_recipients"
@@ -7351,7 +7105,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_sighash() !==
-    56408
+    43131
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_sighash"
@@ -7359,7 +7113,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_tx_version() !==
-    32700
+    17694
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_tx_version"
@@ -7367,7 +7121,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable() !==
-    10665
+    14958
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_txbuilder_unspendable"
@@ -7375,7 +7129,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum() !==
-    26438
+    32446
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum"
@@ -7383,7 +7137,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora() !==
-    37423
+    43721
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora"
@@ -7391,7 +7145,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump() !==
-    36133
+    25451
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump"
@@ -7399,7 +7153,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee() !==
-    47950
+    23202
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_calculate_fee"
@@ -7407,23 +7161,15 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate() !==
-    64903
+    16774
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_cancel_tx() !==
-    39828
-  ) {
-    throw new UniffiInternalError.ApiChecksumMismatch(
-      "uniffi_bdk_ffi_checksum_method_wallet_cancel_tx"
-    );
-  }
-  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_checkpoints() !==
-    44342
+    8565
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_checkpoints"
@@ -7431,7 +7177,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_index() !==
-    14373
+    62031
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_derivation_index"
@@ -7439,7 +7185,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk() !==
-    44475
+    29681
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk"
@@ -7447,14 +7193,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_descriptor_checksum() !==
-    25926
+    26508
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_descriptor_checksum"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain() !== 47076
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain() !== 50687
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_drain"
@@ -7462,7 +7208,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain_with_electrum() !==
-    42924
+    47265
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_drain_with_electrum"
@@ -7470,7 +7216,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_finalize_psbt() !==
-    43414
+    36684
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_finalize_psbt"
@@ -7478,7 +7224,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum() !==
-    40837
+    44577
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum"
@@ -7486,7 +7232,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora() !==
-    39717
+    33673
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora"
@@ -7494,14 +7240,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_balance() !==
-    22733
+    15256
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_get_balance"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_tx() !== 59477
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_tx() !== 31223
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_get_tx"
@@ -7509,7 +7255,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_get_utxo() !==
-    35239
+    32023
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_get_utxo"
@@ -7517,7 +7263,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_insert_txout() !==
-    32676
+    21094
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_insert_txout"
@@ -7525,7 +7271,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_is_mine() !==
-    45210
+    58183
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_is_mine"
@@ -7533,7 +7279,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_keychains() !==
-    22099
+    61350
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_keychains"
@@ -7541,7 +7287,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_latest_checkpoint() !==
-    37521
+    55429
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_latest_checkpoint"
@@ -7549,7 +7295,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_list_output() !==
-    21768
+    56339
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_list_output"
@@ -7557,7 +7303,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_list_unspent() !==
-    13240
+    34815
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_list_unspent"
@@ -7565,7 +7311,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_list_unused_addresses() !==
-    11229
+    62327
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_list_unused_addresses"
@@ -7573,7 +7319,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_mark_used() !==
-    63278
+    12674
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_mark_used"
@@ -7581,7 +7327,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_network() !==
-    50311
+    22441
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_network"
@@ -7589,7 +7335,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_next_derivation_index() !==
-    50867
+    29788
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_next_derivation_index"
@@ -7597,7 +7343,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_next_unused_address() !==
-    51015
+    51509
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_next_unused_address"
@@ -7605,7 +7351,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_peek_address() !==
-    10883
+    26911
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_peek_address"
@@ -7613,7 +7359,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_persist() !==
-    34809
+    32604
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_persist"
@@ -7621,7 +7367,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_policies() !==
-    31626
+    38976
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_policies"
@@ -7629,7 +7375,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor() !==
-    58604
+    57701
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_public_descriptor"
@@ -7637,7 +7383,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to() !==
-    12682
+    972
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to"
@@ -7645,14 +7391,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address() !==
-    25820
+    38695
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 4457
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 20353
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_send"
@@ -7660,7 +7406,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum() !==
-    23570
+    64062
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum"
@@ -7668,14 +7414,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sent_and_received() !==
-    949
+    49517
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sent_and_received"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign() !== 32193
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign() !== 16037
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sign"
@@ -7683,7 +7429,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum() !==
-    17015
+    9147
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"
@@ -7691,7 +7437,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora() !==
-    28111
+    65450
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora"
@@ -7699,7 +7445,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions() !==
-    33179
+    4241
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_transactions"
@@ -7707,7 +7453,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details() !==
-    15355
+    39307
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_tx_details"
@@ -7715,7 +7461,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used() !==
-    46731
+    63499
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_unmark_used"
@@ -7723,7 +7469,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new() !==
-    63288
+    62930
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_electrumclient_new"
@@ -7731,7 +7477,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy() !==
-    37039
+    19558
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy"
@@ -7739,7 +7485,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in() !==
-    31703
+    18300
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in"
@@ -7747,7 +7493,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string() !==
-    55849
+    42146
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string"
@@ -7755,7 +7501,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string_in() !==
-    62725
+    26390
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string_in"
@@ -7763,14 +7509,14 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_new() !==
-    48608
+    65002
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_mnemonic_new"
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_psbt_new() !== 53610
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_psbt_new() !== 45667
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_psbt_new"
@@ -7778,7 +7524,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new() !==
-    16691
+    63178
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_txbuilder_new"
@@ -7786,7 +7532,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new() !==
-    64812
+    53332
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_wallet_new"
@@ -7824,7 +7570,6 @@ export default Object.freeze({
     FfiConverterTypeTxOut,
     FfiConverterTypeTxOutput,
     FfiConverterTypeWallet,
-    FfiConverterTypeWalletEvent,
     FfiConverterTypeWordCount,
   },
 });

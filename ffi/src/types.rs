@@ -6,7 +6,7 @@ use bdk_wallet::KeychainKind as BdkKeychainKind;
 //  ENUMS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum Network {
     Bitcoin,
     Testnet,
@@ -37,7 +37,7 @@ impl From<bitcoin::Network> for Network {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum KeychainKind {
     External,
     Internal,
@@ -61,7 +61,7 @@ impl From<BdkKeychainKind> for KeychainKind {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum ChangeSpendPolicy {
     ChangeAllowed,
     OnlyChange,
@@ -78,7 +78,7 @@ impl From<ChangeSpendPolicy> for bdk_wallet::tx_builder::ChangeSpendPolicy {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum TxOrdering {
     Shuffle,
     Untouched,
@@ -93,7 +93,7 @@ impl From<TxOrdering> for bdk_wallet::tx_builder::TxOrdering {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum WordCount {
     Words12,
     Words15,
@@ -115,7 +115,7 @@ impl WordCount {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum Language {
     English,
     SimplifiedChinese,
@@ -163,7 +163,7 @@ impl From<bip39::Language> for Language {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum DescriptorTemplate {
     BIP44,
     BIP49,
@@ -171,7 +171,7 @@ pub enum DescriptorTemplate {
     BIP86,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 #[allow(non_camel_case_types)]
 pub enum SingleKeyDescriptorTemplate {
     P2Pkh,
@@ -181,36 +181,10 @@ pub enum SingleKeyDescriptorTemplate {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  TAGGED UNION ENUM
-// ═══════════════════════════════════════════════════════════════════════════════
-
-#[derive(Debug, Clone)]
-pub enum WalletEvent {
-    ChainTipChanged {
-        old_tip: BlockId,
-        new_tip: BlockId,
-    },
-    TxConfirmed {
-        txid: String,
-        block_time: ConfirmationBlockTime,
-    },
-    TxUnconfirmed {
-        txid: String,
-    },
-    TxReplaced {
-        txid: String,
-        conflicting_txids: Vec<String>,
-    },
-    TxDropped {
-        txid: String,
-    },
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
 //  DICTIONARY STRUCTS (records)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct BlockId {
     pub height: u32,
     pub hash: String,
@@ -225,7 +199,7 @@ impl From<bdk_wallet::chain::BlockId> for BlockId {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct OutPoint {
     pub txid: String,
     pub vout: u32,
@@ -252,7 +226,7 @@ impl From<bitcoin::OutPoint> for OutPoint {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct TxOut {
     pub value: u64,
     pub script_pubkey_hex: String,
@@ -279,7 +253,7 @@ impl From<&bitcoin::TxOut> for TxOut {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct ConfirmationBlockTime {
     pub height: u32,
     pub block_hash: String,
@@ -306,7 +280,7 @@ pub fn chain_position_to_confirmation(
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct LocalOutput {
     pub outpoint: OutPoint,
     pub txout: TxOut,
@@ -329,7 +303,7 @@ impl From<bdk_wallet::LocalOutput> for LocalOutput {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct AddressInfo {
     pub index: u32,
     pub address: String,
@@ -346,7 +320,7 @@ impl From<bdk_wallet::AddressInfo> for AddressInfo {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct Balance {
     pub immature: u64,
     pub trusted_pending: u64,
@@ -369,7 +343,7 @@ impl From<bdk_wallet::Balance> for Balance {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct TxInput {
     pub previous_txid: String,
     pub previous_vout: u32,
@@ -378,14 +352,14 @@ pub struct TxInput {
     pub witness: Vec<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct TxOutput {
     pub value: u64,
     pub script_pubkey_hex: String,
     pub address: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct TxDetails {
     pub txid: String,
     pub sent: u64,
@@ -401,25 +375,25 @@ pub struct TxDetails {
     pub outputs: Vec<TxOutput>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct SentAndReceived {
     pub sent: u64,
     pub received: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct Recipient {
     pub address: String,
     pub amount_sats: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct DerivationInfo {
     pub keychain: KeychainKind,
     pub index: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, uniffi::Record)]
 pub struct KeychainInfo {
     pub keychain: KeychainKind,
     pub descriptor: String,

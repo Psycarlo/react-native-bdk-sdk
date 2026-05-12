@@ -7,12 +7,15 @@ use bdk_wallet::psbt::PsbtUtils;
 use crate::error::BdkError;
 use crate::types::{self, TxOut};
 
+#[derive(uniffi::Object)]
 pub struct Psbt {
     pub(crate) inner: Mutex<bitcoin::Psbt>,
 }
 
+#[uniffi::export]
 impl Psbt {
     /// Deserialize from a base64-encoded string.
+    #[uniffi::constructor]
     pub fn new(psbt_base64: String) -> Result<Self, BdkError> {
         let psbt: bitcoin::Psbt = psbt_base64
             .parse()
