@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 use bip39;
 
 use crate::error::BdkError;
@@ -7,7 +5,7 @@ use crate::types::{Language, WordCount};
 
 #[derive(uniffi::Object)]
 pub struct Mnemonic {
-    inner: Mutex<bip39::Mnemonic>,
+    inner: bip39::Mnemonic,
 }
 
 #[uniffi::export]
@@ -20,9 +18,7 @@ impl Mnemonic {
         bdk_wallet::bitcoin::key::rand::thread_rng().fill_bytes(&mut entropy);
         let mnemonic = bip39::Mnemonic::from_entropy(&entropy)
             .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
-        Ok(Self {
-            inner: Mutex::new(mnemonic),
-        })
+        Ok(Self { inner: mnemonic })
     }
 
     /// Parse an existing mnemonic string (auto-detects language).
@@ -31,9 +27,7 @@ impl Mnemonic {
         let m: bip39::Mnemonic = mnemonic
             .parse()
             .map_err(|e: bip39::Error| BdkError::InvalidMnemonic { message: e.to_string() })?;
-        Ok(Self {
-            inner: Mutex::new(m),
-        })
+        Ok(Self { inner: m })
     }
 
     /// Parse a mnemonic string in a specific language.
@@ -42,9 +36,7 @@ impl Mnemonic {
         let lang: bip39::Language = language.into();
         let m = bip39::Mnemonic::parse_in(lang, &mnemonic)
             .map_err(|e| BdkError::InvalidMnemonic { message: e.to_string() })?;
-        Ok(Self {
-            inner: Mutex::new(m),
-        })
+        Ok(Self { inner: m })
     }
 
     /// Create a mnemonic from raw entropy bytes (16–32 bytes).
@@ -52,9 +44,7 @@ impl Mnemonic {
     pub fn from_entropy(entropy: Vec<u8>) -> Result<Self, BdkError> {
         let m = bip39::Mnemonic::from_entropy(&entropy)
             .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
-        Ok(Self {
-            inner: Mutex::new(m),
-        })
+        Ok(Self { inner: m })
     }
 
     /// Create a mnemonic from raw entropy bytes in a specific language.
@@ -63,49 +53,39 @@ impl Mnemonic {
         let lang: bip39::Language = language.into();
         let m = bip39::Mnemonic::from_entropy_in(lang, &entropy)
             .map_err(|e| BdkError::InvalidEntropy { message: e.to_string() })?;
-        Ok(Self {
-            inner: Mutex::new(m),
-        })
+        Ok(Self { inner: m })
     }
 
     /// The mnemonic as a space-separated word string.
     pub fn to_string(&self) -> String {
-        let inner = self.inner.lock().unwrap();
-        inner.to_string()
+        self.inner.to_string()
     }
 
     /// Derive the 64-byte seed as hex. Pass an empty string for no passphrase.
     pub fn to_seed_hex(&self, passphrase: String) -> String {
-        let inner = self.inner.lock().unwrap();
-        let seed = inner.to_seed(&passphrase);
+        let seed = self.inner.to_seed(&passphrase);
         crate::types::hex::encode(&seed)
     }
 
     /// Number of words (12, 15, 18, 21, or 24).
     pub fn word_count(&self) -> u32 {
-        let inner = self.inner.lock().unwrap();
-        inner.word_count() as u32
+        self.inner.word_count() as u32
     }
 
     /// The language of this mnemonic.
     pub fn language(&self) -> Language {
-        let inner = self.inner.lock().unwrap();
-        inner.language().into()
+        self.inner.language().into()
     }
 
     /// List the individual words.
     pub fn words(&self) -> Vec<String> {
-        let inner = self.inner.lock().unwrap();
-        inner
-            .words()
-            .map(|w| w.to_string())
-            .collect()
+        self.inner.words().map(|w| w.to_string()).collect()
     }
 }
 
 impl Mnemonic {
     /// Get a reference to the inner bip39::Mnemonic (for internal use).
-    pub(crate) fn inner(&self) -> std::sync::MutexGuard<'_, bip39::Mnemonic> {
-        self.inner.lock().unwrap()
+    pub(crate) fn inner(&self) -> &bip39::Mnemonic {
+        &self.inner
     }
 }
