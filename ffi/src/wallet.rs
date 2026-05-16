@@ -703,7 +703,6 @@ impl Wallet {
 
     fn convert_tx_details(td: &bdk_wallet::TxDetails, network: bitcoin::Network) -> TxDetails {
         let tx = &td.tx;
-        let tx_bytes = consensus::encode::serialize(tx.deref());
 
         let inputs: Vec<TxInput> = tx.input.iter().map(|inp| {
             TxInput {
@@ -735,7 +734,6 @@ impl Wallet {
             fee_rate: td.fee_rate.map(|r| r.to_sat_per_vb_ceil() as f64),
             balance_delta: td.balance_delta.to_sat(),
             confirmation_block_time: chain_position_to_confirmation(&td.chain_position),
-            tx_hex: hex::encode(&tx_bytes),
             version: tx.version.0,
             locktime: tx.lock_time.to_consensus_u32(),
             inputs,

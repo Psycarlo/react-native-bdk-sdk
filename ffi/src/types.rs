@@ -368,7 +368,6 @@ pub struct TxDetails {
     pub fee_rate: Option<f64>,
     pub balance_delta: i64,
     pub confirmation_block_time: Option<ConfirmationBlockTime>,
-    pub tx_hex: String,
     pub version: i32,
     pub locktime: u32,
     pub inputs: Vec<TxInput>,

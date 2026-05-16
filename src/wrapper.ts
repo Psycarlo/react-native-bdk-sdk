@@ -92,7 +92,6 @@ export type TxDetailsN = {
   feeRate?: number;
   balanceDelta: number;
   confirmationBlockTime?: ConfirmationBlockTimeN;
-  txHex: string;
   version: number;
   locktime: number;
   inputs: TxInputN[];
@@ -134,7 +133,6 @@ function toTxDetailsN(tx: {
   feeRate?: number;
   balanceDelta: bigint;
   confirmationBlockTime?: { height: number; blockHash: string; timestamp: bigint };
-  txHex: string;
   version: number;
   locktime: number;
   inputs: Array<{ previousTxid: string; previousVout: number; sequence: number; scriptSigHex: string; witness: string[] }>;
@@ -148,7 +146,6 @@ function toTxDetailsN(tx: {
     feeRate: tx.feeRate ?? undefined,
     balanceDelta: Number(tx.balanceDelta),
     confirmationBlockTime: toConfirmationN(tx.confirmationBlockTime),
-    txHex: tx.txHex,
     version: tx.version,
     locktime: tx.locktime,
     inputs: tx.inputs.map((inp) => ({
