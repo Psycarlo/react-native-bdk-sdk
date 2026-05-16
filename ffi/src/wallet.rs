@@ -158,11 +158,26 @@ impl Wallet {
     pub fn transactions(&self) -> Result<Vec<TxDetails>, BdkError> {
         let w = self.inner.lock().unwrap();
         let network = w.network();
+        let index = w.spk_index();
         let mut details = Vec::new();
         for wallet_tx in w.transactions() {
-            if let Some(td) = w.tx_details(wallet_tx.tx_node.txid) {
-                details.push(Self::convert_tx_details(&td, network));
-            }
+            let tx_arc = wallet_tx.tx_node.tx.clone();
+            let tx_ref: &bitcoin::Transaction = &tx_arc;
+            let (sent, received) = w.sent_and_received(tx_ref);
+            let fee = w.calculate_fee(tx_ref).ok();
+            let fee_rate = w.calculate_fee_rate(tx_ref).ok();
+            let balance_delta = index.net_value(tx_ref, ..);
+            let td = bdk_wallet::TxDetails {
+                txid: wallet_tx.tx_node.txid,
+                sent,
+                received,
+                fee,
+                fee_rate,
+                balance_delta,
+                chain_position: wallet_tx.chain_position,
+                tx: tx_arc,
+            };
+            details.push(Self::convert_tx_details(&td, network));
         }
         Ok(details)
     }
