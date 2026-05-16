@@ -845,7 +845,6 @@ export type TxDetails = {
   feeRate?: /*f64*/ number;
   balanceDelta: /*i64*/ bigint;
   confirmationBlockTime?: ConfirmationBlockTime;
-  txHex: string;
   version: /*i32*/ number;
   locktime: /*u32*/ number;
   inputs: Array<TxInput>;
@@ -880,7 +879,6 @@ const FfiConverterTypeTxDetails = (() => {
         balanceDelta: FfiConverterInt64.read(from),
         confirmationBlockTime:
           FfiConverterOptionalTypeConfirmationBlockTime.read(from),
-        txHex: FfiConverterString.read(from),
         version: FfiConverterInt32.read(from),
         locktime: FfiConverterUInt32.read(from),
         inputs: FfiConverterArrayTypeTxInput.read(from),
@@ -898,7 +896,6 @@ const FfiConverterTypeTxDetails = (() => {
         value.confirmationBlockTime,
         into
       );
-      FfiConverterString.write(value.txHex, into);
       FfiConverterInt32.write(value.version, into);
       FfiConverterUInt32.write(value.locktime, into);
       FfiConverterArrayTypeTxInput.write(value.inputs, into);
@@ -915,7 +912,6 @@ const FfiConverterTypeTxDetails = (() => {
         FfiConverterOptionalTypeConfirmationBlockTime.allocationSize(
           value.confirmationBlockTime
         ) +
-        FfiConverterString.allocationSize(value.txHex) +
         FfiConverterInt32.allocationSize(value.version) +
         FfiConverterUInt32.allocationSize(value.locktime) +
         FfiConverterArrayTypeTxInput.allocationSize(value.inputs) +
@@ -4309,6 +4305,137 @@ const FfiConverterTypeElectrumClient = new FfiConverterObject(
   uniffiTypeElectrumClientObjectFactory
 );
 
+/**
+ * A reusable Esplora client that holds a persistent HTTP/TLS connection pool.
+ * Create once, pass to multiple wallet methods to avoid re-handshaking each call.
+ */
+export interface EsploraClientLike {}
+/**
+ * @deprecated Use `EsploraClientLike` instead.
+ */
+export type EsploraClientInterface = EsploraClientLike;
+
+/**
+ * A reusable Esplora client that holds a persistent HTTP/TLS connection pool.
+ * Create once, pass to multiple wallet methods to avoid re-handshaking each call.
+ */
+export class EsploraClient
+  extends UniffiAbstractObject
+  implements EsploraClientLike
+{
+  readonly [uniffiTypeNameSymbol] = "EsploraClient";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Connect to an Esplora server.
+   * url: e.g. "https://blockstream.info/api" or "https://mempool.space/api"
+   */
+  constructor(url: string) /*throws*/ {
+    super();
+    const pointer = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_new(
+          FfiConverterString.lower(url),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeEsploraClientObjectFactory.bless(pointer);
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer = uniffiTypeEsploraClientObjectFactory.pointer(this);
+      uniffiTypeEsploraClientObjectFactory.freePointer(pointer);
+      uniffiTypeEsploraClientObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is EsploraClient {
+    return uniffiTypeEsploraClientObjectFactory.isConcreteType(obj);
+  }
+}
+
+const uniffiTypeEsploraClientObjectFactory: UniffiObjectFactory<EsploraClientLike> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): EsploraClientLike {
+        const instance = Object.create(EsploraClient.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "EsploraClient";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: EsploraClientLike): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: EsploraClientLike): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_esploraclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_esploraclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is EsploraClientLike {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "EsploraClient"
+        );
+      },
+    };
+  })();
+// FfiConverter for EsploraClientLike
+const FfiConverterTypeEsploraClient = new FfiConverterObject(
+  uniffiTypeEsploraClientObjectFactory
+);
+
 export interface MnemonicLike {
   /**
    * The language of this mnemonic.
@@ -5439,7 +5566,7 @@ export interface WalletLike {
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
   broadcastWithEsplora(
-    url: string,
+    client: EsploraClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
@@ -5448,12 +5575,12 @@ export interface WalletLike {
   calculateFeeRate(txHex: string): /*throws*/ /*f64*/ number;
   checkpoints(): Array<BlockId>;
   derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
-  derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
+  derivationOfSpk(scriptHex: string): /*throws*/ DerivationInfo | undefined;
   descriptorChecksum(keychain: KeychainKind): /*throws*/ string;
   drain(
     address: string,
     feeRate: /*f64*/ number,
-    esploraUrl: string,
+    client: EsploraClientLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
   drainWithElectrum(
@@ -5469,7 +5596,7 @@ export interface WalletLike {
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   fullScanWithEsplora(
-    url: string,
+    client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
@@ -5477,7 +5604,7 @@ export interface WalletLike {
   getTx(txid: string): /*throws*/ string | undefined;
   getUtxo(outpoint: OutPoint): /*throws*/ LocalOutput | undefined;
   insertTxout(outpoint: OutPoint, txout: TxOut): void;
-  isMine(scriptHex: string): boolean;
+  isMine(scriptHex: string): /*throws*/ boolean;
   keychains(): Array<KeychainInfo>;
   latestCheckpoint(): BlockId | undefined;
   listOutput(): /*throws*/ Array<LocalOutput>;
@@ -5503,7 +5630,7 @@ export interface WalletLike {
     address: string,
     amountSats: /*u64*/ bigint,
     feeRate: /*f64*/ number,
-    esploraUrl: string,
+    client: EsploraClientLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
   sendWithElectrum(
@@ -5521,7 +5648,7 @@ export interface WalletLike {
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   syncWithEsplora(
-    url: string,
+    client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
@@ -5607,7 +5734,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   }
 
   async broadcastWithEsplora(
-    url: string,
+    client: EsploraClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<string> /*throws*/ {
@@ -5618,7 +5745,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(
             uniffiTypeWalletObjectFactory.clonePointer(this),
-            FfiConverterString.lower(url),
+            FfiConverterTypeEsploraClient.lower(client),
             FfiConverterTypePsbt.lower(psbt)
           );
         },
@@ -5729,9 +5856,12 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  derivationOfSpk(scriptHex: string): DerivationInfo | undefined {
+  derivationOfSpk(scriptHex: string): DerivationInfo | undefined /*throws*/ {
     return FfiConverterOptionalTypeDerivationInfo.lift(
-      uniffiCaller.rustCall(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
         /*caller:*/ (callStatus) => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_of_spk(
             uniffiTypeWalletObjectFactory.clonePointer(this),
@@ -5765,7 +5895,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   async drain(
     address: string,
     feeRate: /*f64*/ number,
-    esploraUrl: string,
+    client: EsploraClientLike,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<string> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -5777,7 +5907,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterString.lower(address),
             FfiConverterFloat64.lower(feeRate),
-            FfiConverterString.lower(esploraUrl)
+            FfiConverterTypeEsploraClient.lower(client)
           );
         },
         /*pollFunc:*/ nativeModule()
@@ -5899,7 +6029,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   }
 
   async fullScanWithEsplora(
-    url: string,
+    client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
@@ -5910,7 +6040,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
             uniffiTypeWalletObjectFactory.clonePointer(this),
-            FfiConverterString.lower(url),
+            FfiConverterTypeEsploraClient.lower(client),
             FfiConverterUInt64.lower(stopGap)
           );
         },
@@ -6001,9 +6131,12 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     );
   }
 
-  isMine(scriptHex: string): boolean {
+  isMine(scriptHex: string): boolean /*throws*/ {
     return FfiConverterBool.lift(
-      uniffiCaller.rustCall(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
         /*caller:*/ (callStatus) => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_is_mine(
             uniffiTypeWalletObjectFactory.clonePointer(this),
@@ -6278,7 +6411,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     address: string,
     amountSats: /*u64*/ bigint,
     feeRate: /*f64*/ number,
-    esploraUrl: string,
+    client: EsploraClientLike,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<string> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -6291,7 +6424,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
             FfiConverterString.lower(address),
             FfiConverterUInt64.lower(amountSats),
             FfiConverterFloat64.lower(feeRate),
-            FfiConverterString.lower(esploraUrl)
+            FfiConverterTypeEsploraClient.lower(client)
           );
         },
         /*pollFunc:*/ nativeModule()
@@ -6433,7 +6566,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   }
 
   async syncWithEsplora(
-    url: string,
+    client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
@@ -6444,7 +6577,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*rustFutureFunc:*/ () => {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
             uniffiTypeWalletObjectFactory.clonePointer(this),
-            FfiConverterString.lower(url),
+            FfiConverterTypeEsploraClient.lower(client),
             FfiConverterUInt64.lower(stopGap)
           );
         },
@@ -7137,7 +7270,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora() !==
-    43721
+    50185
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora"
@@ -7185,7 +7318,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk() !==
-    29681
+    54659
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk"
@@ -7200,7 +7333,7 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain() !== 50687
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_drain() !== 7368
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_drain"
@@ -7232,7 +7365,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora() !==
-    33673
+    245
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora"
@@ -7271,7 +7404,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_is_mine() !==
-    58183
+    43647
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_is_mine"
@@ -7398,7 +7531,7 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
-    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 20353
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 30966
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_send"
@@ -7437,7 +7570,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora() !==
-    65450
+    60834
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora"
@@ -7473,6 +7606,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_electrumclient_new"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new() !==
+    22120
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_esploraclient_new"
     );
   }
   if (
@@ -7552,6 +7693,7 @@ export default Object.freeze({
     FfiConverterTypeDerivationInfo,
     FfiConverterTypeDescriptorTemplate,
     FfiConverterTypeElectrumClient,
+    FfiConverterTypeEsploraClient,
     FfiConverterTypeKeychainInfo,
     FfiConverterTypeKeychainKind,
     FfiConverterTypeLanguage,

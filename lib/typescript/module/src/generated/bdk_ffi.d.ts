@@ -185,7 +185,6 @@ export type TxDetails = {
     feeRate?: number;
     balanceDelta: bigint;
     confirmationBlockTime?: ConfirmationBlockTime;
-    txHex: string;
     version: number;
     locktime: number;
     inputs: Array<TxInput>;
@@ -4548,6 +4547,35 @@ export declare class ElectrumClient extends UniffiAbstractObject implements Elec
     uniffiDestroy(): void;
     static instanceOf(obj: any): obj is ElectrumClient;
 }
+/**
+ * A reusable Esplora client that holds a persistent HTTP/TLS connection pool.
+ * Create once, pass to multiple wallet methods to avoid re-handshaking each call.
+ */
+export interface EsploraClientLike {
+}
+/**
+ * @deprecated Use `EsploraClientLike` instead.
+ */
+export type EsploraClientInterface = EsploraClientLike;
+/**
+ * A reusable Esplora client that holds a persistent HTTP/TLS connection pool.
+ * Create once, pass to multiple wallet methods to avoid re-handshaking each call.
+ */
+export declare class EsploraClient extends UniffiAbstractObject implements EsploraClientLike {
+    readonly [uniffiTypeNameSymbol] = "EsploraClient";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Connect to an Esplora server.
+     * url: e.g. "https://blockstream.info/api" or "https://mempool.space/api"
+     */
+    constructor(url: string);
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is EsploraClient;
+}
 export interface MnemonicLike {
     /**
      * The language of this mnemonic.
@@ -4785,7 +4813,7 @@ export interface WalletLike {
     broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    broadcastWithEsplora(url: string, psbt: PsbtLike, asyncOpts_?: {
+    broadcastWithEsplora(client: EsploraClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
@@ -4793,9 +4821,9 @@ export interface WalletLike {
     calculateFeeRate(txHex: string): number;
     checkpoints(): Array<BlockId>;
     derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
-    derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
+    derivationOfSpk(scriptHex: string): /*throws*/ DerivationInfo | undefined;
     descriptorChecksum(keychain: KeychainKind): string;
-    drain(address: string, feeRate: number, esploraUrl: string, asyncOpts_?: {
+    drain(address: string, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     drainWithElectrum(address: string, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
@@ -4805,7 +4833,7 @@ export interface WalletLike {
     fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    fullScanWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     getBalance(): Balance;
@@ -4828,7 +4856,7 @@ export interface WalletLike {
     publicDescriptor(keychain: KeychainKind): string;
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
     revealNextAddress(keychain: KeychainKind): AddressInfo;
-    send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string, asyncOpts_?: {
+    send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     sendWithElectrum(address: string, amountSats: bigint, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
@@ -4839,7 +4867,7 @@ export interface WalletLike {
     syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    syncWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     transactions(): Array<TxDetails>;
@@ -4861,7 +4889,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
-    broadcastWithEsplora(url: string, psbt: PsbtLike, asyncOpts_?: {
+    broadcastWithEsplora(client: EsploraClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
@@ -4871,7 +4899,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     derivationIndex(keychain: KeychainKind): /*u32*/ number | undefined;
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
     descriptorChecksum(keychain: KeychainKind): string;
-    drain(address: string, feeRate: number, esploraUrl: string, asyncOpts_?: {
+    drain(address: string, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     drainWithElectrum(address: string, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
@@ -4881,7 +4909,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    fullScanWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     getBalance(): Balance;
@@ -4904,7 +4932,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     publicDescriptor(keychain: KeychainKind): string;
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
     revealNextAddress(keychain: KeychainKind): AddressInfo;
-    send(address: string, amountSats: bigint, feeRate: number, esploraUrl: string, asyncOpts_?: {
+    send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     sendWithElectrum(address: string, amountSats: bigint, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
@@ -4915,7 +4943,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    syncWithEsplora(url: string, stopGap: bigint, asyncOpts_?: {
+    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     transactions(): Array<TxDetails>;
@@ -4998,6 +5026,7 @@ declare const _default: Readonly<{
             lower(value: DescriptorTemplate): UniffiByteArray;
         };
         FfiConverterTypeElectrumClient: FfiConverterObject<ElectrumClientLike>;
+        FfiConverterTypeEsploraClient: FfiConverterObject<EsploraClientLike>;
         FfiConverterTypeKeychainInfo: {
             read(from: RustBuffer): KeychainInfo;
             write(value: KeychainInfo, into: RustBuffer): void;

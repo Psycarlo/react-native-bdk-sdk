@@ -24,6 +24,9 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_fn_clone_electrumclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_free_electrumclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_electrumclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_clone_esploraclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_free_esploraclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_clone_mnemonic(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_free_mnemonic(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -279,6 +282,7 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_tx_details(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -289,6 +293,7 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_wallet_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_ffi_bdk_ffi_uniffi_contract_version(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_psbt_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
