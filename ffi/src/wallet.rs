@@ -579,21 +579,28 @@ impl Wallet {
 
     // ── Script / SPK queries ──────────────────────────────────────────────────
 
-    pub fn is_mine(&self, script_hex: String) -> bool {
-        let bytes = hex::decode(&script_hex).unwrap_or_default();
+    pub fn is_mine(&self, script_hex: String) -> Result<bool, BdkError> {
+        let bytes = hex::decode(&script_hex).map_err(|_| BdkError::InvalidScript {
+            message: "Invalid hex encoding".into(),
+        })?;
         let script = ScriptBuf::from_bytes(bytes);
         let w = self.inner.lock().unwrap();
-        w.is_mine(script)
+        Ok(w.is_mine(script))
     }
 
-    pub fn derivation_of_spk(&self, script_hex: String) -> Option<DerivationInfo> {
-        let bytes = hex::decode(&script_hex).unwrap_or_default();
+    pub fn derivation_of_spk(
+        &self,
+        script_hex: String,
+    ) -> Result<Option<DerivationInfo>, BdkError> {
+        let bytes = hex::decode(&script_hex).map_err(|_| BdkError::InvalidScript {
+            message: "Invalid hex encoding".into(),
+        })?;
         let script = ScriptBuf::from_bytes(bytes);
         let w = self.inner.lock().unwrap();
-        w.derivation_of_spk(script).map(|(kc, idx)| DerivationInfo {
+        Ok(w.derivation_of_spk(script).map(|(kc, idx)| DerivationInfo {
             keychain: kc.into(),
             index: idx,
-        })
+        }))
     }
 
     // ── Descriptor / keychain info ────────────────────────────────────────────

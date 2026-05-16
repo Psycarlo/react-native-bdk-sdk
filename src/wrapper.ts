@@ -435,10 +435,12 @@ export class BdkWallet {
 
   // ── Script / SPK queries ────────────────────────────────────────────────
 
+  /** Throws BdkError on invalid hex. */
   isMine(scriptHex: string): boolean {
     return this.inner.isMine(scriptHex);
   }
 
+  /** Throws BdkError on invalid hex. */
   derivationOfSpk(scriptHex: string): DerivationInfo | undefined {
     return this.inner.derivationOfSpk(scriptHex);
   }
