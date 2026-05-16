@@ -8,6 +8,7 @@ use bdk_wallet::PersistedWallet;
 
 use crate::electrum::ElectrumClient;
 use crate::error::BdkError;
+use crate::esplora::EsploraClient;
 use crate::psbt::Psbt;
 use crate::types::*;
 
@@ -250,7 +251,11 @@ impl Wallet {
 
     // ── Sync (Esplora) ──────────────────────────────────────────────────────
 
-    pub async fn full_scan_with_esplora(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
+    pub async fn full_scan_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        stop_gap: u64,
+    ) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
         let request = {
@@ -259,12 +264,8 @@ impl Wallet {
         };
 
         let update = crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&url)
-                .build_async()
-                .map_err(|e| BdkError::SyncFailed {
-                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
-                })?;
             client
+                .inner
                 .full_scan(request, stop_gap as usize, 1)
                 .await
                 .map_err(|e| BdkError::SyncFailed {
@@ -278,7 +279,11 @@ impl Wallet {
         Ok(())
     }
 
-    pub async fn sync_with_esplora(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
+    pub async fn sync_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        _stop_gap: u64,
+    ) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
         let request = {
@@ -287,12 +292,8 @@ impl Wallet {
         };
 
         let update = crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&url)
-                .build_async()
-                .map_err(|e| BdkError::SyncFailed {
-                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
-                })?;
             client
+                .inner
                 .sync(request, 1)
                 .await
                 .map_err(|e| BdkError::SyncFailed {
@@ -370,7 +371,11 @@ impl Wallet {
 
     // ── Broadcast (Esplora) ──────────────────────────────────────────────────
 
-    pub async fn broadcast_with_esplora(&self, url: String, psbt: Arc<Psbt>) -> Result<String, BdkError> {
+    pub async fn broadcast_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        psbt: Arc<Psbt>,
+    ) -> Result<String, BdkError> {
         let tx = {
             let psbt_inner = psbt.inner.lock().unwrap();
             psbt_inner
@@ -383,12 +388,8 @@ impl Wallet {
 
         let txid = tx.compute_txid().to_string();
         crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&url)
-                .build_async()
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
-                })?;
             client
+                .inner
                 .broadcast(&tx)
                 .await
                 .map_err(|e| BdkError::BroadcastFailed {
@@ -444,18 +445,14 @@ impl Wallet {
         address: String,
         amount_sats: u64,
         fee_rate: f64,
-        esplora_url: String,
+        client: Arc<EsploraClient>,
     ) -> Result<String, BdkError> {
         let tx = self.build_send_tx(&address, amount_sats, fee_rate)?;
         let txid = tx.compute_txid().to_string();
 
         crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-                .build_async()
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Failed to build Esplora client: {}", e),
-                })?;
             client
+                .inner
                 .broadcast(&tx)
                 .await
                 .map_err(|e| BdkError::BroadcastFailed {
@@ -472,18 +469,14 @@ impl Wallet {
         &self,
         address: String,
         fee_rate: f64,
-        esplora_url: String,
+        client: Arc<EsploraClient>,
     ) -> Result<String, BdkError> {
         let tx = self.build_drain_tx(&address, fee_rate)?;
         let txid = tx.compute_txid().to_string();
 
         crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-                .build_async()
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Failed to build Esplora client: {}", e),
-                })?;
             client
+                .inner
                 .broadcast(&tx)
                 .await
                 .map_err(|e| BdkError::BroadcastFailed {

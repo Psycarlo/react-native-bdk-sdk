@@ -15,6 +15,7 @@ import type {
   ChangeSpendPolicy,
   DerivationInfo,
   ElectrumClientLike,
+  EsploraClientLike,
   KeychainInfo,
   KeychainKind,
   Network,
@@ -25,6 +26,7 @@ import type {
 
 import {
   ElectrumClient,
+  EsploraClient,
   TxBuilder,
   Wallet,
   createWallet as rawCreateWallet,
@@ -213,6 +215,32 @@ function resolveElectrum(input: ElectrumInput): ElectrumClientLike {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  EsploraClient wrapper
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Pass a URL string (creates temp client) or a BdkEsploraClient (reuses). */
+export type EsploraInput = string | BdkEsploraClient;
+
+export class BdkEsploraClient {
+  private readonly inner: EsploraClient;
+
+  constructor(url: string) {
+    this.inner = new EsploraClient(url);
+  }
+
+  get raw(): EsploraClientLike {
+    return this.inner;
+  }
+}
+
+function resolveEsplora(input: EsploraInput): EsploraClientLike {
+  if (typeof input === 'string') {
+    return new EsploraClient(input);
+  }
+  return input.raw;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Async wallet factory
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -349,12 +377,12 @@ export class BdkWallet {
 
   // ── Sync (Esplora) ─────────────────────────────────────────────────────
 
-  fullScanWithEsplora(url: string, stopGap: number): Promise<void> {
-    return this.inner.fullScanWithEsplora(url, BigInt(stopGap));
+  fullScanWithEsplora(client: EsploraInput, stopGap: number): Promise<void> {
+    return this.inner.fullScanWithEsplora(resolveEsplora(client), BigInt(stopGap));
   }
 
-  syncWithEsplora(url: string, stopGap: number): Promise<void> {
-    return this.inner.syncWithEsplora(url, BigInt(stopGap));
+  syncWithEsplora(client: EsploraInput, stopGap: number): Promise<void> {
+    return this.inner.syncWithEsplora(resolveEsplora(client), BigInt(stopGap));
   }
 
   // ── Sync (Electrum) ────────────────────────────────────────────────────
@@ -369,8 +397,8 @@ export class BdkWallet {
 
   // ── Broadcast ───────────────────────────────────────────────────────────
 
-  broadcastWithEsplora(url: string, psbt: PsbtLike): Promise<string> {
-    return this.inner.broadcastWithEsplora(url, psbt);
+  broadcastWithEsplora(client: EsploraInput, psbt: PsbtLike): Promise<string> {
+    return this.inner.broadcastWithEsplora(resolveEsplora(client), psbt);
   }
 
   broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string> {
@@ -379,12 +407,12 @@ export class BdkWallet {
 
   // ── Convenience (Esplora) ───────────────────────────────────────────────
 
-  send(address: string, amountSats: number, feeRate: number, esploraUrl: string): Promise<string> {
-    return this.inner.send(address, BigInt(amountSats), feeRate, esploraUrl);
+  send(address: string, amountSats: number, feeRate: number, esplora: EsploraInput): Promise<string> {
+    return this.inner.send(address, BigInt(amountSats), feeRate, resolveEsplora(esplora));
   }
 
-  drain(address: string, feeRate: number, esploraUrl: string): Promise<string> {
-    return this.inner.drain(address, feeRate, esploraUrl);
+  drain(address: string, feeRate: number, esplora: EsploraInput): Promise<string> {
+    return this.inner.drain(address, feeRate, resolveEsplora(esplora));
   }
 
   // ── Convenience (Electrum) ──────────────────────────────────────────────

@@ -1,5 +1,6 @@
 pub mod electrum;
 pub mod error;
+pub mod esplora;
 pub mod mnemonic;
 pub mod psbt;
 pub mod tx_builder;
@@ -8,6 +9,7 @@ pub mod wallet;
 
 pub use electrum::*;
 pub use error::*;
+pub use esplora::*;
 pub use mnemonic::*;
 pub use psbt::*;
 pub use tx_builder::*;
