@@ -137,9 +137,6 @@ pub fn create_descriptor(
     let kc: bdk_wallet::KeychainKind = keychain.into();
 
     let descriptor_str = match (template, kc) {
-        (DescriptorTemplate::BIP44, bdk_wallet::KeychainKind::External) => {
-            Bip44(xprv, kc).into_wallet_descriptor(&*SECP, net.into())?.0.to_string()
-        }
         (DescriptorTemplate::BIP44, _) => {
             Bip44(xprv, kc).into_wallet_descriptor(&*SECP, net.into())?.0.to_string()
         }
