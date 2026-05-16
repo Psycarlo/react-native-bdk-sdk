@@ -400,21 +400,19 @@ pub struct KeychainInfo {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  HELPER: hex encoding (minimal, avoids extra dep)
+//  HELPER: hex encoding — thin wrapper over `bitcoin::hex` (hex-conservative).
 // ═══════════════════════════════════════════════════════════════════════════════
 
 pub(crate) mod hex {
+    use bdk_wallet::bitcoin::hex::{DisplayHex, FromHex};
+
+    #[inline]
     pub fn encode(bytes: &[u8]) -> String {
-        bytes.iter().map(|b| format!("{:02x}", b)).collect()
+        bytes.to_lower_hex_string()
     }
 
+    #[inline]
     pub fn decode(s: &str) -> Result<Vec<u8>, ()> {
-        if s.len() % 2 != 0 {
-            return Err(());
-        }
-        (0..s.len())
-            .step_by(2)
-            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).map_err(|_| ()))
-            .collect()
+        Vec::<u8>::from_hex(s).map_err(|_| ())
     }
 }
