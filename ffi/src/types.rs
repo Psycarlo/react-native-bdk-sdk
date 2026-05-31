@@ -180,6 +180,33 @@ pub enum SingleKeyDescriptorTemplate {
     P2TR,
 }
 
+/// How the Kyoto (BIP157/158) light client should scan filters on start-up.
+#[derive(Debug, Clone, uniffi::Enum)]
+pub enum KyotoScanType {
+    /// Continue from the wallet's last known checkpoint. Use for an already-synced wallet.
+    Sync,
+    /// Rescan the chain to recover history. Use the first time a wallet is restored.
+    Recovery {
+        /// Highest derivation index known to have been used (lookahead during recovery).
+        used_script_index: u32,
+        /// Block height/hash at which to begin the rescan.
+        start: KyotoRecoveryStart,
+    },
+}
+
+/// Where a Kyoto recovery scan should begin in the chain.
+#[derive(Debug, Clone, uniffi::Enum)]
+pub enum KyotoRecoveryStart {
+    /// From the network's genesis block. Works on any network but is slow on mainnet.
+    Genesis,
+    /// One block before segwit activation (height 481,823). **Mainnet only.**
+    SegwitActivation,
+    /// One block before taproot activation (height 709,631). **Mainnet only.**
+    TaprootActivation,
+    /// From an explicit, trusted block height + hash. Works on any network.
+    FromBlock { height: u32, block_hash: String },
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  DICTIONARY STRUCTS (records)
 // ═══════════════════════════════════════════════════════════════════════════════

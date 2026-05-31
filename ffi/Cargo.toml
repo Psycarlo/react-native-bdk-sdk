@@ -12,6 +12,7 @@ crate-type = ["cdylib", "staticlib", "lib"]
 bdk_wallet = { version = "3.0.0", features = ["all-keys", "keys-bip39", "rusqlite"] }
 bdk_esplora = { version = "0.22.1", default-features = false, features = ["std", "blocking", "blocking-https-rustls", "async-https-rustls", "tokio"] }
 bdk_electrum = { version = "0.23.2", default-features = false, features = ["use-rustls-ring"] }
+bdk_kyoto = { version = "0.17.0" }
 bip39 = { version = "2.2", features = ["all-languages"] }
 serde_json = "1.0"
 

@@ -18,6 +18,9 @@ import type {
   EsploraClientLike,
   KeychainInfo,
   KeychainKind,
+  KyotoClientLike,
+  KyotoNodeEventHandler,
+  KyotoScanType,
   Network,
   OutPoint,
   PsbtLike,
@@ -27,6 +30,7 @@ import type {
 import {
   ElectrumClient,
   EsploraClient,
+  KyotoClient,
   TxBuilder,
   Wallet,
   createWallet as rawCreateWallet,
@@ -238,6 +242,64 @@ function resolveEsplora(input: EsploraInput): EsploraClientLike {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  KyotoClient wrapper (BIP157/158 light client)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export type KyotoOptions = {
+  /** Incremental `Sync` or full `Recovery` — see `KyotoScanType`. */
+  scanType: KyotoScanType;
+  /** Number of peers to maintain. Clamped to >= 1. Defaults to 2. */
+  requiredPeers?: number;
+  /** Explicit peer IPs. Empty (default) falls back to DNS discovery. */
+  peers?: string[];
+  /** Writable directory for header/peer persistence. */
+  dataDir: string;
+  /** Receives info/warning events emitted by the node while it runs. */
+  handler: KyotoNodeEventHandler;
+};
+
+/**
+ * Wraps a running Kyoto light client. Unlike Electrum/Esplora this owns a
+ * long-lived P2P node: build it once from a wallet, reuse it across sync calls,
+ * and call {@link shutdown} when done (it also stops on GC).
+ */
+export class BdkKyotoClient {
+  private readonly inner: KyotoClient;
+
+  constructor(wallet: BdkWallet, opts: KyotoOptions) {
+    this.inner = new KyotoClient(
+      wallet.raw,
+      opts.scanType,
+      opts.requiredPeers ?? 2,
+      opts.peers ?? [],
+      opts.dataDir,
+      opts.handler
+    );
+  }
+
+  get raw(): KyotoClientLike {
+    return this.inner;
+  }
+
+  /** Whether the background node is still running. */
+  isRunning(): boolean {
+    return this.inner.isRunning();
+  }
+
+  /** Stop the node and release peer connections. */
+  shutdown(): void {
+    this.inner.shutdown();
+  }
+}
+
+/** A Kyoto client is stateful, so only an existing instance can be reused. */
+export type KyotoInput = BdkKyotoClient;
+
+function resolveKyoto(input: KyotoInput): KyotoClientLike {
+  return input.raw;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Async wallet factory
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -400,6 +462,17 @@ export class BdkWallet {
 
   broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string> {
     return this.inner.broadcastWithElectrum(resolveElectrum(client), psbt);
+  }
+
+  // ── Sync / Broadcast (Kyoto) ────────────────────────────────────────────
+
+  /** Drives one sync against the Kyoto node; resolves once caught up to tip. */
+  syncWithKyoto(client: KyotoInput): Promise<void> {
+    return this.inner.syncWithKyoto(resolveKyoto(client));
+  }
+
+  broadcastWithKyoto(client: KyotoInput, psbt: PsbtLike): Promise<string> {
+    return this.inner.broadcastWithKyoto(resolveKyoto(client), psbt);
   }
 
   // ── Convenience (Esplora) ───────────────────────────────────────────────

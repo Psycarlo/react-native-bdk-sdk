@@ -9,6 +9,7 @@ use bdk_wallet::PersistedWallet;
 use crate::electrum::ElectrumClient;
 use crate::error::BdkError;
 use crate::esplora::EsploraClient;
+use crate::kyoto::KyotoClient;
 use crate::psbt::Psbt;
 use crate::types::*;
 
@@ -369,6 +370,25 @@ impl Wallet {
         Ok(())
     }
 
+    // ── Sync (Kyoto) ─────────────────────────────────────────────────────────
+
+    /// Drive a single sync against the Kyoto light client. Awaits until the node
+    /// reports it has caught up to the chain tip, applies the resulting update,
+    /// and persists. The scan strategy (incremental vs recovery) is fixed when the
+    /// `KyotoClient` is built. Safe to call repeatedly while the node is running.
+    pub async fn sync_with_kyoto(&self, client: Arc<KyotoClient>) -> Result<(), BdkError> {
+        let update = crate::run_async(async move {
+            let mut sub = client.update_subscriber.lock().await;
+            sub.update().await.map_err(BdkError::from)
+        })
+        .await?;
+
+        let mut w = self.inner.lock().unwrap();
+        w.apply_update(update)?;
+        self.persist_wallet(&mut w)?;
+        Ok(())
+    }
+
     // ── Broadcast (Esplora) ──────────────────────────────────────────────────
 
     pub async fn broadcast_with_esplora(
@@ -434,6 +454,38 @@ impl Wallet {
                 message: format!("Electrum broadcast task panicked: {}", e),
             })?
         }).await?;
+
+        Ok(txid)
+    }
+
+    // ── Broadcast (Kyoto) ────────────────────────────────────────────────────
+
+    pub async fn broadcast_with_kyoto(
+        &self,
+        client: Arc<KyotoClient>,
+        psbt: Arc<Psbt>,
+    ) -> Result<String, BdkError> {
+        let tx = {
+            let psbt_inner = psbt.inner.lock().unwrap();
+            psbt_inner
+                .clone()
+                .extract_tx()
+                .map_err(|e| BdkError::InvalidPsbt {
+                    message: format!("Failed to extract tx from PSBT: {}", e),
+                })?
+        };
+
+        let txid = tx.compute_txid().to_string();
+        crate::run_async(async move {
+            client
+                .requester
+                .submit_package(tx)
+                .await
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Kyoto broadcast failed: {}", e),
+                })
+        })
+        .await?;
 
         Ok(txid)
     }

@@ -27,6 +27,16 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_fn_clone_esploraclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_free_esploraclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_clone_kyotoclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_free_kyotoclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_clone_mnemonic(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_free_mnemonic(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -86,6 +96,7 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_fn_constructor_wallet_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -124,6 +135,7 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_sign(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_transactions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_tx_details(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_fn_method_wallet_unmark_used(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -197,6 +209,10 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_func_validate_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_func_version(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_mnemonic_language(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_mnemonic_to_string(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -240,6 +256,7 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -278,11 +295,13 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_sign(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_transactions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_tx_details(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
@@ -294,6 +313,8 @@ class NativeBdkFfi : public jsi::HostObject {
     jsi::Value cpp_ffi_bdk_ffi_uniffi_contract_version(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
+    jsi::Value cpp_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_psbt_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);
     jsi::Value cpp_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count);

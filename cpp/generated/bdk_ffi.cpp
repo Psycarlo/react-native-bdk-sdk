@@ -129,6 +129,23 @@ extern "C" {
     uint64_t callback_data, 
     UniffiForeignFutureResultVoid result
     );
+    typedef void
+    (*UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0)(
+    uint64_t uniffi_handle, 
+    RustBuffer message, 
+    void * uniffi_out_return, RustCallStatus* rust_call_status
+    );
+    typedef void
+    (*UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1)(
+    uint64_t uniffi_handle, 
+    RustBuffer message, 
+    void * uniffi_out_return, RustCallStatus* rust_call_status
+    );typedef struct UniffiVTableCallbackInterfaceKyotoNodeEventHandler {
+        UniffiCallbackInterfaceFree uniffi_free;
+        UniffiCallbackInterfaceClone uniffi_clone;
+        UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0 on_info;
+        UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1 on_warning;
+    } UniffiVTableCallbackInterfaceKyotoNodeEventHandler;
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_electrumclient(
         /*handle*/ uint64_t handle, 
         RustCallStatus *uniffi_out_err
@@ -151,6 +168,52 @@ extern "C" {
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_esploraclient_new(
         RustBuffer url, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_kyotoclient(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_free_kyotoclient(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_kyotoclient_new(
+        /*handle*/ uint64_t wallet, 
+        RustBuffer scan_type, 
+        uint8_t required_peers, 
+        RustBuffer peers, 
+        RustBuffer data_dir, 
+        /*handle*/ uint64_t handler, 
+        RustCallStatus *uniffi_out_err
+    );
+    int8_t uniffi_bdk_ffi_fn_method_kyotoclient_is_running(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(
+        UniffiVTableCallbackInterfaceKyotoNodeEventHandler * vtable
+    );
+    void uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer message, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer message, 
         RustCallStatus *uniffi_out_err
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_mnemonic(
@@ -419,6 +482,11 @@ extern "C" {
         /*handle*/ uint64_t client, 
         /*handle*/ uint64_t psbt
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t client, 
+        /*handle*/ uint64_t psbt
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(
         /*handle*/ uint64_t ptr, 
         RustBuffer txid, 
@@ -611,6 +679,10 @@ extern "C" {
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t client, 
         uint64_t _stop_gap
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t client
     );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_transactions(
         /*handle*/ uint64_t ptr, 
@@ -908,6 +980,14 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_mnemonic_language(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex(
@@ -994,6 +1074,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(
@@ -1070,6 +1152,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_transactions(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_tx_details(
@@ -1079,6 +1163,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_constructor_electrumclient_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_esploraclient_new(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(
     );
@@ -1555,6 +1641,121 @@ namespace uniffi::bdk_ffi::cb::foreignfuturedroppedcallback {
 } // namespace uniffi::bdk_ffi::cb::foreignfuturedroppedcallback
     // Implementation of free callback function CallbackInterfaceFree
 
+
+// Callback function: uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free::UniffiCallbackInterfaceFree
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_handle) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_handle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_handle);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_handle
+            );
+
+            
+
+            
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceFree: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static void callback(uint64_t rs_handle) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return;
+        }
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_handle);
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceFree
+    makeCallbackFunction( // uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_handle) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_handle](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_handle);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                
+                callInvoker->invokeNonBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free
 namespace uniffi::bdk_ffi {
 using namespace facebook;
 using CallInvoker = uniffi_runtime::UniffiCallInvoker;
@@ -2473,6 +2674,433 @@ template <> struct Bridging<UniffiForeignFutureCompleteVoid> {
   }
 };
 } // namespace uniffi::bdk_ffi
+    // Implementation of CallbackInterfaceClone for vtable field uniffi_clone in VTableCallbackInterfaceKyotoNodeEventHandler
+
+
+// Callback function: uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler::UniffiCallbackInterfaceClone
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t, uint64_t*)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_handle
+            , uint64_t* uniffi_direct_return) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_handle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_handle);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_handle
+            );
+
+            
+
+            
+            // Write the direct return value back to the caller.
+            if (uniffi_direct_return != nullptr) {
+                *uniffi_direct_return = uniffi_jsi::Bridging<uint64_t>::fromJs(
+                    rt, callInvoker, uniffiResult
+                );
+            }
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceClone: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static uint64_t callback(uint64_t rs_handle) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return 0;
+        }
+        uint64_t uniffi_result = 0;
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_handle, 
+            &uniffi_result);
+        return uniffi_result;
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceClone
+    makeCallbackFunction( // uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_handle, uint64_t* uniffi_direct_return) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_handle, uniffi_direct_return](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_handle, uniffi_direct_return);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                callInvoker->invokeBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler
+    // Implementation of CallbackInterfaceKyotoNodeEventHandlerMethod0 for vtable field on_info in VTableCallbackInterfaceKyotoNodeEventHandler
+
+
+// Callback function: uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler::UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t, RustBuffer, void *, RustCallStatus*)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_uniffiHandle
+            ,RustBuffer rs_message
+            ,void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_uniffiHandle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_uniffiHandle);
+        auto js_message = uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, rs_message);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_uniffiHandle, js_message
+            );
+
+            // Now copy the result back from JS into the RustCallStatus object.
+            uniffi::bdk_ffi::Bridging<RustCallStatus>::copyFromJs(rt, callInvoker, uniffiResult, uniffi_call_status);
+
+            if (uniffi_call_status->code != UNIFFI_CALL_STATUS_OK) {
+                // The JS callback finished abnormally, so we cannot retrieve the return value.
+                return;
+            }
+
+            
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static void callback(uint64_t rs_uniffiHandle, RustBuffer rs_message, void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return;
+        }
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_uniffiHandle, 
+            rs_message, 
+            rs_uniffiOutReturn, uniffi_call_status);
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0
+    makeCallbackFunction( // uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_uniffiHandle, RustBuffer rs_message, void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_uniffiHandle
+                    , rs_message
+                    , rs_uniffiOutReturn, uniffi_call_status](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_uniffiHandle
+                        , rs_message
+                        , rs_uniffiOutReturn, uniffi_call_status);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                callInvoker->invokeBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler
+    // Implementation of CallbackInterfaceKyotoNodeEventHandlerMethod1 for vtable field on_warning in VTableCallbackInterfaceKyotoNodeEventHandler
+
+
+// Callback function: uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler::UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t, RustBuffer, void *, RustCallStatus*)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_uniffiHandle
+            ,RustBuffer rs_message
+            ,void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_uniffiHandle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_uniffiHandle);
+        auto js_message = uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, rs_message);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_uniffiHandle, js_message
+            );
+
+            // Now copy the result back from JS into the RustCallStatus object.
+            uniffi::bdk_ffi::Bridging<RustCallStatus>::copyFromJs(rt, callInvoker, uniffiResult, uniffi_call_status);
+
+            if (uniffi_call_status->code != UNIFFI_CALL_STATUS_OK) {
+                // The JS callback finished abnormally, so we cannot retrieve the return value.
+                return;
+            }
+
+            
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static void callback(uint64_t rs_uniffiHandle, RustBuffer rs_message, void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return;
+        }
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_uniffiHandle, 
+            rs_message, 
+            rs_uniffiOutReturn, uniffi_call_status);
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1
+    makeCallbackFunction( // uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_uniffiHandle, RustBuffer rs_message, void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_uniffiHandle
+                    , rs_message
+                    , rs_uniffiOutReturn, uniffi_call_status](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_uniffiHandle
+                        , rs_message
+                        , rs_uniffiOutReturn, uniffi_call_status);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                callInvoker->invokeBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler
+namespace uniffi::bdk_ffi {
+using namespace facebook;
+using CallInvoker = uniffi_runtime::UniffiCallInvoker;
+
+template <> struct Bridging<UniffiVTableCallbackInterfaceKyotoNodeEventHandler> {
+  static UniffiVTableCallbackInterfaceKyotoNodeEventHandler fromJs(jsi::Runtime &rt,
+    std::shared_ptr<CallInvoker> callInvoker,
+    const jsi::Value &jsValue
+  ) {
+    // Check if the input is an object
+    if (!jsValue.isObject()) {
+      throw jsi::JSError(rt, "Expected an object for UniffiVTableCallbackInterfaceKyotoNodeEventHandler");
+    }
+
+    // Get the object from the jsi::Value
+    auto jsObject = jsValue.getObject(rt);
+
+    // Create the vtable struct
+    UniffiVTableCallbackInterfaceKyotoNodeEventHandler rsObject;
+
+    // Create the vtable from the js callbacks.
+    rsObject.uniffi_free = uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "uniffiFree")
+        );
+    rsObject.uniffi_clone = uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "uniffiClone")
+        );
+    rsObject.on_info = uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "onInfo")
+        );
+    rsObject.on_warning = uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "onWarning")
+        );
+
+    return rsObject;
+  }
+};
+
+} // namespace uniffi::bdk_ffi
 
 
 namespace uniffi::bdk_ffi {
@@ -2574,6 +3202,86 @@ NativeBdkFfi::NativeBdkFfi(
         1,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_clone_kyotoclient"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_kyotoclient"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_clone_kyotoclient(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_free_kyotoclient"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_free_kyotoclient"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_free_kyotoclient(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_constructor_kyotoclient_new"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_constructor_kyotoclient_new"),
+        6,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_is_running"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_is_running"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_clone_mnemonic"] = jsi::Function::createFromHostFunction(
@@ -3048,6 +3756,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump"),
@@ -3350,6 +4066,14 @@ NativeBdkFfi::NativeBdkFfi(
         3,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions"] = jsi::Function::createFromHostFunction(
@@ -3936,6 +4660,38 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language"),
@@ -4280,6 +5036,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump"),
@@ -4584,6 +5348,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions"),
@@ -4622,6 +5394,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy"] = jsi::Function::createFromHostFunction(
@@ -4712,6 +5492,22 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer"),
@@ -4784,7 +5580,10 @@ uniffi::bdk_ffi::cb::rustfuturecontinuationcallback::cleanup();
     // Cleanup for callback function ForeignFutureDroppedCallback
 uniffi::bdk_ffi::cb::foreignfuturedroppedcallback::cleanup();
     // Cleanup for "free" callback function CallbackInterfaceFree
-
+uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free::cleanup();
+uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler::cleanup();
+uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler::cleanup();
+uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler::cleanup();
 }
 
 // Utility functions for serialization/deserialization of strings.
@@ -4812,6 +5611,24 @@ jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_func_ffi__arraybuffer_to_string(
     auto static destructor = [](uint64_t p) {
         RustCallStatus status = {0};
         uniffi_bdk_ffi_fn_free_esploraclient(p, &status);
+    };
+    auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
+    auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
+    return jsi::Value(rt, obj);
+}jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
+    auto static destructor = [](uint64_t p) {
+        RustCallStatus status = {0};
+        uniffi_bdk_ffi_fn_free_kyotoclient(p, &status);
+    };
+    auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
+    auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
+    return jsi::Value(rt, obj);
+}jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
+    auto static destructor = [](uint64_t p) {
+        RustCallStatus status = {0};
+        uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(p, &status);
     };
     auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
     auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
@@ -4914,6 +5731,113 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_new(jsi
 
         
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_kyotoclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_clone_kyotoclient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_kyotoclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_free_kyotoclient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_constructor_kyotoclient_new(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint8_t>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[4]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[5]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_kyotoclient_is_running(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto vtableInstance =
+        uniffi::bdk_ffi::Bridging<UniffiVTableCallbackInterfaceKyotoNodeEventHandler>::fromJs(
+            rt,
+            callInvoker,
+            args[0]
+        );
+
+    std::lock_guard<std::mutex> lock(uniffi::bdk_ffi::registry::vtableMutex);
+    uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(
+        uniffi::bdk_ffi::registry::putTable(
+            "UniffiVTableCallbackInterfaceKyotoNodeEventHandler",
+            vtableInstance
+        )
+    );
+    return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_mnemonic(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
@@ -5495,6 +6419,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_espl
         
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<double>::fromJs(rt, callInvoker, args[2]), 
@@ -5846,6 +6777,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1])
         );
 
         
@@ -6436,6 +7374,34 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_wallet_name_from_descr
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_mnemonic_language(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_mnemonic_language(
         );
@@ -6737,6 +7703,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_wit
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(
         );
@@ -7003,6 +7976,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esp
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_transactions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_transactions(
         );
@@ -7033,6 +8013,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_constructor_esploraclient_new(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(
         );
 
         

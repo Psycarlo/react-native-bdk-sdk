@@ -32,6 +32,7 @@ import nativeModule, {
   type UniffiForeignFutureCompleteRustBuffer,
   type UniffiForeignFutureResultVoid,
   type UniffiForeignFutureCompleteVoid,
+  type UniffiVTableCallbackInterfaceKyotoNodeEventHandler,
 } from "./bdk_ffi-ffi";
 import {
   type FfiConverter,
@@ -39,6 +40,8 @@ import {
   type UniffiGcObject,
   type UniffiHandle,
   type UniffiObjectFactory,
+  type UniffiReferenceHolder,
+  type UniffiRustCallStatus,
   AbstractFfiConverterByteArray,
   FfiConverterArray,
   FfiConverterArrayBuffer,
@@ -47,19 +50,24 @@ import {
   FfiConverterInt32,
   FfiConverterInt64,
   FfiConverterObject,
+  FfiConverterObjectWithCallbacks,
   FfiConverterOptional,
   FfiConverterUInt32,
   FfiConverterUInt64,
+  FfiConverterUInt8,
   RustBuffer,
   UniffiAbstractObject,
+  UniffiEnum,
   UniffiError,
   UniffiInternalError,
+  UniffiResult,
   UniffiRustCaller,
   destructorGuardSymbol,
   pointerLiteralSymbol,
   uniffiCreateFfiConverterString,
   uniffiCreateRecord,
   uniffiRustCallAsync,
+  uniffiTraitInterfaceCall,
   uniffiTypeNameSymbol,
   variantOrdinalSymbol,
 } from "uniffi-bindgen-react-native";
@@ -3929,6 +3937,398 @@ const FfiConverterTypeKeychainKind = (() => {
   return new FFIConverter();
 })();
 
+// Enum: KyotoRecoveryStart
+export enum KyotoRecoveryStart_Tags {
+  Genesis = "Genesis",
+  SegwitActivation = "SegwitActivation",
+  TaprootActivation = "TaprootActivation",
+  FromBlock = "FromBlock",
+}
+/**
+ * Where a Kyoto recovery scan should begin in the chain.
+ */
+export const KyotoRecoveryStart = (() => {
+  type Genesis__interface = {
+    tag: KyotoRecoveryStart_Tags.Genesis;
+  };
+
+  /**
+   * From the network's genesis block. Works on any network but is slow on mainnet.
+   */
+  class Genesis_ extends UniffiEnum implements Genesis__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoRecoveryStart";
+    readonly tag = KyotoRecoveryStart_Tags.Genesis;
+    constructor() {
+      super("KyotoRecoveryStart", "Genesis");
+    }
+
+    static new(): Genesis_ {
+      return new Genesis_();
+    }
+
+    static instanceOf(obj: any): obj is Genesis_ {
+      return obj.tag === KyotoRecoveryStart_Tags.Genesis;
+    }
+  }
+
+  type SegwitActivation__interface = {
+    tag: KyotoRecoveryStart_Tags.SegwitActivation;
+  };
+
+  /**
+   * One block before segwit activation (height 481,823). **Mainnet only.**
+   */
+  class SegwitActivation_
+    extends UniffiEnum
+    implements SegwitActivation__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoRecoveryStart";
+    readonly tag = KyotoRecoveryStart_Tags.SegwitActivation;
+    constructor() {
+      super("KyotoRecoveryStart", "SegwitActivation");
+    }
+
+    static new(): SegwitActivation_ {
+      return new SegwitActivation_();
+    }
+
+    static instanceOf(obj: any): obj is SegwitActivation_ {
+      return obj.tag === KyotoRecoveryStart_Tags.SegwitActivation;
+    }
+  }
+
+  type TaprootActivation__interface = {
+    tag: KyotoRecoveryStart_Tags.TaprootActivation;
+  };
+
+  /**
+   * One block before taproot activation (height 709,631). **Mainnet only.**
+   */
+  class TaprootActivation_
+    extends UniffiEnum
+    implements TaprootActivation__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoRecoveryStart";
+    readonly tag = KyotoRecoveryStart_Tags.TaprootActivation;
+    constructor() {
+      super("KyotoRecoveryStart", "TaprootActivation");
+    }
+
+    static new(): TaprootActivation_ {
+      return new TaprootActivation_();
+    }
+
+    static instanceOf(obj: any): obj is TaprootActivation_ {
+      return obj.tag === KyotoRecoveryStart_Tags.TaprootActivation;
+    }
+  }
+
+  type FromBlock__interface = {
+    tag: KyotoRecoveryStart_Tags.FromBlock;
+    inner: Readonly<{ height: /*u32*/ number; blockHash: string }>;
+  };
+
+  /**
+   * From an explicit, trusted block height + hash. Works on any network.
+   */
+  class FromBlock_ extends UniffiEnum implements FromBlock__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoRecoveryStart";
+    readonly tag = KyotoRecoveryStart_Tags.FromBlock;
+    readonly inner: Readonly<{ height: /*u32*/ number; blockHash: string }>;
+    constructor(inner: { height: /*u32*/ number; blockHash: string }) {
+      super("KyotoRecoveryStart", "FromBlock");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: {
+      height: /*u32*/ number;
+      blockHash: string;
+    }): FromBlock_ {
+      return new FromBlock_(inner);
+    }
+
+    static instanceOf(obj: any): obj is FromBlock_ {
+      return obj.tag === KyotoRecoveryStart_Tags.FromBlock;
+    }
+  }
+
+  function instanceOf(obj: any): obj is KyotoRecoveryStart {
+    return obj[uniffiTypeNameSymbol] === "KyotoRecoveryStart";
+  }
+
+  return Object.freeze({
+    instanceOf,
+    Genesis: Genesis_,
+    SegwitActivation: SegwitActivation_,
+    TaprootActivation: TaprootActivation_,
+    FromBlock: FromBlock_,
+  });
+})();
+
+/**
+ * Where a Kyoto recovery scan should begin in the chain.
+ */
+
+export type KyotoRecoveryStart = InstanceType<
+  (typeof KyotoRecoveryStart)[keyof Omit<
+    typeof KyotoRecoveryStart,
+    "instanceOf"
+  >]
+>;
+
+// FfiConverter for enum KyotoRecoveryStart
+const FfiConverterTypeKyotoRecoveryStart = (() => {
+  const ordinalConverter = FfiConverterInt32;
+  type TypeName = KyotoRecoveryStart;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    read(from: RustBuffer): TypeName {
+      switch (ordinalConverter.read(from)) {
+        case 1:
+          return new KyotoRecoveryStart.Genesis();
+        case 2:
+          return new KyotoRecoveryStart.SegwitActivation();
+        case 3:
+          return new KyotoRecoveryStart.TaprootActivation();
+        case 4:
+          return new KyotoRecoveryStart.FromBlock({
+            height: FfiConverterUInt32.read(from),
+            blockHash: FfiConverterString.read(from),
+          });
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    write(value: TypeName, into: RustBuffer): void {
+      switch (value.tag) {
+        case KyotoRecoveryStart_Tags.Genesis: {
+          ordinalConverter.write(1, into);
+          return;
+        }
+        case KyotoRecoveryStart_Tags.SegwitActivation: {
+          ordinalConverter.write(2, into);
+          return;
+        }
+        case KyotoRecoveryStart_Tags.TaprootActivation: {
+          ordinalConverter.write(3, into);
+          return;
+        }
+        case KyotoRecoveryStart_Tags.FromBlock: {
+          ordinalConverter.write(4, into);
+          const inner = value.inner;
+          FfiConverterUInt32.write(inner.height, into);
+          FfiConverterString.write(inner.blockHash, into);
+          return;
+        }
+        default:
+          // Throwing from here means that KyotoRecoveryStart_Tags hasn't matched an ordinal.
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    allocationSize(value: TypeName): number {
+      switch (value.tag) {
+        case KyotoRecoveryStart_Tags.Genesis: {
+          return ordinalConverter.allocationSize(1);
+        }
+        case KyotoRecoveryStart_Tags.SegwitActivation: {
+          return ordinalConverter.allocationSize(2);
+        }
+        case KyotoRecoveryStart_Tags.TaprootActivation: {
+          return ordinalConverter.allocationSize(3);
+        }
+        case KyotoRecoveryStart_Tags.FromBlock: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(4);
+          size += FfiConverterUInt32.allocationSize(inner.height);
+          size += FfiConverterString.allocationSize(inner.blockHash);
+          return size;
+        }
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+  }
+  return new FFIConverter();
+})();
+
+// Enum: KyotoScanType
+export enum KyotoScanType_Tags {
+  Sync = "Sync",
+  Recovery = "Recovery",
+}
+/**
+ * How the Kyoto (BIP157/158) light client should scan filters on start-up.
+ */
+export const KyotoScanType = (() => {
+  type Sync__interface = {
+    tag: KyotoScanType_Tags.Sync;
+  };
+
+  /**
+   * Continue from the wallet's last known checkpoint. Use for an already-synced wallet.
+   */
+  class Sync_ extends UniffiEnum implements Sync__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoScanType";
+    readonly tag = KyotoScanType_Tags.Sync;
+    constructor() {
+      super("KyotoScanType", "Sync");
+    }
+
+    static new(): Sync_ {
+      return new Sync_();
+    }
+
+    static instanceOf(obj: any): obj is Sync_ {
+      return obj.tag === KyotoScanType_Tags.Sync;
+    }
+  }
+
+  type Recovery__interface = {
+    tag: KyotoScanType_Tags.Recovery;
+    inner: Readonly<{
+      usedScriptIndex: /*u32*/ number;
+      start: KyotoRecoveryStart;
+    }>;
+  };
+
+  /**
+   * Rescan the chain to recover history. Use the first time a wallet is restored.
+   */
+  class Recovery_ extends UniffiEnum implements Recovery__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoScanType";
+    readonly tag = KyotoScanType_Tags.Recovery;
+    readonly inner: Readonly<{
+      usedScriptIndex: /*u32*/ number;
+      start: KyotoRecoveryStart;
+    }>;
+    constructor(inner: {
+      /**
+       * Highest derivation index known to have been used (lookahead during recovery).
+       */ usedScriptIndex: /*u32*/ number;
+      /**
+       * Block height/hash at which to begin the rescan.
+       */ start: KyotoRecoveryStart;
+    }) {
+      super("KyotoScanType", "Recovery");
+      this.inner = Object.freeze(inner);
+    }
+
+    static new(inner: {
+      /**
+       * Highest derivation index known to have been used (lookahead during recovery).
+       */ usedScriptIndex: /*u32*/ number;
+      /**
+       * Block height/hash at which to begin the rescan.
+       */ start: KyotoRecoveryStart;
+    }): Recovery_ {
+      return new Recovery_(inner);
+    }
+
+    static instanceOf(obj: any): obj is Recovery_ {
+      return obj.tag === KyotoScanType_Tags.Recovery;
+    }
+  }
+
+  function instanceOf(obj: any): obj is KyotoScanType {
+    return obj[uniffiTypeNameSymbol] === "KyotoScanType";
+  }
+
+  return Object.freeze({
+    instanceOf,
+    Sync: Sync_,
+    Recovery: Recovery_,
+  });
+})();
+
+/**
+ * How the Kyoto (BIP157/158) light client should scan filters on start-up.
+ */
+
+export type KyotoScanType = InstanceType<
+  (typeof KyotoScanType)[keyof Omit<typeof KyotoScanType, "instanceOf">]
+>;
+
+// FfiConverter for enum KyotoScanType
+const FfiConverterTypeKyotoScanType = (() => {
+  const ordinalConverter = FfiConverterInt32;
+  type TypeName = KyotoScanType;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    read(from: RustBuffer): TypeName {
+      switch (ordinalConverter.read(from)) {
+        case 1:
+          return new KyotoScanType.Sync();
+        case 2:
+          return new KyotoScanType.Recovery({
+            usedScriptIndex: FfiConverterUInt32.read(from),
+            start: FfiConverterTypeKyotoRecoveryStart.read(from),
+          });
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    write(value: TypeName, into: RustBuffer): void {
+      switch (value.tag) {
+        case KyotoScanType_Tags.Sync: {
+          ordinalConverter.write(1, into);
+          return;
+        }
+        case KyotoScanType_Tags.Recovery: {
+          ordinalConverter.write(2, into);
+          const inner = value.inner;
+          FfiConverterUInt32.write(inner.usedScriptIndex, into);
+          FfiConverterTypeKyotoRecoveryStart.write(inner.start, into);
+          return;
+        }
+        default:
+          // Throwing from here means that KyotoScanType_Tags hasn't matched an ordinal.
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    allocationSize(value: TypeName): number {
+      switch (value.tag) {
+        case KyotoScanType_Tags.Sync: {
+          return ordinalConverter.allocationSize(1);
+        }
+        case KyotoScanType_Tags.Recovery: {
+          const inner = value.inner;
+          let size = ordinalConverter.allocationSize(2);
+          size += FfiConverterUInt32.allocationSize(inner.usedScriptIndex);
+          size += FfiConverterTypeKyotoRecoveryStart.allocationSize(
+            inner.start
+          );
+          return size;
+        }
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+  }
+  return new FFIConverter();
+})();
+
 export enum Language {
   English,
   SimplifiedChinese,
@@ -4435,6 +4835,429 @@ const uniffiTypeEsploraClientObjectFactory: UniffiObjectFactory<EsploraClientLik
 const FfiConverterTypeEsploraClient = new FfiConverterObject(
   uniffiTypeEsploraClientObjectFactory
 );
+
+/**
+ * A running BIP157/158 compact-block-filter light client backed by Kyoto.
+ *
+ * Unlike the Electrum/Esplora clients, this owns a long-lived peer-to-peer node
+ * running on the global Tokio runtime. Construct it once, drive sync via
+ * [`Wallet::sync_with_kyoto`], broadcast via [`Wallet::broadcast_with_kyoto`],
+ * and call [`KyotoClient::shutdown`] (or simply drop it) when finished.
+ */
+export interface KyotoClientLike {
+  /**
+   * Whether the background node is still running.
+   */
+  isRunning(): boolean;
+  /**
+   * Stop the node and release peer connections. Idempotent-ish: returns an
+   * error if the node has already stopped.
+   */
+  shutdown(): /*throws*/ void;
+}
+/**
+ * @deprecated Use `KyotoClientLike` instead.
+ */
+export type KyotoClientInterface = KyotoClientLike;
+
+/**
+ * A running BIP157/158 compact-block-filter light client backed by Kyoto.
+ *
+ * Unlike the Electrum/Esplora clients, this owns a long-lived peer-to-peer node
+ * running on the global Tokio runtime. Construct it once, drive sync via
+ * [`Wallet::sync_with_kyoto`], broadcast via [`Wallet::broadcast_with_kyoto`],
+ * and call [`KyotoClient::shutdown`] (or simply drop it) when finished.
+ */
+export class KyotoClient
+  extends UniffiAbstractObject
+  implements KyotoClientLike
+{
+  readonly [uniffiTypeNameSymbol] = "KyotoClient";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Build a light client for `wallet` and start its background node.
+   *
+   * - `scan_type`: [`KyotoScanType::Sync`] to continue from the wallet's
+   * checkpoint, or [`KyotoScanType::Recovery`] to rescan for restoration.
+   * - `required_peers`: how many peers to maintain (clamped to >= 1).
+   * - `peers`: optional explicit peer IPs; empty falls back to DNS discovery.
+   * - `data_dir`: writable directory for header/peer persistence.
+   * - `handler`: receives info/warning events from the node.
+   */
+  constructor(
+    wallet: WalletLike,
+    scanType: KyotoScanType,
+    requiredPeers: /*u8*/ number,
+    peers: Array<string>,
+    dataDir: string,
+    handler: KyotoNodeEventHandler
+  ) /*throws*/ {
+    super();
+    const pointer = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(
+          FfiConverterTypeWallet.lower(wallet),
+          FfiConverterTypeKyotoScanType.lower(scanType),
+          FfiConverterUInt8.lower(requiredPeers),
+          FfiConverterArrayString.lower(peers),
+          FfiConverterString.lower(dataDir),
+          FfiConverterTypeKyotoNodeEventHandler.lower(handler),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeKyotoClientObjectFactory.bless(pointer);
+  }
+
+  /**
+   * Whether the background node is still running.
+   */
+  isRunning(): boolean {
+    return FfiConverterBool.lift(
+      uniffiCaller.rustCall(
+        /*caller:*/ (callStatus) => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(
+            uniffiTypeKyotoClientObjectFactory.clonePointer(this),
+            callStatus
+          );
+        },
+        /*liftString:*/ FfiConverterString.lift
+      )
+    );
+  }
+
+  /**
+   * Stop the node and release peer connections. Idempotent-ish: returns an
+   * error if the node has already stopped.
+   */
+  shutdown(): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(
+          uniffiTypeKyotoClientObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer = uniffiTypeKyotoClientObjectFactory.pointer(this);
+      uniffiTypeKyotoClientObjectFactory.freePointer(pointer);
+      uniffiTypeKyotoClientObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is KyotoClient {
+    return uniffiTypeKyotoClientObjectFactory.isConcreteType(obj);
+  }
+}
+
+const uniffiTypeKyotoClientObjectFactory: UniffiObjectFactory<KyotoClientLike> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): KyotoClientLike {
+        const instance = Object.create(KyotoClient.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "KyotoClient";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: KyotoClientLike): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: KyotoClientLike): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_kyotoclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_kyotoclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is KyotoClientLike {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "KyotoClient"
+        );
+      },
+    };
+  })();
+// FfiConverter for KyotoClientLike
+const FfiConverterTypeKyotoClient = new FfiConverterObject(
+  uniffiTypeKyotoClientObjectFactory
+);
+
+/**
+ * Callback implemented on the JS side to receive node log/warning events while
+ * a [`KyotoClient`] is running. Methods are invoked from background threads and
+ * should return quickly (e.g. forward to a UI log) — they must not block.
+ */
+export interface KyotoNodeEventHandler {
+  /**
+   * Informational message (handshakes, progress, blocks received, …).
+   */
+  onInfo(message: string): void;
+  /**
+   * Warning message (peer timeouts, rejected txs, potential forks, …).
+   */
+  onWarning(message: string): void;
+}
+
+/**
+ * Callback implemented on the JS side to receive node log/warning events while
+ * a [`KyotoClient`] is running. Methods are invoked from background threads and
+ * should return quickly (e.g. forward to a UI log) — they must not block.
+ */
+export class KyotoNodeEventHandlerImpl
+  extends UniffiAbstractObject
+  implements KyotoNodeEventHandler
+{
+  readonly [uniffiTypeNameSymbol] = "KyotoNodeEventHandlerImpl";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  // No primary constructor declared for this class.
+  private constructor(pointer: UniffiHandle) {
+    super();
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeKyotoNodeEventHandlerImplObjectFactory.bless(pointer);
+  }
+
+  /**
+   * Informational message (handshakes, progress, blocks received, …).
+   */
+  onInfo(message: string): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(
+          uniffiTypeKyotoNodeEventHandlerImplObjectFactory.clonePointer(this),
+          FfiConverterString.lower(message),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+  }
+
+  /**
+   * Warning message (peer timeouts, rejected txs, potential forks, …).
+   */
+  onWarning(message: string): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(
+          uniffiTypeKyotoNodeEventHandlerImplObjectFactory.clonePointer(this),
+          FfiConverterString.lower(message),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer =
+        uniffiTypeKyotoNodeEventHandlerImplObjectFactory.pointer(this);
+      uniffiTypeKyotoNodeEventHandlerImplObjectFactory.freePointer(pointer);
+      uniffiTypeKyotoNodeEventHandlerImplObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is KyotoNodeEventHandlerImpl {
+    return uniffiTypeKyotoNodeEventHandlerImplObjectFactory.isConcreteType(obj);
+  }
+}
+
+const uniffiTypeKyotoNodeEventHandlerImplObjectFactory: UniffiObjectFactory<KyotoNodeEventHandler> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): KyotoNodeEventHandler {
+        const instance = Object.create(KyotoNodeEventHandlerImpl.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "KyotoNodeEventHandlerImpl";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: KyotoNodeEventHandler): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: KyotoNodeEventHandler): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is KyotoNodeEventHandler {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "KyotoNodeEventHandlerImpl"
+        );
+      },
+    };
+  })();
+// FfiConverter for KyotoNodeEventHandler
+const FfiConverterTypeKyotoNodeEventHandler =
+  new FfiConverterObjectWithCallbacks(
+    uniffiTypeKyotoNodeEventHandlerImplObjectFactory
+  );
+
+// Add a vtavble for the callbacks that go in KyotoNodeEventHandler.
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+const uniffiCallbackInterfaceKyotoNodeEventHandler: {
+  vtable: UniffiVTableCallbackInterfaceKyotoNodeEventHandler;
+  register: () => void;
+} = {
+  // Create the VTable using a series of closures.
+  // ts automatically converts these into C callback functions.
+  vtable: {
+    onInfo: (uniffiHandle: bigint, message: Uint8Array) => {
+      const uniffiMakeCall = (): void => {
+        const jsCallback =
+          FfiConverterTypeKyotoNodeEventHandler.lift(uniffiHandle);
+        return jsCallback.onInfo(FfiConverterString.lift(message));
+      };
+      const uniffiResult = UniffiResult.ready<void>();
+      const uniffiHandleSuccess = (obj: any) => {};
+      const uniffiHandleError = (code: number, errBuf: UniffiByteArray) => {
+        UniffiResult.writeError(uniffiResult, code, errBuf);
+      };
+      uniffiTraitInterfaceCall(
+        /*makeCall:*/ uniffiMakeCall,
+        /*handleSuccess:*/ uniffiHandleSuccess,
+        /*handleError:*/ uniffiHandleError,
+        /*lowerString:*/ FfiConverterString.lower
+      );
+      return uniffiResult;
+    },
+    onWarning: (uniffiHandle: bigint, message: Uint8Array) => {
+      const uniffiMakeCall = (): void => {
+        const jsCallback =
+          FfiConverterTypeKyotoNodeEventHandler.lift(uniffiHandle);
+        return jsCallback.onWarning(FfiConverterString.lift(message));
+      };
+      const uniffiResult = UniffiResult.ready<void>();
+      const uniffiHandleSuccess = (obj: any) => {};
+      const uniffiHandleError = (code: number, errBuf: UniffiByteArray) => {
+        UniffiResult.writeError(uniffiResult, code, errBuf);
+      };
+      uniffiTraitInterfaceCall(
+        /*makeCall:*/ uniffiMakeCall,
+        /*handleSuccess:*/ uniffiHandleSuccess,
+        /*handleError:*/ uniffiHandleError,
+        /*lowerString:*/ FfiConverterString.lower
+      );
+      return uniffiResult;
+    },
+    uniffiFree: (uniffiHandle: UniffiHandle): void => {
+      // KyotoNodeEventHandler: this will throw a stale handle error if the handle isn't found.
+      FfiConverterTypeKyotoNodeEventHandler.drop(uniffiHandle);
+    },
+    uniffiClone: (uniffiHandle: UniffiHandle): UniffiHandle => {
+      return FfiConverterTypeKyotoNodeEventHandler.clone(uniffiHandle);
+    },
+  },
+  register: () => {
+    nativeModule().ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(
+      uniffiCallbackInterfaceKyotoNodeEventHandler.vtable
+    );
+  },
+};
 
 export interface MnemonicLike {
   /**
@@ -5570,6 +6393,11 @@ export interface WalletLike {
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
+  broadcastWithKyoto(
+    client: KyotoClientLike,
+    psbt: PsbtLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<string>;
   buildFeeBump(txid: string, newFeeRate: /*f64*/ number): /*throws*/ PsbtLike;
   calculateFee(txHex: string): /*throws*/ /*u64*/ bigint;
   calculateFeeRate(txHex: string): /*throws*/ /*f64*/ number;
@@ -5650,6 +6478,16 @@ export interface WalletLike {
   syncWithEsplora(
     client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<void>;
+  /**
+   * Drive a single sync against the Kyoto light client. Awaits until the node
+   * reports it has caught up to the chain tip, applies the resulting update,
+   * and persists. The scan strategy (incremental vs recovery) is fixed when the
+   * `KyotoClient` is built. Safe to call repeatedly while the node is running.
+   */
+  syncWithKyoto(
+    client: KyotoClientLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   transactions(): /*throws*/ Array<TxDetails>;
@@ -5746,6 +6584,45 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterTypeEsploraClient.lower(client),
+            FfiConverterTypePsbt.lower(psbt)
+          );
+        },
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  async broadcastWithKyoto(
+    client: KyotoClientLike,
+    psbt: PsbtLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypeKyotoClient.lower(client),
             FfiConverterTypePsbt.lower(psbt)
           );
         },
@@ -6601,6 +7478,46 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
+  /**
+   * Drive a single sync against the Kyoto light client. Awaits until the node
+   * reports it has caught up to the chain tip, applies the resulting update,
+   * and persists. The scan strategy (incremental vs recovery) is fixed when the
+   * `KyotoClient` is built. Safe to call repeatedly while the node is running.
+   */
+  async syncWithKyoto(
+    client: KyotoClientLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypeKyotoClient.lower(client)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
   transactions(): Array<TxDetails> /*throws*/ {
     return FfiConverterArrayTypeTxDetails.lift(
       uniffiCaller.rustCallWithError(
@@ -6932,6 +7849,38 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running() !==
+    33975
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_kyotoclient_is_running"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown() !==
+    18283
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info() !==
+    29289
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning() !==
+    46310
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning"
     );
   }
   if (
@@ -7277,6 +8226,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto() !==
+    18184
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump() !==
     25451
   ) {
@@ -7577,6 +8534,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto() !==
+    12234
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions() !==
     4241
   ) {
@@ -7614,6 +8579,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_esploraclient_new"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new() !==
+    35516
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_kyotoclient_new"
     );
   }
   if (
@@ -7679,6 +8652,8 @@ function uniffiEnsureInitialized() {
       "uniffi_bdk_ffi_checksum_constructor_wallet_new"
     );
   }
+
+  uniffiCallbackInterfaceKyotoNodeEventHandler.register();
 }
 
 export default Object.freeze({
@@ -7696,6 +8671,10 @@ export default Object.freeze({
     FfiConverterTypeEsploraClient,
     FfiConverterTypeKeychainInfo,
     FfiConverterTypeKeychainKind,
+    FfiConverterTypeKyotoClient,
+    FfiConverterTypeKyotoNodeEventHandler,
+    FfiConverterTypeKyotoRecoveryStart,
+    FfiConverterTypeKyotoScanType,
     FfiConverterTypeLanguage,
     FfiConverterTypeLocalOutput,
     FfiConverterTypeMnemonic,
