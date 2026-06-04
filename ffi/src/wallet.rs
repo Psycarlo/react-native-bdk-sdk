@@ -256,12 +256,24 @@ impl Wallet {
         &self,
         client: Arc<EsploraClient>,
         stop_gap: u64,
+        inspector: Option<Arc<dyn FullScanProgressInspector>>,
     ) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
         let request = {
             let w = self.inner.lock().unwrap();
-            w.start_full_scan().build()
+            let builder = w.start_full_scan();
+            match inspector {
+                Some(insp) => {
+                    let mut visited = 0u64;
+                    builder.inspect(move |keychain, index, _script| {
+                        visited += 1;
+                        insp.inspect(keychain.into(), index, visited);
+                    })
+                }
+                None => builder,
+            }
+            .build()
         };
 
         let update = crate::run_async(async move {
@@ -284,12 +296,20 @@ impl Wallet {
         &self,
         client: Arc<EsploraClient>,
         _stop_gap: u64,
+        inspector: Option<Arc<dyn SyncProgressInspector>>,
     ) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
         let request = {
             let w = self.inner.lock().unwrap();
-            w.start_sync_with_revealed_spks().build()
+            let builder = w.start_sync_with_revealed_spks();
+            match inspector {
+                Some(insp) => builder.inspect(move |_item, progress| {
+                    insp.inspect(progress.consumed() as u64, progress.total() as u64);
+                }),
+                None => builder,
+            }
+            .build()
         };
 
         let update = crate::run_async(async move {
@@ -314,10 +334,22 @@ impl Wallet {
         &self,
         client: Arc<ElectrumClient>,
         stop_gap: u64,
+        inspector: Option<Arc<dyn FullScanProgressInspector>>,
     ) -> Result<(), BdkError> {
         let request = {
             let w = self.inner.lock().unwrap();
-            w.start_full_scan().build()
+            let builder = w.start_full_scan();
+            match inspector {
+                Some(insp) => {
+                    let mut visited = 0u64;
+                    builder.inspect(move |keychain, index, _script| {
+                        visited += 1;
+                        insp.inspect(keychain.into(), index, visited);
+                    })
+                }
+                None => builder,
+            }
+            .build()
         };
 
         let update = crate::run_async(async move {
@@ -344,10 +376,18 @@ impl Wallet {
         &self,
         client: Arc<ElectrumClient>,
         _stop_gap: u64,
+        inspector: Option<Arc<dyn SyncProgressInspector>>,
     ) -> Result<(), BdkError> {
         let request = {
             let w = self.inner.lock().unwrap();
-            w.start_sync_with_revealed_spks().build()
+            let builder = w.start_sync_with_revealed_spks();
+            match inspector {
+                Some(insp) => builder.inspect(move |_item, progress| {
+                    insp.inspect(progress.consumed() as u64, progress.total() as u64);
+                }),
+                None => builder,
+            }
+            .build()
         };
 
         let update = crate::run_async(async move {

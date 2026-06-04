@@ -16,6 +16,7 @@ import type {
   DerivationInfo,
   ElectrumClientLike,
   EsploraClientLike,
+  FullScanProgressInspector,
   KeychainInfo,
   KeychainKind,
   KyotoClientLike,
@@ -24,6 +25,7 @@ import type {
   Network,
   OutPoint,
   PsbtLike,
+  SyncProgressInspector,
   TxOrdering,
 } from './generated/bdk_ffi';
 
@@ -53,6 +55,24 @@ export type ConfirmationBlockTimeN = {
   height: number;
   blockHash: string;
   timestamp: number;
+};
+
+/**
+ * Number-friendly sync progress callback. `consumed` items processed out of
+ * `total` items in the request — `consumed / total` is a completion fraction.
+ * Called from a background thread; keep it fast and non-blocking.
+ */
+export type SyncProgressInspectorN = {
+  inspect(consumed: number, total: number): void;
+};
+
+/**
+ * Number-friendly full-scan progress callback. A full scan has no fixed total
+ * (stop-gap driven), so only the running `visited` count of scripts is given,
+ * not a fraction. Called from a background thread; keep it fast and non-blocking.
+ */
+export type FullScanProgressInspectorN = {
+  inspect(keychain: KeychainKind, index: number, visited: number): void;
 };
 
 export type TxOutN = {
@@ -239,6 +259,29 @@ function resolveEsplora(input: EsploraInput): EsploraClientLike {
     return new EsploraClient(input);
   }
   return input.raw;
+}
+
+// Bridge the number-friendly inspector callbacks to the bigint-based FFI ones.
+// Counts here fit comfortably in a JS number (well under 2^53), so the bigint
+// → number conversion is lossless.
+function adaptSyncInspector(
+  inspector?: SyncProgressInspectorN
+): SyncProgressInspector | undefined {
+  if (!inspector) return undefined;
+  return {
+    inspect: (consumed, total) =>
+      inspector.inspect(Number(consumed), Number(total)),
+  };
+}
+
+function adaptFullScanInspector(
+  inspector?: FullScanProgressInspectorN
+): FullScanProgressInspector | undefined {
+  if (!inspector) return undefined;
+  return {
+    inspect: (keychain, index, visited) =>
+      inspector.inspect(keychain, index, Number(visited)),
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -436,22 +479,54 @@ export class BdkWallet {
 
   // ── Sync (Esplora) ─────────────────────────────────────────────────────
 
-  fullScanWithEsplora(client: EsploraInput, stopGap: number): Promise<void> {
-    return this.inner.fullScanWithEsplora(resolveEsplora(client), BigInt(stopGap));
+  fullScanWithEsplora(
+    client: EsploraInput,
+    stopGap: number,
+    inspector?: FullScanProgressInspectorN
+  ): Promise<void> {
+    return this.inner.fullScanWithEsplora(
+      resolveEsplora(client),
+      BigInt(stopGap),
+      adaptFullScanInspector(inspector)
+    );
   }
 
-  syncWithEsplora(client: EsploraInput, stopGap: number): Promise<void> {
-    return this.inner.syncWithEsplora(resolveEsplora(client), BigInt(stopGap));
+  syncWithEsplora(
+    client: EsploraInput,
+    stopGap: number,
+    inspector?: SyncProgressInspectorN
+  ): Promise<void> {
+    return this.inner.syncWithEsplora(
+      resolveEsplora(client),
+      BigInt(stopGap),
+      adaptSyncInspector(inspector)
+    );
   }
 
   // ── Sync (Electrum) ────────────────────────────────────────────────────
 
-  fullScanWithElectrum(client: ElectrumInput, stopGap: number): Promise<void> {
-    return this.inner.fullScanWithElectrum(resolveElectrum(client), BigInt(stopGap));
+  fullScanWithElectrum(
+    client: ElectrumInput,
+    stopGap: number,
+    inspector?: FullScanProgressInspectorN
+  ): Promise<void> {
+    return this.inner.fullScanWithElectrum(
+      resolveElectrum(client),
+      BigInt(stopGap),
+      adaptFullScanInspector(inspector)
+    );
   }
 
-  syncWithElectrum(client: ElectrumInput, stopGap: number): Promise<void> {
-    return this.inner.syncWithElectrum(resolveElectrum(client), BigInt(stopGap));
+  syncWithElectrum(
+    client: ElectrumInput,
+    stopGap: number,
+    inspector?: SyncProgressInspectorN
+  ): Promise<void> {
+    return this.inner.syncWithElectrum(
+      resolveElectrum(client),
+      BigInt(stopGap),
+      adaptSyncInspector(inspector)
+    );
   }
 
   // ── Broadcast ───────────────────────────────────────────────────────────

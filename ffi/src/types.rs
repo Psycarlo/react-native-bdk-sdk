@@ -61,6 +61,35 @@ impl From<BdkKeychainKind> for KeychainKind {
     }
 }
 
+/// Callback invoked on each item visited while syncing a wallet against a
+/// chain source (Electrum/Esplora). Implemented on the JS side and passed to
+/// the `sync_with_*` methods to drive a progress indicator.
+///
+/// Sync is bounded: `total` is the number of items (script pubkeys, txids and
+/// outpoints) in the request, so `consumed as f64 / total as f64` is a usable
+/// completion fraction. `inspect` is called from a background thread and should
+/// return quickly — it must not block.
+#[uniffi::export(with_foreign)]
+pub trait SyncProgressInspector: Send + Sync {
+    /// `consumed`: items processed so far. `total`: items in the whole request.
+    fn inspect(&self, consumed: u64, total: u64);
+}
+
+/// Callback invoked on each script pubkey revealed while full-scanning a wallet
+/// against a chain source (Electrum/Esplora). Implemented on the JS side and
+/// passed to the `full_scan_with_*` methods.
+///
+/// Unlike sync, a full scan has no fixed total — it keeps revealing scripts per
+/// keychain until `stop_gap` consecutive empty ones are seen — so only the
+/// running count of scripts visited is reported, not a fraction. `inspect` is
+/// called from a background thread and must not block.
+#[uniffi::export(with_foreign)]
+pub trait FullScanProgressInspector: Send + Sync {
+    /// `keychain`/`index`: the spk just visited. `visited`: running count of
+    /// scripts inspected so far across all keychains in this scan.
+    fn inspect(&self, keychain: KeychainKind, index: u32, visited: u64);
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum ChangeSpendPolicy {
     ChangeAllowed,
