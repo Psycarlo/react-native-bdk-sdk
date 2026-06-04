@@ -8,7 +8,7 @@
  * JS `number` safely handles up to 2^53 (~9 quadrillion), which covers
  * the entire Bitcoin supply in satoshis (2.1 quadrillion).
  */
-import type { AddressInfo, BlockId, ChangeSpendPolicy, DerivationInfo, ElectrumClientLike, KeychainInfo, KeychainKind, Network, OutPoint, PsbtLike, TxOrdering } from './generated/bdk_ffi';
+import type { AddressInfo, BlockId, ChangeSpendPolicy, DerivationInfo, ElectrumClientLike, EsploraClientLike, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, TxOrdering } from './generated/bdk_ffi';
 import { TxBuilder, Wallet } from './generated/bdk_ffi';
 export type BalanceN = {
     immature: number;
@@ -59,7 +59,6 @@ export type TxDetailsN = {
     feeRate?: number;
     balanceDelta: number;
     confirmationBlockTime?: ConfirmationBlockTimeN;
-    txHex: string;
     version: number;
     locktime: number;
     inputs: TxInputN[];
@@ -72,6 +71,41 @@ export declare class BdkElectrumClient {
     constructor(url: string);
     get raw(): ElectrumClientLike;
 }
+/** Pass a URL string (creates temp client) or a BdkEsploraClient (reuses). */
+export type EsploraInput = string | BdkEsploraClient;
+export declare class BdkEsploraClient {
+    private readonly inner;
+    constructor(url: string);
+    get raw(): EsploraClientLike;
+}
+export type KyotoOptions = {
+    /** Incremental `Sync` or full `Recovery` — see `KyotoScanType`. */
+    scanType: KyotoScanType;
+    /** Number of peers to maintain. Clamped to >= 1. Defaults to 2. */
+    requiredPeers?: number;
+    /** Explicit peer IPs. Empty (default) falls back to DNS discovery. */
+    peers?: string[];
+    /** Writable directory for header/peer persistence. */
+    dataDir: string;
+    /** Receives info/warning events emitted by the node while it runs. */
+    handler: KyotoNodeEventHandler;
+};
+/**
+ * Wraps a running Kyoto light client. Unlike Electrum/Esplora this owns a
+ * long-lived P2P node: build it once from a wallet, reuse it across sync calls,
+ * and call {@link shutdown} when done (it also stops on GC).
+ */
+export declare class BdkKyotoClient {
+    private readonly inner;
+    constructor(wallet: BdkWallet, opts: KyotoOptions);
+    get raw(): KyotoClientLike;
+    /** Whether the background node is still running. */
+    isRunning(): boolean;
+    /** Stop the node and release peer connections. */
+    shutdown(): void;
+}
+/** A Kyoto client is stateful, so only an existing instance can be reused. */
+export type KyotoInput = BdkKyotoClient;
 export declare function bdkCreateWallet(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string): Promise<BdkWallet>;
 export declare class BdkWallet {
     private readonly inner;
@@ -101,18 +135,23 @@ export declare class BdkWallet {
     calculateFeeRate(txHex: string): number;
     sign(psbt: PsbtLike): boolean;
     finalizePsbt(psbt: PsbtLike): boolean;
-    fullScanWithEsplora(url: string, stopGap: number): Promise<void>;
-    syncWithEsplora(url: string, stopGap: number): Promise<void>;
+    fullScanWithEsplora(client: EsploraInput, stopGap: number): Promise<void>;
+    syncWithEsplora(client: EsploraInput, stopGap: number): Promise<void>;
     fullScanWithElectrum(client: ElectrumInput, stopGap: number): Promise<void>;
     syncWithElectrum(client: ElectrumInput, stopGap: number): Promise<void>;
-    broadcastWithEsplora(url: string, psbt: PsbtLike): Promise<string>;
+    broadcastWithEsplora(client: EsploraInput, psbt: PsbtLike): Promise<string>;
     broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string>;
-    send(address: string, amountSats: number, feeRate: number, esploraUrl: string): Promise<string>;
-    drain(address: string, feeRate: number, esploraUrl: string): Promise<string>;
+    /** Drives one sync against the Kyoto node; resolves once caught up to tip. */
+    syncWithKyoto(client: KyotoInput): Promise<void>;
+    broadcastWithKyoto(client: KyotoInput, psbt: PsbtLike): Promise<string>;
+    send(address: string, amountSats: number, feeRate: number, esplora: EsploraInput): Promise<string>;
+    drain(address: string, feeRate: number, esplora: EsploraInput): Promise<string>;
     sendWithElectrum(address: string, amountSats: number, feeRate: number, client: ElectrumInput): Promise<string>;
     drainWithElectrum(address: string, feeRate: number, client: ElectrumInput): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
+    /** Throws BdkError on invalid hex. */
     isMine(scriptHex: string): boolean;
+    /** Throws BdkError on invalid hex. */
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
     publicDescriptor(keychain: KeychainKind): string;
     descriptorChecksum(keychain: KeychainKind): string;

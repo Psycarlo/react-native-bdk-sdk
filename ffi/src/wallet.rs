@@ -8,6 +8,8 @@ use bdk_wallet::PersistedWallet;
 
 use crate::electrum::ElectrumClient;
 use crate::error::BdkError;
+use crate::esplora::EsploraClient;
+use crate::kyoto::KyotoClient;
 use crate::psbt::Psbt;
 use crate::types::*;
 
@@ -158,11 +160,26 @@ impl Wallet {
     pub fn transactions(&self) -> Result<Vec<TxDetails>, BdkError> {
         let w = self.inner.lock().unwrap();
         let network = w.network();
+        let index = w.spk_index();
         let mut details = Vec::new();
         for wallet_tx in w.transactions() {
-            if let Some(td) = w.tx_details(wallet_tx.tx_node.txid) {
-                details.push(Self::convert_tx_details(&td, network));
-            }
+            let tx_arc = wallet_tx.tx_node.tx.clone();
+            let tx_ref: &bitcoin::Transaction = &tx_arc;
+            let (sent, received) = w.sent_and_received(tx_ref);
+            let fee = w.calculate_fee(tx_ref).ok();
+            let fee_rate = w.calculate_fee_rate(tx_ref).ok();
+            let balance_delta = index.net_value(tx_ref, ..);
+            let td = bdk_wallet::TxDetails {
+                txid: wallet_tx.tx_node.txid,
+                sent,
+                received,
+                fee,
+                fee_rate,
+                balance_delta,
+                chain_position: wallet_tx.chain_position,
+                tx: tx_arc,
+            };
+            details.push(Self::convert_tx_details(&td, network));
         }
         Ok(details)
     }
@@ -235,7 +252,11 @@ impl Wallet {
 
     // ── Sync (Esplora) ──────────────────────────────────────────────────────
 
-    pub async fn full_scan_with_esplora(&self, url: String, stop_gap: u64) -> Result<(), BdkError> {
+    pub async fn full_scan_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        stop_gap: u64,
+    ) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
         let request = {
@@ -244,12 +265,8 @@ impl Wallet {
         };
 
         let update = crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&url)
-                .build_async()
-                .map_err(|e| BdkError::SyncFailed {
-                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
-                })?;
             client
+                .inner
                 .full_scan(request, stop_gap as usize, 1)
                 .await
                 .map_err(|e| BdkError::SyncFailed {
@@ -263,7 +280,11 @@ impl Wallet {
         Ok(())
     }
 
-    pub async fn sync_with_esplora(&self, url: String, _stop_gap: u64) -> Result<(), BdkError> {
+    pub async fn sync_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        _stop_gap: u64,
+    ) -> Result<(), BdkError> {
         use bdk_esplora::EsploraAsyncExt;
 
         let request = {
@@ -272,12 +293,8 @@ impl Wallet {
         };
 
         let update = crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&url)
-                .build_async()
-                .map_err(|e| BdkError::SyncFailed {
-                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
-                })?;
             client
+                .inner
                 .sync(request, 1)
                 .await
                 .map_err(|e| BdkError::SyncFailed {
@@ -353,9 +370,32 @@ impl Wallet {
         Ok(())
     }
 
+    // ── Sync (Kyoto) ─────────────────────────────────────────────────────────
+
+    /// Drive a single sync against the Kyoto light client. Awaits until the node
+    /// reports it has caught up to the chain tip, applies the resulting update,
+    /// and persists. The scan strategy (incremental vs recovery) is fixed when the
+    /// `KyotoClient` is built. Safe to call repeatedly while the node is running.
+    pub async fn sync_with_kyoto(&self, client: Arc<KyotoClient>) -> Result<(), BdkError> {
+        let update = crate::run_async(async move {
+            let mut sub = client.update_subscriber.lock().await;
+            sub.update().await.map_err(BdkError::from)
+        })
+        .await?;
+
+        let mut w = self.inner.lock().unwrap();
+        w.apply_update(update)?;
+        self.persist_wallet(&mut w)?;
+        Ok(())
+    }
+
     // ── Broadcast (Esplora) ──────────────────────────────────────────────────
 
-    pub async fn broadcast_with_esplora(&self, url: String, psbt: Arc<Psbt>) -> Result<String, BdkError> {
+    pub async fn broadcast_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        psbt: Arc<Psbt>,
+    ) -> Result<String, BdkError> {
         let tx = {
             let psbt_inner = psbt.inner.lock().unwrap();
             psbt_inner
@@ -368,12 +408,8 @@ impl Wallet {
 
         let txid = tx.compute_txid().to_string();
         crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&url)
-                .build_async()
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Failed to build Esplora client for '{}': {}", url, e),
-                })?;
             client
+                .inner
                 .broadcast(&tx)
                 .await
                 .map_err(|e| BdkError::BroadcastFailed {
@@ -422,6 +458,38 @@ impl Wallet {
         Ok(txid)
     }
 
+    // ── Broadcast (Kyoto) ────────────────────────────────────────────────────
+
+    pub async fn broadcast_with_kyoto(
+        &self,
+        client: Arc<KyotoClient>,
+        psbt: Arc<Psbt>,
+    ) -> Result<String, BdkError> {
+        let tx = {
+            let psbt_inner = psbt.inner.lock().unwrap();
+            psbt_inner
+                .clone()
+                .extract_tx()
+                .map_err(|e| BdkError::InvalidPsbt {
+                    message: format!("Failed to extract tx from PSBT: {}", e),
+                })?
+        };
+
+        let txid = tx.compute_txid().to_string();
+        crate::run_async(async move {
+            client
+                .requester
+                .submit_package(tx)
+                .await
+                .map_err(|e| BdkError::BroadcastFailed {
+                    message: format!("Kyoto broadcast failed: {}", e),
+                })
+        })
+        .await?;
+
+        Ok(txid)
+    }
+
     // ── Convenience (Esplora) ────────────────────────────────────────────────
 
     pub async fn send(
@@ -429,18 +497,14 @@ impl Wallet {
         address: String,
         amount_sats: u64,
         fee_rate: f64,
-        esplora_url: String,
+        client: Arc<EsploraClient>,
     ) -> Result<String, BdkError> {
         let tx = self.build_send_tx(&address, amount_sats, fee_rate)?;
         let txid = tx.compute_txid().to_string();
 
         crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-                .build_async()
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Failed to build Esplora client: {}", e),
-                })?;
             client
+                .inner
                 .broadcast(&tx)
                 .await
                 .map_err(|e| BdkError::BroadcastFailed {
@@ -457,18 +521,14 @@ impl Wallet {
         &self,
         address: String,
         fee_rate: f64,
-        esplora_url: String,
+        client: Arc<EsploraClient>,
     ) -> Result<String, BdkError> {
         let tx = self.build_drain_tx(&address, fee_rate)?;
         let txid = tx.compute_txid().to_string();
 
         crate::run_async(async move {
-            let client = bdk_esplora::esplora_client::Builder::new(&esplora_url)
-                .build_async()
-                .map_err(|e| BdkError::BroadcastFailed {
-                    message: format!("Failed to build Esplora client: {}", e),
-                })?;
             client
+                .inner
                 .broadcast(&tx)
                 .await
                 .map_err(|e| BdkError::BroadcastFailed {
@@ -571,21 +631,28 @@ impl Wallet {
 
     // ── Script / SPK queries ──────────────────────────────────────────────────
 
-    pub fn is_mine(&self, script_hex: String) -> bool {
-        let bytes = hex::decode(&script_hex).unwrap_or_default();
+    pub fn is_mine(&self, script_hex: String) -> Result<bool, BdkError> {
+        let bytes = hex::decode(&script_hex).map_err(|_| BdkError::InvalidScript {
+            message: "Invalid hex encoding".into(),
+        })?;
         let script = ScriptBuf::from_bytes(bytes);
         let w = self.inner.lock().unwrap();
-        w.is_mine(script)
+        Ok(w.is_mine(script))
     }
 
-    pub fn derivation_of_spk(&self, script_hex: String) -> Option<DerivationInfo> {
-        let bytes = hex::decode(&script_hex).unwrap_or_default();
+    pub fn derivation_of_spk(
+        &self,
+        script_hex: String,
+    ) -> Result<Option<DerivationInfo>, BdkError> {
+        let bytes = hex::decode(&script_hex).map_err(|_| BdkError::InvalidScript {
+            message: "Invalid hex encoding".into(),
+        })?;
         let script = ScriptBuf::from_bytes(bytes);
         let w = self.inner.lock().unwrap();
-        w.derivation_of_spk(script).map(|(kc, idx)| DerivationInfo {
+        Ok(w.derivation_of_spk(script).map(|(kc, idx)| DerivationInfo {
             keychain: kc.into(),
             index: idx,
-        })
+        }))
     }
 
     // ── Descriptor / keychain info ────────────────────────────────────────────
@@ -695,7 +762,6 @@ impl Wallet {
 
     fn convert_tx_details(td: &bdk_wallet::TxDetails, network: bitcoin::Network) -> TxDetails {
         let tx = &td.tx;
-        let tx_bytes = consensus::encode::serialize(tx.deref());
 
         let inputs: Vec<TxInput> = tx.input.iter().map(|inp| {
             TxInput {
@@ -727,7 +793,6 @@ impl Wallet {
             fee_rate: td.fee_rate.map(|r| r.to_sat_per_vb_ceil() as f64),
             balance_delta: td.balance_delta.to_sat(),
             confirmation_block_time: chain_position_to_confirmation(&td.chain_position),
-            tx_hex: hex::encode(&tx_bytes),
             version: tx.version.0,
             locktime: tx.lock_time.to_consensus_u32(),
             inputs,

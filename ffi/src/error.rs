@@ -235,6 +235,22 @@ impl From<bdk_wallet::keys::KeyError> for BdkError {
     }
 }
 
+// ── Kyoto (BIP157/158 light client) ──────────────────────────────────────────
+// `ClientError` is intentionally mapped at each call site instead of here, so a
+// failed broadcast surfaces as `BroadcastFailed` while a failed sync stays `SyncFailed`.
+
+impl From<bdk_kyoto::builder::BuilderError> for BdkError {
+    fn from(e: bdk_kyoto::builder::BuilderError) -> Self {
+        Self::SyncFailed { message: format!("Kyoto builder error: {e}") }
+    }
+}
+
+impl From<bdk_kyoto::UpdateError> for BdkError {
+    fn from(e: bdk_kyoto::UpdateError) -> Self {
+        Self::SyncFailed { message: format!("Kyoto sync failed: {e}") }
+    }
+}
+
 impl<E: std::fmt::Debug> From<bdk_wallet::CreateWithPersistError<E>> for BdkError {
     fn from(e: bdk_wallet::CreateWithPersistError<E>) -> Self {
         let msg = format!("{:?}", e);

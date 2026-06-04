@@ -180,6 +180,33 @@ pub enum SingleKeyDescriptorTemplate {
     P2TR,
 }
 
+/// How the Kyoto (BIP157/158) light client should scan filters on start-up.
+#[derive(Debug, Clone, uniffi::Enum)]
+pub enum KyotoScanType {
+    /// Continue from the wallet's last known checkpoint. Use for an already-synced wallet.
+    Sync,
+    /// Rescan the chain to recover history. Use the first time a wallet is restored.
+    Recovery {
+        /// Highest derivation index known to have been used (lookahead during recovery).
+        used_script_index: u32,
+        /// Block height/hash at which to begin the rescan.
+        start: KyotoRecoveryStart,
+    },
+}
+
+/// Where a Kyoto recovery scan should begin in the chain.
+#[derive(Debug, Clone, uniffi::Enum)]
+pub enum KyotoRecoveryStart {
+    /// From the network's genesis block. Works on any network but is slow on mainnet.
+    Genesis,
+    /// One block before segwit activation (height 481,823). **Mainnet only.**
+    SegwitActivation,
+    /// One block before taproot activation (height 709,631). **Mainnet only.**
+    TaprootActivation,
+    /// From an explicit, trusted block height + hash. Works on any network.
+    FromBlock { height: u32, block_hash: String },
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  DICTIONARY STRUCTS (records)
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -368,7 +395,6 @@ pub struct TxDetails {
     pub fee_rate: Option<f64>,
     pub balance_delta: i64,
     pub confirmation_block_time: Option<ConfirmationBlockTime>,
-    pub tx_hex: String,
     pub version: i32,
     pub locktime: u32,
     pub inputs: Vec<TxInput>,
@@ -400,21 +426,19 @@ pub struct KeychainInfo {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  HELPER: hex encoding (minimal, avoids extra dep)
+//  HELPER: hex encoding — thin wrapper over `bitcoin::hex` (hex-conservative).
 // ═══════════════════════════════════════════════════════════════════════════════
 
 pub(crate) mod hex {
+    use bdk_wallet::bitcoin::hex::{DisplayHex, FromHex};
+
+    #[inline]
     pub fn encode(bytes: &[u8]) -> String {
-        bytes.iter().map(|b| format!("{:02x}", b)).collect()
+        bytes.to_lower_hex_string()
     }
 
+    #[inline]
     pub fn decode(s: &str) -> Result<Vec<u8>, ()> {
-        if s.len() % 2 != 0 {
-            return Err(());
-        }
-        (0..s.len())
-            .step_by(2)
-            .map(|i| u8::from_str_radix(&s[i..i + 2], 16).map_err(|_| ()))
-            .collect()
+        Vec::<u8>::from_hex(s).map_err(|_| ())
     }
 }

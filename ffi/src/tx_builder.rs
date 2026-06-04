@@ -223,12 +223,8 @@ impl TxBuilder {
 
 impl TxBuilder {
     fn finish_inner(params: TxBuilderParams, wallet: Arc<Wallet>) -> Result<Arc<Psbt>, BdkError> {
-        let network = {
-            let w = wallet.inner.lock().unwrap();
-            w.network()
-        };
-
         let mut w = wallet.inner.lock().unwrap();
+        let network = w.network();
         let mut builder = w.build_tx();
 
         // Recipients

@@ -15,8 +15,12 @@ import type {
   ChangeSpendPolicy,
   DerivationInfo,
   ElectrumClientLike,
+  EsploraClientLike,
   KeychainInfo,
   KeychainKind,
+  KyotoClientLike,
+  KyotoNodeEventHandler,
+  KyotoScanType,
   Network,
   OutPoint,
   PsbtLike,
@@ -25,6 +29,8 @@ import type {
 
 import {
   ElectrumClient,
+  EsploraClient,
+  KyotoClient,
   TxBuilder,
   Wallet,
   createWallet as rawCreateWallet,
@@ -90,7 +96,6 @@ export type TxDetailsN = {
   feeRate?: number;
   balanceDelta: number;
   confirmationBlockTime?: ConfirmationBlockTimeN;
-  txHex: string;
   version: number;
   locktime: number;
   inputs: TxInputN[];
@@ -132,7 +137,6 @@ function toTxDetailsN(tx: {
   feeRate?: number;
   balanceDelta: bigint;
   confirmationBlockTime?: { height: number; blockHash: string; timestamp: bigint };
-  txHex: string;
   version: number;
   locktime: number;
   inputs: Array<{ previousTxid: string; previousVout: number; sequence: number; scriptSigHex: string; witness: string[] }>;
@@ -146,7 +150,6 @@ function toTxDetailsN(tx: {
     feeRate: tx.feeRate ?? undefined,
     balanceDelta: Number(tx.balanceDelta),
     confirmationBlockTime: toConfirmationN(tx.confirmationBlockTime),
-    txHex: tx.txHex,
     version: tx.version,
     locktime: tx.locktime,
     inputs: tx.inputs.map((inp) => ({
@@ -209,6 +212,90 @@ function resolveElectrum(input: ElectrumInput): ElectrumClientLike {
   if (typeof input === 'string') {
     return new ElectrumClient(input);
   }
+  return input.raw;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  EsploraClient wrapper
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Pass a URL string (creates temp client) or a BdkEsploraClient (reuses). */
+export type EsploraInput = string | BdkEsploraClient;
+
+export class BdkEsploraClient {
+  private readonly inner: EsploraClient;
+
+  constructor(url: string) {
+    this.inner = new EsploraClient(url);
+  }
+
+  get raw(): EsploraClientLike {
+    return this.inner;
+  }
+}
+
+function resolveEsplora(input: EsploraInput): EsploraClientLike {
+  if (typeof input === 'string') {
+    return new EsploraClient(input);
+  }
+  return input.raw;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  KyotoClient wrapper (BIP157/158 light client)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export type KyotoOptions = {
+  /** Incremental `Sync` or full `Recovery` — see `KyotoScanType`. */
+  scanType: KyotoScanType;
+  /** Number of peers to maintain. Clamped to >= 1. Defaults to 2. */
+  requiredPeers?: number;
+  /** Explicit peer IPs. Empty (default) falls back to DNS discovery. */
+  peers?: string[];
+  /** Writable directory for header/peer persistence. */
+  dataDir: string;
+  /** Receives info/warning events emitted by the node while it runs. */
+  handler: KyotoNodeEventHandler;
+};
+
+/**
+ * Wraps a running Kyoto light client. Unlike Electrum/Esplora this owns a
+ * long-lived P2P node: build it once from a wallet, reuse it across sync calls,
+ * and call {@link shutdown} when done (it also stops on GC).
+ */
+export class BdkKyotoClient {
+  private readonly inner: KyotoClient;
+
+  constructor(wallet: BdkWallet, opts: KyotoOptions) {
+    this.inner = new KyotoClient(
+      wallet.raw,
+      opts.scanType,
+      opts.requiredPeers ?? 2,
+      opts.peers ?? [],
+      opts.dataDir,
+      opts.handler
+    );
+  }
+
+  get raw(): KyotoClientLike {
+    return this.inner;
+  }
+
+  /** Whether the background node is still running. */
+  isRunning(): boolean {
+    return this.inner.isRunning();
+  }
+
+  /** Stop the node and release peer connections. */
+  shutdown(): void {
+    this.inner.shutdown();
+  }
+}
+
+/** A Kyoto client is stateful, so only an existing instance can be reused. */
+export type KyotoInput = BdkKyotoClient;
+
+function resolveKyoto(input: KyotoInput): KyotoClientLike {
   return input.raw;
 }
 
@@ -349,12 +436,12 @@ export class BdkWallet {
 
   // ── Sync (Esplora) ─────────────────────────────────────────────────────
 
-  fullScanWithEsplora(url: string, stopGap: number): Promise<void> {
-    return this.inner.fullScanWithEsplora(url, BigInt(stopGap));
+  fullScanWithEsplora(client: EsploraInput, stopGap: number): Promise<void> {
+    return this.inner.fullScanWithEsplora(resolveEsplora(client), BigInt(stopGap));
   }
 
-  syncWithEsplora(url: string, stopGap: number): Promise<void> {
-    return this.inner.syncWithEsplora(url, BigInt(stopGap));
+  syncWithEsplora(client: EsploraInput, stopGap: number): Promise<void> {
+    return this.inner.syncWithEsplora(resolveEsplora(client), BigInt(stopGap));
   }
 
   // ── Sync (Electrum) ────────────────────────────────────────────────────
@@ -369,22 +456,33 @@ export class BdkWallet {
 
   // ── Broadcast ───────────────────────────────────────────────────────────
 
-  broadcastWithEsplora(url: string, psbt: PsbtLike): Promise<string> {
-    return this.inner.broadcastWithEsplora(url, psbt);
+  broadcastWithEsplora(client: EsploraInput, psbt: PsbtLike): Promise<string> {
+    return this.inner.broadcastWithEsplora(resolveEsplora(client), psbt);
   }
 
   broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string> {
     return this.inner.broadcastWithElectrum(resolveElectrum(client), psbt);
   }
 
-  // ── Convenience (Esplora) ───────────────────────────────────────────────
+  // ── Sync / Broadcast (Kyoto) ────────────────────────────────────────────
 
-  send(address: string, amountSats: number, feeRate: number, esploraUrl: string): Promise<string> {
-    return this.inner.send(address, BigInt(amountSats), feeRate, esploraUrl);
+  /** Drives one sync against the Kyoto node; resolves once caught up to tip. */
+  syncWithKyoto(client: KyotoInput): Promise<void> {
+    return this.inner.syncWithKyoto(resolveKyoto(client));
   }
 
-  drain(address: string, feeRate: number, esploraUrl: string): Promise<string> {
-    return this.inner.drain(address, feeRate, esploraUrl);
+  broadcastWithKyoto(client: KyotoInput, psbt: PsbtLike): Promise<string> {
+    return this.inner.broadcastWithKyoto(resolveKyoto(client), psbt);
+  }
+
+  // ── Convenience (Esplora) ───────────────────────────────────────────────
+
+  send(address: string, amountSats: number, feeRate: number, esplora: EsploraInput): Promise<string> {
+    return this.inner.send(address, BigInt(amountSats), feeRate, resolveEsplora(esplora));
+  }
+
+  drain(address: string, feeRate: number, esplora: EsploraInput): Promise<string> {
+    return this.inner.drain(address, feeRate, resolveEsplora(esplora));
   }
 
   // ── Convenience (Electrum) ──────────────────────────────────────────────
@@ -410,10 +508,12 @@ export class BdkWallet {
 
   // ── Script / SPK queries ────────────────────────────────────────────────
 
+  /** Throws BdkError on invalid hex. */
   isMine(scriptHex: string): boolean {
     return this.inner.isMine(scriptHex);
   }
 
+  /** Throws BdkError on invalid hex. */
   derivationOfSpk(scriptHex: string): DerivationInfo | undefined {
     return this.inner.derivationOfSpk(scriptHex);
   }
