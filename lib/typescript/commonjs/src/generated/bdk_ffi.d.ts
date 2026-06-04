@@ -1,4 +1,4 @@
-import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConverterObject, RustBuffer, UniffiAbstractObject, destructorGuardSymbol, pointerLiteralSymbol, uniffiTypeNameSymbol } from "uniffi-bindgen-react-native";
+import { type UniffiByteArray, type UniffiGcObject, type UniffiHandle, FfiConverterObject, FfiConverterObjectWithCallbacks, RustBuffer, UniffiAbstractObject, destructorGuardSymbol, pointerLiteralSymbol, uniffiTypeNameSymbol } from "uniffi-bindgen-react-native";
 /**
  * Convert a scriptPubKey (hex) to an address string for the given network.
  * Returns the address string, or an error if the script cannot be converted.
@@ -4483,6 +4483,236 @@ export declare enum KeychainKind {
     External = 0,
     Internal = 1
 }
+export declare enum KyotoRecoveryStart_Tags {
+    Genesis = "Genesis",
+    SegwitActivation = "SegwitActivation",
+    TaprootActivation = "TaprootActivation",
+    FromBlock = "FromBlock"
+}
+/**
+ * Where a Kyoto recovery scan should begin in the chain.
+ */
+export declare const KyotoRecoveryStart: Readonly<{
+    instanceOf: (obj: any) => obj is KyotoRecoveryStart;
+    Genesis: {
+        new (): {
+            readonly tag: KyotoRecoveryStart_Tags.Genesis;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        "new"(): {
+            readonly tag: KyotoRecoveryStart_Tags.Genesis;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        instanceOf(obj: any): obj is {
+            readonly tag: KyotoRecoveryStart_Tags.Genesis;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+    };
+    SegwitActivation: {
+        new (): {
+            readonly tag: KyotoRecoveryStart_Tags.SegwitActivation;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        "new"(): {
+            readonly tag: KyotoRecoveryStart_Tags.SegwitActivation;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        instanceOf(obj: any): obj is {
+            readonly tag: KyotoRecoveryStart_Tags.SegwitActivation;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+    };
+    TaprootActivation: {
+        new (): {
+            readonly tag: KyotoRecoveryStart_Tags.TaprootActivation;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        "new"(): {
+            readonly tag: KyotoRecoveryStart_Tags.TaprootActivation;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        instanceOf(obj: any): obj is {
+            readonly tag: KyotoRecoveryStart_Tags.TaprootActivation;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+    };
+    FromBlock: {
+        new (inner: {
+            height: number;
+            blockHash: string;
+        }): {
+            readonly tag: KyotoRecoveryStart_Tags.FromBlock;
+            readonly inner: Readonly<{
+                height: number;
+                blockHash: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        "new"(inner: {
+            height: number;
+            blockHash: string;
+        }): {
+            readonly tag: KyotoRecoveryStart_Tags.FromBlock;
+            readonly inner: Readonly<{
+                height: number;
+                blockHash: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+        instanceOf(obj: any): obj is {
+            readonly tag: KyotoRecoveryStart_Tags.FromBlock;
+            readonly inner: Readonly<{
+                height: number;
+                blockHash: string;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoRecoveryStart";
+        };
+    };
+}>;
+/**
+ * Where a Kyoto recovery scan should begin in the chain.
+ */
+export type KyotoRecoveryStart = InstanceType<(typeof KyotoRecoveryStart)[keyof Omit<typeof KyotoRecoveryStart, "instanceOf">]>;
+export declare enum KyotoScanType_Tags {
+    Sync = "Sync",
+    Recovery = "Recovery"
+}
+/**
+ * How the Kyoto (BIP157/158) light client should scan filters on start-up.
+ */
+export declare const KyotoScanType: Readonly<{
+    instanceOf: (obj: any) => obj is KyotoScanType;
+    Sync: {
+        new (): {
+            readonly tag: KyotoScanType_Tags.Sync;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+        };
+        "new"(): {
+            readonly tag: KyotoScanType_Tags.Sync;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+        };
+        instanceOf(obj: any): obj is {
+            readonly tag: KyotoScanType_Tags.Sync;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+        };
+    };
+    Recovery: {
+        new (inner: {
+            /**
+             * Highest derivation index known to have been used (lookahead during recovery).
+             */ usedScriptIndex: number;
+            /**
+             * Block height/hash at which to begin the rescan.
+             */ start: KyotoRecoveryStart;
+        }): {
+            readonly tag: KyotoScanType_Tags.Recovery;
+            readonly inner: Readonly<{
+                usedScriptIndex: number;
+                start: KyotoRecoveryStart;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+        };
+        "new"(inner: {
+            /**
+             * Highest derivation index known to have been used (lookahead during recovery).
+             */ usedScriptIndex: number;
+            /**
+             * Block height/hash at which to begin the rescan.
+             */ start: KyotoRecoveryStart;
+        }): {
+            readonly tag: KyotoScanType_Tags.Recovery;
+            readonly inner: Readonly<{
+                usedScriptIndex: number;
+                start: KyotoRecoveryStart;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+        };
+        instanceOf(obj: any): obj is {
+            readonly tag: KyotoScanType_Tags.Recovery;
+            readonly inner: Readonly<{
+                usedScriptIndex: number;
+                start: KyotoRecoveryStart;
+            }>;
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+        };
+    };
+}>;
+/**
+ * How the Kyoto (BIP157/158) light client should scan filters on start-up.
+ */
+export type KyotoScanType = InstanceType<(typeof KyotoScanType)[keyof Omit<typeof KyotoScanType, "instanceOf">]>;
 export declare enum Language {
     English = 0,
     SimplifiedChinese = 1,
@@ -4575,6 +4805,106 @@ export declare class EsploraClient extends UniffiAbstractObject implements Esplo
      */
     uniffiDestroy(): void;
     static instanceOf(obj: any): obj is EsploraClient;
+}
+/**
+ * A running BIP157/158 compact-block-filter light client backed by Kyoto.
+ *
+ * Unlike the Electrum/Esplora clients, this owns a long-lived peer-to-peer node
+ * running on the global Tokio runtime. Construct it once, drive sync via
+ * [`Wallet::sync_with_kyoto`], broadcast via [`Wallet::broadcast_with_kyoto`],
+ * and call [`KyotoClient::shutdown`] (or simply drop it) when finished.
+ */
+export interface KyotoClientLike {
+    /**
+     * Whether the background node is still running.
+     */
+    isRunning(): boolean;
+    /**
+     * Stop the node and release peer connections. Idempotent-ish: returns an
+     * error if the node has already stopped.
+     */
+    shutdown(): void;
+}
+/**
+ * @deprecated Use `KyotoClientLike` instead.
+ */
+export type KyotoClientInterface = KyotoClientLike;
+/**
+ * A running BIP157/158 compact-block-filter light client backed by Kyoto.
+ *
+ * Unlike the Electrum/Esplora clients, this owns a long-lived peer-to-peer node
+ * running on the global Tokio runtime. Construct it once, drive sync via
+ * [`Wallet::sync_with_kyoto`], broadcast via [`Wallet::broadcast_with_kyoto`],
+ * and call [`KyotoClient::shutdown`] (or simply drop it) when finished.
+ */
+export declare class KyotoClient extends UniffiAbstractObject implements KyotoClientLike {
+    readonly [uniffiTypeNameSymbol] = "KyotoClient";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Build a light client for `wallet` and start its background node.
+     *
+     * - `scan_type`: [`KyotoScanType::Sync`] to continue from the wallet's
+     * checkpoint, or [`KyotoScanType::Recovery`] to rescan for restoration.
+     * - `required_peers`: how many peers to maintain (clamped to >= 1).
+     * - `peers`: optional explicit peer IPs; empty falls back to DNS discovery.
+     * - `data_dir`: writable directory for header/peer persistence.
+     * - `handler`: receives info/warning events from the node.
+     */
+    constructor(wallet: WalletLike, scanType: KyotoScanType, requiredPeers: number, peers: Array<string>, dataDir: string, handler: KyotoNodeEventHandler);
+    /**
+     * Whether the background node is still running.
+     */
+    isRunning(): boolean;
+    /**
+     * Stop the node and release peer connections. Idempotent-ish: returns an
+     * error if the node has already stopped.
+     */
+    shutdown(): void;
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is KyotoClient;
+}
+/**
+ * Callback implemented on the JS side to receive node log/warning events while
+ * a [`KyotoClient`] is running. Methods are invoked from background threads and
+ * should return quickly (e.g. forward to a UI log) — they must not block.
+ */
+export interface KyotoNodeEventHandler {
+    /**
+     * Informational message (handshakes, progress, blocks received, …).
+     */
+    onInfo(message: string): void;
+    /**
+     * Warning message (peer timeouts, rejected txs, potential forks, …).
+     */
+    onWarning(message: string): void;
+}
+/**
+ * Callback implemented on the JS side to receive node log/warning events while
+ * a [`KyotoClient`] is running. Methods are invoked from background threads and
+ * should return quickly (e.g. forward to a UI log) — they must not block.
+ */
+export declare class KyotoNodeEventHandlerImpl extends UniffiAbstractObject implements KyotoNodeEventHandler {
+    readonly [uniffiTypeNameSymbol] = "KyotoNodeEventHandlerImpl";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    private constructor();
+    /**
+     * Informational message (handshakes, progress, blocks received, …).
+     */
+    onInfo(message: string): void;
+    /**
+     * Warning message (peer timeouts, rejected txs, potential forks, …).
+     */
+    onWarning(message: string): void;
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is KyotoNodeEventHandlerImpl;
 }
 export interface MnemonicLike {
     /**
@@ -4816,6 +5146,9 @@ export interface WalletLike {
     broadcastWithEsplora(client: EsploraClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
+    broadcastWithKyoto(client: KyotoClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     calculateFee(txHex: string): bigint;
     calculateFeeRate(txHex: string): number;
@@ -4870,6 +5203,15 @@ export interface WalletLike {
     syncWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
+    /**
+     * Drive a single sync against the Kyoto light client. Awaits until the node
+     * reports it has caught up to the chain tip, applies the resulting update,
+     * and persists. The scan strategy (incremental vs recovery) is fixed when the
+     * `KyotoClient` is built. Safe to call repeatedly while the node is running.
+     */
+    syncWithKyoto(client: KyotoClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     transactions(): Array<TxDetails>;
     txDetails(txid: string): /*throws*/ TxDetails | undefined;
     unmarkUsed(keychain: KeychainKind, index: number): boolean;
@@ -4890,6 +5232,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
         signal: AbortSignal;
     }): Promise<string>;
     broadcastWithEsplora(client: EsploraClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    broadcastWithKyoto(client: KyotoClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
@@ -4944,6 +5289,15 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
         signal: AbortSignal;
     }): Promise<void>;
     syncWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    /**
+     * Drive a single sync against the Kyoto light client. Awaits until the node
+     * reports it has caught up to the chain tip, applies the resulting update,
+     * and persists. The scan strategy (incremental vs recovery) is fixed when the
+     * `KyotoClient` is built. Safe to call repeatedly while the node is running.
+     */
+    syncWithKyoto(client: KyotoClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     transactions(): Array<TxDetails>;
@@ -5040,6 +5394,22 @@ declare const _default: Readonly<{
             allocationSize(value: KeychainKind): number;
             lift(value: UniffiByteArray): KeychainKind;
             lower(value: KeychainKind): UniffiByteArray;
+        };
+        FfiConverterTypeKyotoClient: FfiConverterObject<KyotoClientLike>;
+        FfiConverterTypeKyotoNodeEventHandler: FfiConverterObjectWithCallbacks<KyotoNodeEventHandler>;
+        FfiConverterTypeKyotoRecoveryStart: {
+            read(from: RustBuffer): KyotoRecoveryStart;
+            write(value: KyotoRecoveryStart, into: RustBuffer): void;
+            allocationSize(value: KyotoRecoveryStart): number;
+            lift(value: UniffiByteArray): KyotoRecoveryStart;
+            lower(value: KyotoRecoveryStart): UniffiByteArray;
+        };
+        FfiConverterTypeKyotoScanType: {
+            read(from: RustBuffer): KyotoScanType;
+            write(value: KyotoScanType, into: RustBuffer): void;
+            allocationSize(value: KyotoScanType): number;
+            lift(value: UniffiByteArray): KyotoScanType;
+            lower(value: KyotoScanType): UniffiByteArray;
         };
         FfiConverterTypeLanguage: {
             read(from: RustBuffer): Language;

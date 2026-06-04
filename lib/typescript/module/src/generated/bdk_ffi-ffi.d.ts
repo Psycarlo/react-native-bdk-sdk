@@ -1,4 +1,4 @@
-import { type UniffiRustCallStatus, type UniffiGcObject } from "uniffi-bindgen-react-native";
+import { type UniffiRustCallStatus, type UniffiGcObject, type UniffiResult } from "uniffi-bindgen-react-native";
 interface NativeModuleInterface {
     ubrn_uniffi_internal_fn_func_ffi__string_to_byte_length(string: string, uniffi_out_err: UniffiRustCallStatus): number;
     ubrn_uniffi_internal_fn_func_ffi__string_to_arraybuffer(string: string, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
@@ -9,6 +9,16 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_clone_esploraclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_esploraclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_new(url: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_clone_kyotoclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_free_kyotoclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(wallet: bigint, scanType: Uint8Array, requiredPeers: number, peers: Uint8Array, dataDir: Uint8Array, handler: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): number;
+    ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(vtable: UniffiVTableCallbackInterfaceKyotoNodeEventHandler): void;
+    ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(ptr: bigint, message: Uint8Array, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(ptr: bigint, message: Uint8Array, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_clone_mnemonic(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_mnemonic(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(entropy: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
@@ -68,6 +78,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(descriptor: Uint8Array, changeDescriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(ptr: bigint, client: bigint, psbt: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(ptr: bigint, txid: Uint8Array, newFeeRate: number, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): number;
@@ -106,6 +117,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sign(ptr: bigint, psbt: bigint, uniffi_out_err: UniffiRustCallStatus): number;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(ptr: bigint, client: bigint, stopGap: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(ptr: bigint, client: bigint, stopGap: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(ptr: bigint, client: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(ptr: bigint, txid: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_unmark_used(ptr: bigint, keychain: Uint8Array, index: number, uniffi_out_err: UniffiRustCallStatus): number;
@@ -179,6 +191,10 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_version(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_string(): number;
@@ -222,6 +238,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(): number;
@@ -260,11 +277,13 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(): number;
+    ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string(): number;
@@ -276,6 +295,8 @@ interface NativeModuleInterface {
     ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
     ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
+    ubrn_uniffi_internal_fn_method_kyotoclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
+    ubrn_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
@@ -285,6 +306,8 @@ declare const getter: () => NativeModuleInterface;
 export default getter;
 export type UniffiRustFutureContinuationCallback = (data: bigint, pollResult: number) => void;
 export type UniffiForeignFutureDroppedCallback = (handle: bigint) => void;
+type UniffiCallbackInterfaceFree = (handle: bigint) => void;
+type UniffiCallbackInterfaceClone = (handle: bigint) => UniffiResult<void>;
 export type UniffiForeignFutureDroppedCallbackStruct = {
     handle: bigint;
     free: UniffiForeignFutureDroppedCallback;
@@ -348,4 +371,12 @@ export type UniffiForeignFutureResultVoid = {
     callStatus: UniffiRustCallStatus;
 };
 export type UniffiForeignFutureCompleteVoid = (callbackData: bigint, result: UniffiForeignFutureResultVoid) => void;
+type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0 = (uniffiHandle: bigint, message: Uint8Array) => UniffiResult<void>;
+type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1 = (uniffiHandle: bigint, message: Uint8Array) => UniffiResult<void>;
+export type UniffiVTableCallbackInterfaceKyotoNodeEventHandler = {
+    uniffiFree: UniffiCallbackInterfaceFree;
+    uniffiClone: UniffiCallbackInterfaceClone;
+    onInfo: UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0;
+    onWarning: UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1;
+};
 //# sourceMappingURL=bdk_ffi-ffi.d.ts.map
