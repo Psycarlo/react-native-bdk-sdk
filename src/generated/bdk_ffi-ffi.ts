@@ -339,6 +339,41 @@ interface NativeModuleInterface {
     outpoints: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
+  ubrn_uniffi_bdk_ffi_fn_clone_fullscanprogressinspector(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_free_fullscanprogressinspector(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_fullscanprogressinspector(
+    vtable: UniffiVTableCallbackInterfaceFullScanProgressInspector
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(
+    ptr: bigint,
+    keychain: Uint8Array,
+    index: number,
+    visited: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_clone_syncprogressinspector(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_free_syncprogressinspector(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_syncprogressinspector(
+    vtable: UniffiVTableCallbackInterfaceSyncProgressInspector
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_syncprogressinspector_inspect(
+    ptr: bigint,
+    consumed: bigint,
+    total: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_wallet(
     handle: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -424,12 +459,14 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
     ptr: bigint,
     client: bigint,
-    stopGap: bigint
+    stopGap: bigint,
+    inspector: Uint8Array
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
     ptr: bigint,
     client: bigint,
-    stopGap: bigint
+    stopGap: bigint,
+    inspector: Uint8Array
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_get_balance(
     ptr: bigint,
@@ -555,12 +592,14 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
     ptr: bigint,
     client: bigint,
-    stopGap: bigint
+    stopGap: bigint,
+    inspector: Uint8Array
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
     ptr: bigint,
     client: bigint,
-    stopGap: bigint
+    stopGap: bigint,
+    inspector: Uint8Array
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(
     ptr: bigint,
@@ -832,6 +871,8 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_sighash(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_tx_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(): number;
@@ -914,6 +955,14 @@ interface NativeModuleInterface {
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
   ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(
+    pointer: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): UniffiGcObject;
+  ubrn_uniffi_internal_fn_method_fullscanprogressinspector_ffi__bless_pointer(
+    pointer: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): UniffiGcObject;
+  ubrn_uniffi_internal_fn_method_syncprogressinspector_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
@@ -1047,11 +1096,32 @@ type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1 = (
   uniffiHandle: bigint,
   message: Uint8Array
 ) => UniffiResult<void>;
+type UniffiCallbackInterfaceFullScanProgressInspectorMethod0 = (
+  uniffiHandle: bigint,
+  keychain: Uint8Array,
+  index: number,
+  visited: bigint
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceSyncProgressInspectorMethod0 = (
+  uniffiHandle: bigint,
+  consumed: bigint,
+  total: bigint
+) => UniffiResult<void>;
 export type UniffiVTableCallbackInterfaceKyotoNodeEventHandler = {
   uniffiFree: UniffiCallbackInterfaceFree;
   uniffiClone: UniffiCallbackInterfaceClone;
   onInfo: UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0;
   onWarning: UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1;
+};
+export type UniffiVTableCallbackInterfaceFullScanProgressInspector = {
+  uniffiFree: UniffiCallbackInterfaceFree;
+  uniffiClone: UniffiCallbackInterfaceClone;
+  inspect: UniffiCallbackInterfaceFullScanProgressInspectorMethod0;
+};
+export type UniffiVTableCallbackInterfaceSyncProgressInspector = {
+  uniffiFree: UniffiCallbackInterfaceFree;
+  uniffiClone: UniffiCallbackInterfaceClone;
+  inspect: UniffiCallbackInterfaceSyncProgressInspectorMethod0;
 };
 
 // UniffiRustFutureContinuationCallback is generated as part of the component interface's

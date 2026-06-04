@@ -33,6 +33,8 @@ import nativeModule, {
   type UniffiForeignFutureResultVoid,
   type UniffiForeignFutureCompleteVoid,
   type UniffiVTableCallbackInterfaceKyotoNodeEventHandler,
+  type UniffiVTableCallbackInterfaceFullScanProgressInspector,
+  type UniffiVTableCallbackInterfaceSyncProgressInspector,
 } from "./bdk_ffi-ffi";
 import {
   type FfiConverter,
@@ -4837,6 +4839,222 @@ const FfiConverterTypeEsploraClient = new FfiConverterObject(
 );
 
 /**
+ * Callback invoked on each script pubkey revealed while full-scanning a wallet
+ * against a chain source (Electrum/Esplora). Implemented on the JS side and
+ * passed to the `full_scan_with_*` methods.
+ *
+ * Unlike sync, a full scan has no fixed total — it keeps revealing scripts per
+ * keychain until `stop_gap` consecutive empty ones are seen — so only the
+ * running count of scripts visited is reported, not a fraction. `inspect` is
+ * called from a background thread and must not block.
+ */
+export interface FullScanProgressInspector {
+  /**
+   * `keychain`/`index`: the spk just visited. `visited`: running count of
+   * scripts inspected so far across all keychains in this scan.
+   */
+  inspect(
+    keychain: KeychainKind,
+    index: /*u32*/ number,
+    visited: /*u64*/ bigint
+  ): void;
+}
+
+/**
+ * Callback invoked on each script pubkey revealed while full-scanning a wallet
+ * against a chain source (Electrum/Esplora). Implemented on the JS side and
+ * passed to the `full_scan_with_*` methods.
+ *
+ * Unlike sync, a full scan has no fixed total — it keeps revealing scripts per
+ * keychain until `stop_gap` consecutive empty ones are seen — so only the
+ * running count of scripts visited is reported, not a fraction. `inspect` is
+ * called from a background thread and must not block.
+ */
+export class FullScanProgressInspectorImpl
+  extends UniffiAbstractObject
+  implements FullScanProgressInspector
+{
+  readonly [uniffiTypeNameSymbol] = "FullScanProgressInspectorImpl";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  // No primary constructor declared for this class.
+  private constructor(pointer: UniffiHandle) {
+    super();
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeFullScanProgressInspectorImplObjectFactory.bless(pointer);
+  }
+
+  /**
+   * `keychain`/`index`: the spk just visited. `visited`: running count of
+   * scripts inspected so far across all keychains in this scan.
+   */
+  inspect(
+    keychain: KeychainKind,
+    index: /*u32*/ number,
+    visited: /*u64*/ bigint
+  ): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(
+          uniffiTypeFullScanProgressInspectorImplObjectFactory.clonePointer(
+            this
+          ),
+          FfiConverterTypeKeychainKind.lower(keychain),
+          FfiConverterUInt32.lower(index),
+          FfiConverterUInt64.lower(visited),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer =
+        uniffiTypeFullScanProgressInspectorImplObjectFactory.pointer(this);
+      uniffiTypeFullScanProgressInspectorImplObjectFactory.freePointer(pointer);
+      uniffiTypeFullScanProgressInspectorImplObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is FullScanProgressInspectorImpl {
+    return uniffiTypeFullScanProgressInspectorImplObjectFactory.isConcreteType(
+      obj
+    );
+  }
+}
+
+const uniffiTypeFullScanProgressInspectorImplObjectFactory: UniffiObjectFactory<FullScanProgressInspector> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): FullScanProgressInspector {
+        const instance = Object.create(FullScanProgressInspectorImpl.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "FullScanProgressInspectorImpl";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_fullscanprogressinspector_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: FullScanProgressInspector): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: FullScanProgressInspector): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_fullscanprogressinspector(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_fullscanprogressinspector(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is FullScanProgressInspector {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "FullScanProgressInspectorImpl"
+        );
+      },
+    };
+  })();
+// FfiConverter for FullScanProgressInspector
+const FfiConverterTypeFullScanProgressInspector =
+  new FfiConverterObjectWithCallbacks(
+    uniffiTypeFullScanProgressInspectorImplObjectFactory
+  );
+
+// Add a vtavble for the callbacks that go in FullScanProgressInspector.
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+const uniffiCallbackInterfaceFullScanProgressInspector: {
+  vtable: UniffiVTableCallbackInterfaceFullScanProgressInspector;
+  register: () => void;
+} = {
+  // Create the VTable using a series of closures.
+  // ts automatically converts these into C callback functions.
+  vtable: {
+    inspect: (
+      uniffiHandle: bigint,
+      keychain: Uint8Array,
+      index: number,
+      visited: bigint
+    ) => {
+      const uniffiMakeCall = (): void => {
+        const jsCallback =
+          FfiConverterTypeFullScanProgressInspector.lift(uniffiHandle);
+        return jsCallback.inspect(
+          FfiConverterTypeKeychainKind.lift(keychain),
+          FfiConverterUInt32.lift(index),
+          FfiConverterUInt64.lift(visited)
+        );
+      };
+      const uniffiResult = UniffiResult.ready<void>();
+      const uniffiHandleSuccess = (obj: any) => {};
+      const uniffiHandleError = (code: number, errBuf: UniffiByteArray) => {
+        UniffiResult.writeError(uniffiResult, code, errBuf);
+      };
+      uniffiTraitInterfaceCall(
+        /*makeCall:*/ uniffiMakeCall,
+        /*handleSuccess:*/ uniffiHandleSuccess,
+        /*handleError:*/ uniffiHandleError,
+        /*lowerString:*/ FfiConverterString.lower
+      );
+      return uniffiResult;
+    },
+    uniffiFree: (uniffiHandle: UniffiHandle): void => {
+      // FullScanProgressInspector: this will throw a stale handle error if the handle isn't found.
+      FfiConverterTypeFullScanProgressInspector.drop(uniffiHandle);
+    },
+    uniffiClone: (uniffiHandle: UniffiHandle): UniffiHandle => {
+      return FfiConverterTypeFullScanProgressInspector.clone(uniffiHandle);
+    },
+  },
+  register: () => {
+    nativeModule().ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_fullscanprogressinspector(
+      uniffiCallbackInterfaceFullScanProgressInspector.vtable
+    );
+  },
+};
+
+/**
  * A running BIP157/158 compact-block-filter light client backed by Kyoto.
  *
  * Unlike the Electrum/Esplora clients, this owns a long-lived peer-to-peer node
@@ -5814,6 +6032,201 @@ const FfiConverterTypePsbt = new FfiConverterObject(
   uniffiTypePsbtObjectFactory
 );
 
+/**
+ * Callback invoked on each item visited while syncing a wallet against a
+ * chain source (Electrum/Esplora). Implemented on the JS side and passed to
+ * the `sync_with_*` methods to drive a progress indicator.
+ *
+ * Sync is bounded: `total` is the number of items (script pubkeys, txids and
+ * outpoints) in the request, so `consumed as f64 / total as f64` is a usable
+ * completion fraction. `inspect` is called from a background thread and should
+ * return quickly — it must not block.
+ */
+export interface SyncProgressInspector {
+  /**
+   * `consumed`: items processed so far. `total`: items in the whole request.
+   */
+  inspect(consumed: /*u64*/ bigint, total: /*u64*/ bigint): void;
+}
+
+/**
+ * Callback invoked on each item visited while syncing a wallet against a
+ * chain source (Electrum/Esplora). Implemented on the JS side and passed to
+ * the `sync_with_*` methods to drive a progress indicator.
+ *
+ * Sync is bounded: `total` is the number of items (script pubkeys, txids and
+ * outpoints) in the request, so `consumed as f64 / total as f64` is a usable
+ * completion fraction. `inspect` is called from a background thread and should
+ * return quickly — it must not block.
+ */
+export class SyncProgressInspectorImpl
+  extends UniffiAbstractObject
+  implements SyncProgressInspector
+{
+  readonly [uniffiTypeNameSymbol] = "SyncProgressInspectorImpl";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  // No primary constructor declared for this class.
+  private constructor(pointer: UniffiHandle) {
+    super();
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeSyncProgressInspectorImplObjectFactory.bless(pointer);
+  }
+
+  /**
+   * `consumed`: items processed so far. `total`: items in the whole request.
+   */
+  inspect(consumed: /*u64*/ bigint, total: /*u64*/ bigint): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_syncprogressinspector_inspect(
+          uniffiTypeSyncProgressInspectorImplObjectFactory.clonePointer(this),
+          FfiConverterUInt64.lower(consumed),
+          FfiConverterUInt64.lower(total),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer =
+        uniffiTypeSyncProgressInspectorImplObjectFactory.pointer(this);
+      uniffiTypeSyncProgressInspectorImplObjectFactory.freePointer(pointer);
+      uniffiTypeSyncProgressInspectorImplObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is SyncProgressInspectorImpl {
+    return uniffiTypeSyncProgressInspectorImplObjectFactory.isConcreteType(obj);
+  }
+}
+
+const uniffiTypeSyncProgressInspectorImplObjectFactory: UniffiObjectFactory<SyncProgressInspector> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): SyncProgressInspector {
+        const instance = Object.create(SyncProgressInspectorImpl.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "SyncProgressInspectorImpl";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_syncprogressinspector_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: SyncProgressInspector): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: SyncProgressInspector): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_syncprogressinspector(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_syncprogressinspector(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is SyncProgressInspector {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "SyncProgressInspectorImpl"
+        );
+      },
+    };
+  })();
+// FfiConverter for SyncProgressInspector
+const FfiConverterTypeSyncProgressInspector =
+  new FfiConverterObjectWithCallbacks(
+    uniffiTypeSyncProgressInspectorImplObjectFactory
+  );
+
+// Add a vtavble for the callbacks that go in SyncProgressInspector.
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+const uniffiCallbackInterfaceSyncProgressInspector: {
+  vtable: UniffiVTableCallbackInterfaceSyncProgressInspector;
+  register: () => void;
+} = {
+  // Create the VTable using a series of closures.
+  // ts automatically converts these into C callback functions.
+  vtable: {
+    inspect: (uniffiHandle: bigint, consumed: bigint, total: bigint) => {
+      const uniffiMakeCall = (): void => {
+        const jsCallback =
+          FfiConverterTypeSyncProgressInspector.lift(uniffiHandle);
+        return jsCallback.inspect(
+          FfiConverterUInt64.lift(consumed),
+          FfiConverterUInt64.lift(total)
+        );
+      };
+      const uniffiResult = UniffiResult.ready<void>();
+      const uniffiHandleSuccess = (obj: any) => {};
+      const uniffiHandleError = (code: number, errBuf: UniffiByteArray) => {
+        UniffiResult.writeError(uniffiResult, code, errBuf);
+      };
+      uniffiTraitInterfaceCall(
+        /*makeCall:*/ uniffiMakeCall,
+        /*handleSuccess:*/ uniffiHandleSuccess,
+        /*handleError:*/ uniffiHandleError,
+        /*lowerString:*/ FfiConverterString.lower
+      );
+      return uniffiResult;
+    },
+    uniffiFree: (uniffiHandle: UniffiHandle): void => {
+      // SyncProgressInspector: this will throw a stale handle error if the handle isn't found.
+      FfiConverterTypeSyncProgressInspector.drop(uniffiHandle);
+    },
+    uniffiClone: (uniffiHandle: UniffiHandle): UniffiHandle => {
+      return FfiConverterTypeSyncProgressInspector.clone(uniffiHandle);
+    },
+  },
+  register: () => {
+    nativeModule().ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_syncprogressinspector(
+      uniffiCallbackInterfaceSyncProgressInspector.vtable
+    );
+  },
+};
+
 export interface TxBuilderLike {
   addData(data: ArrayBuffer): void;
   addGlobalXpubs(): void;
@@ -6421,11 +6834,13 @@ export interface WalletLike {
   fullScanWithElectrum(
     client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: FullScanProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   fullScanWithEsplora(
     client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: FullScanProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   getBalance(): /*throws*/ Balance;
@@ -6473,11 +6888,13 @@ export interface WalletLike {
   syncWithElectrum(
     client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: SyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   syncWithEsplora(
     client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: SyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   /**
@@ -6872,6 +7289,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   async fullScanWithElectrum(
     client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: FullScanProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -6882,7 +7300,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterTypeElectrumClient.lower(client),
-            FfiConverterUInt64.lower(stopGap)
+            FfiConverterUInt64.lower(stopGap),
+            FfiConverterOptionalTypeFullScanProgressInspector.lower(inspector)
           );
         },
         /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
@@ -6908,6 +7327,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   async fullScanWithEsplora(
     client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: FullScanProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -6918,7 +7338,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterTypeEsploraClient.lower(client),
-            FfiConverterUInt64.lower(stopGap)
+            FfiConverterUInt64.lower(stopGap),
+            FfiConverterOptionalTypeFullScanProgressInspector.lower(inspector)
           );
         },
         /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
@@ -7409,6 +7830,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   async syncWithElectrum(
     client: ElectrumClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: SyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -7419,7 +7841,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterTypeElectrumClient.lower(client),
-            FfiConverterUInt64.lower(stopGap)
+            FfiConverterUInt64.lower(stopGap),
+            FfiConverterOptionalTypeSyncProgressInspector.lower(inspector)
           );
         },
         /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
@@ -7445,6 +7868,7 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
   async syncWithEsplora(
     client: EsploraClientLike,
     stopGap: /*u64*/ bigint,
+    inspector: SyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): Promise<void> /*throws*/ {
     const __stack = uniffiIsDebug ? new Error().stack : undefined;
@@ -7455,7 +7879,8 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterTypeEsploraClient.lower(client),
-            FfiConverterUInt64.lower(stopGap)
+            FfiConverterUInt64.lower(stopGap),
+            FfiConverterOptionalTypeSyncProgressInspector.lower(inspector)
           );
         },
         /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
@@ -7745,6 +8170,15 @@ const FfiConverterArrayTypeTxOutput = new FfiConverterArray(
 
 // FfiConverter for Array<string>
 const FfiConverterArrayString = new FfiConverterArray(FfiConverterString);
+
+// FfiConverter for FullScanProgressInspector | undefined
+const FfiConverterOptionalTypeFullScanProgressInspector =
+  new FfiConverterOptional(FfiConverterTypeFullScanProgressInspector);
+
+// FfiConverter for SyncProgressInspector | undefined
+const FfiConverterOptionalTypeSyncProgressInspector = new FfiConverterOptional(
+  FfiConverterTypeSyncProgressInspector
+);
 
 /**
  * This should be called before anything else.
@@ -8210,6 +8644,22 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect() !==
+    49334
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect() !==
+    21297
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum() !==
     32446
   ) {
@@ -8314,7 +8764,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum() !==
-    44577
+    3559
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_electrum"
@@ -8322,7 +8772,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora() !==
-    245
+    20702
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_full_scan_with_esplora"
@@ -8519,7 +8969,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum() !==
-    9147
+    47051
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"
@@ -8527,7 +8977,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora() !==
-    60834
+    46997
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora"
@@ -8653,7 +9103,9 @@ function uniffiEnsureInitialized() {
     );
   }
 
+  uniffiCallbackInterfaceFullScanProgressInspector.register();
   uniffiCallbackInterfaceKyotoNodeEventHandler.register();
+  uniffiCallbackInterfaceSyncProgressInspector.register();
 }
 
 export default Object.freeze({
@@ -8669,6 +9121,7 @@ export default Object.freeze({
     FfiConverterTypeDescriptorTemplate,
     FfiConverterTypeElectrumClient,
     FfiConverterTypeEsploraClient,
+    FfiConverterTypeFullScanProgressInspector,
     FfiConverterTypeKeychainInfo,
     FfiConverterTypeKeychainKind,
     FfiConverterTypeKyotoClient,
@@ -8684,6 +9137,7 @@ export default Object.freeze({
     FfiConverterTypeRecipient,
     FfiConverterTypeSentAndReceived,
     FfiConverterTypeSingleKeyDescriptorTemplate,
+    FfiConverterTypeSyncProgressInspector,
     FfiConverterTypeTxBuilder,
     FfiConverterTypeTxDetails,
     FfiConverterTypeTxInput,

@@ -23,6 +23,22 @@ export type ConfirmationBlockTimeN = {
     blockHash: string;
     timestamp: number;
 };
+/**
+ * Number-friendly sync progress callback. `consumed` items processed out of
+ * `total` items in the request — `consumed / total` is a completion fraction.
+ * Called from a background thread; keep it fast and non-blocking.
+ */
+export type SyncProgressInspectorN = {
+    inspect(consumed: number, total: number): void;
+};
+/**
+ * Number-friendly full-scan progress callback. A full scan has no fixed total
+ * (stop-gap driven), so only the running `visited` count of scripts is given,
+ * not a fraction. Called from a background thread; keep it fast and non-blocking.
+ */
+export type FullScanProgressInspectorN = {
+    inspect(keychain: KeychainKind, index: number, visited: number): void;
+};
 export type TxOutN = {
     value: number;
     scriptPubkeyHex: string;
@@ -135,10 +151,10 @@ export declare class BdkWallet {
     calculateFeeRate(txHex: string): number;
     sign(psbt: PsbtLike): boolean;
     finalizePsbt(psbt: PsbtLike): boolean;
-    fullScanWithEsplora(client: EsploraInput, stopGap: number): Promise<void>;
-    syncWithEsplora(client: EsploraInput, stopGap: number): Promise<void>;
-    fullScanWithElectrum(client: ElectrumInput, stopGap: number): Promise<void>;
-    syncWithElectrum(client: ElectrumInput, stopGap: number): Promise<void>;
+    fullScanWithEsplora(client: EsploraInput, stopGap: number, inspector?: FullScanProgressInspectorN): Promise<void>;
+    syncWithEsplora(client: EsploraInput, stopGap: number, inspector?: SyncProgressInspectorN): Promise<void>;
+    fullScanWithElectrum(client: ElectrumInput, stopGap: number, inspector?: FullScanProgressInspectorN): Promise<void>;
+    syncWithElectrum(client: ElectrumInput, stopGap: number, inspector?: SyncProgressInspectorN): Promise<void>;
     broadcastWithEsplora(client: EsploraInput, psbt: PsbtLike): Promise<string>;
     broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string>;
     /** Drives one sync against the Kyoto node; resolves once caught up to tip. */

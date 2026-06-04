@@ -4807,6 +4807,49 @@ export declare class EsploraClient extends UniffiAbstractObject implements Esplo
     static instanceOf(obj: any): obj is EsploraClient;
 }
 /**
+ * Callback invoked on each script pubkey revealed while full-scanning a wallet
+ * against a chain source (Electrum/Esplora). Implemented on the JS side and
+ * passed to the `full_scan_with_*` methods.
+ *
+ * Unlike sync, a full scan has no fixed total — it keeps revealing scripts per
+ * keychain until `stop_gap` consecutive empty ones are seen — so only the
+ * running count of scripts visited is reported, not a fraction. `inspect` is
+ * called from a background thread and must not block.
+ */
+export interface FullScanProgressInspector {
+    /**
+     * `keychain`/`index`: the spk just visited. `visited`: running count of
+     * scripts inspected so far across all keychains in this scan.
+     */
+    inspect(keychain: KeychainKind, index: number, visited: bigint): void;
+}
+/**
+ * Callback invoked on each script pubkey revealed while full-scanning a wallet
+ * against a chain source (Electrum/Esplora). Implemented on the JS side and
+ * passed to the `full_scan_with_*` methods.
+ *
+ * Unlike sync, a full scan has no fixed total — it keeps revealing scripts per
+ * keychain until `stop_gap` consecutive empty ones are seen — so only the
+ * running count of scripts visited is reported, not a fraction. `inspect` is
+ * called from a background thread and must not block.
+ */
+export declare class FullScanProgressInspectorImpl extends UniffiAbstractObject implements FullScanProgressInspector {
+    readonly [uniffiTypeNameSymbol] = "FullScanProgressInspectorImpl";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    private constructor();
+    /**
+     * `keychain`/`index`: the spk just visited. `visited`: running count of
+     * scripts inspected so far across all keychains in this scan.
+     */
+    inspect(keychain: KeychainKind, index: number, visited: bigint): void;
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is FullScanProgressInspectorImpl;
+}
+/**
  * A running BIP157/158 compact-block-filter light client backed by Kyoto.
  *
  * Unlike the Electrum/Esplora clients, this owns a long-lived peer-to-peer node
@@ -5050,6 +5093,47 @@ export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     uniffiDestroy(): void;
     static instanceOf(obj: any): obj is Psbt;
 }
+/**
+ * Callback invoked on each item visited while syncing a wallet against a
+ * chain source (Electrum/Esplora). Implemented on the JS side and passed to
+ * the `sync_with_*` methods to drive a progress indicator.
+ *
+ * Sync is bounded: `total` is the number of items (script pubkeys, txids and
+ * outpoints) in the request, so `consumed as f64 / total as f64` is a usable
+ * completion fraction. `inspect` is called from a background thread and should
+ * return quickly — it must not block.
+ */
+export interface SyncProgressInspector {
+    /**
+     * `consumed`: items processed so far. `total`: items in the whole request.
+     */
+    inspect(consumed: bigint, total: bigint): void;
+}
+/**
+ * Callback invoked on each item visited while syncing a wallet against a
+ * chain source (Electrum/Esplora). Implemented on the JS side and passed to
+ * the `sync_with_*` methods to drive a progress indicator.
+ *
+ * Sync is bounded: `total` is the number of items (script pubkeys, txids and
+ * outpoints) in the request, so `consumed as f64 / total as f64` is a usable
+ * completion fraction. `inspect` is called from a background thread and should
+ * return quickly — it must not block.
+ */
+export declare class SyncProgressInspectorImpl extends UniffiAbstractObject implements SyncProgressInspector {
+    readonly [uniffiTypeNameSymbol] = "SyncProgressInspectorImpl";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    private constructor();
+    /**
+     * `consumed`: items processed so far. `total`: items in the whole request.
+     */
+    inspect(consumed: bigint, total: bigint): void;
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is SyncProgressInspectorImpl;
+}
 export interface TxBuilderLike {
     addData(data: ArrayBuffer): void;
     addGlobalXpubs(): void;
@@ -5163,10 +5247,10 @@ export interface WalletLike {
         signal: AbortSignal;
     }): Promise<string>;
     finalizePsbt(psbt: PsbtLike): boolean;
-    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
+    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
+    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     getBalance(): Balance;
@@ -5197,10 +5281,10 @@ export interface WalletLike {
     }): Promise<string>;
     sentAndReceived(txHex: string): SentAndReceived;
     sign(psbt: PsbtLike): boolean;
-    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
+    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
+    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     /**
@@ -5251,10 +5335,10 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
         signal: AbortSignal;
     }): Promise<string>;
     finalizePsbt(psbt: PsbtLike): boolean;
-    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
+    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
+    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     getBalance(): Balance;
@@ -5285,10 +5369,10 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     }): Promise<string>;
     sentAndReceived(txHex: string): SentAndReceived;
     sign(psbt: PsbtLike): boolean;
-    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, asyncOpts_?: {
+    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
-    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, asyncOpts_?: {
+    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     /**
@@ -5381,6 +5465,7 @@ declare const _default: Readonly<{
         };
         FfiConverterTypeElectrumClient: FfiConverterObject<ElectrumClientLike>;
         FfiConverterTypeEsploraClient: FfiConverterObject<EsploraClientLike>;
+        FfiConverterTypeFullScanProgressInspector: FfiConverterObjectWithCallbacks<FullScanProgressInspector>;
         FfiConverterTypeKeychainInfo: {
             read(from: RustBuffer): KeychainInfo;
             write(value: KeychainInfo, into: RustBuffer): void;
@@ -5462,6 +5547,7 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): SingleKeyDescriptorTemplate;
             lower(value: SingleKeyDescriptorTemplate): UniffiByteArray;
         };
+        FfiConverterTypeSyncProgressInspector: FfiConverterObjectWithCallbacks<SyncProgressInspector>;
         FfiConverterTypeTxBuilder: FfiConverterObject<TxBuilderLike>;
         FfiConverterTypeTxDetails: {
             read(from: RustBuffer): TxDetails;
