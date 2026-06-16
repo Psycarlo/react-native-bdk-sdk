@@ -25,6 +25,8 @@ import type {
   Network,
   OutPoint,
   PsbtLike,
+  RpcClientLike,
+  RpcSyncProgressInspector,
   SyncProgressInspector,
   TxOrdering,
 } from './generated/bdk_ffi';
@@ -33,6 +35,7 @@ import {
   ElectrumClient,
   EsploraClient,
   KyotoClient,
+  RpcClient,
   TxBuilder,
   Wallet,
   createWallet as rawCreateWallet,
@@ -73,6 +76,25 @@ export type SyncProgressInspectorN = {
  */
 export type FullScanProgressInspectorN = {
   inspect(keychain: KeychainKind, index: number, visited: number): void;
+};
+
+/** Progress of an in-flight Bitcoin Core RPC sync. */
+export type RpcSyncProgressN = {
+  /** Height of the block just applied. */
+  currentHeight: number;
+  /** The node's chain tip at the start of this sync. */
+  tipHeight: number;
+  /** Completion fraction in `[0, 1]` (`currentHeight / tipHeight`). */
+  progress: number;
+};
+
+/**
+ * Number-friendly RPC sync progress callback. Unlike Electrum/Esplora, an RPC
+ * sync walks blocks toward a known tip, so `progress` is a real fraction (not a
+ * raw count). Called from a background thread; keep it fast and non-blocking.
+ */
+export type RpcSyncProgressInspectorN = {
+  inspect(progress: RpcSyncProgressN): void;
 };
 
 export type TxOutN = {
@@ -343,6 +365,77 @@ function resolveKyoto(input: KyotoInput): KyotoClientLike {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  RpcClient wrapper (Bitcoin Core full-node RPC)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * How to authenticate against the node's JSON-RPC endpoint.
+ * - `cookieFile`: path to bitcoind's auto-generated `.cookie` (easiest locally).
+ * - `userPass`: the `rpcuser` / `rpcpassword` from `bitcoin.conf`.
+ * - `none`: no auth (e.g. behind an already-authenticated proxy).
+ */
+export type RpcAuth =
+  | { type: 'cookieFile'; path: string }
+  | { type: 'userPass'; username: string; password: string }
+  | { type: 'none' };
+
+export type RpcOptions = {
+  /** Node RPC URL, e.g. `"http://127.0.0.1:8332"`. */
+  url: string;
+  auth: RpcAuth;
+};
+
+/**
+ * Wraps a Bitcoin Core RPC connection. Downloads full blocks (max privacy — the
+ * node never sees the wallet's scripts) at the cost of bandwidth. Build once and
+ * reuse across {@link BdkWallet.syncWithRpc} / {@link BdkWallet.broadcastWithRpc}.
+ */
+export class BdkRpcClient {
+  private readonly inner: RpcClient;
+
+  constructor(opts: RpcOptions) {
+    const a = opts.auth;
+    this.inner = new RpcClient(
+      opts.url,
+      a.type === 'userPass' ? a.username : undefined,
+      a.type === 'userPass' ? a.password : undefined,
+      a.type === 'cookieFile' ? a.path : undefined
+    );
+  }
+
+  get raw(): RpcClientLike {
+    return this.inner;
+  }
+
+  /** The node's current chain-tip height. */
+  getBlockHeight(): number {
+    return this.inner.getBlockHeight();
+  }
+}
+
+/** An RPC client owns a connection, so only an existing instance can be reused. */
+export type RpcInput = BdkRpcClient;
+
+function resolveRpc(input: RpcInput): RpcClientLike {
+  return input.raw;
+}
+
+// Bridge the throttled bigint-free FFI callback to the friendly fraction object.
+function adaptRpcInspector(
+  inspector?: RpcSyncProgressInspectorN
+): RpcSyncProgressInspector | undefined {
+  if (!inspector) return undefined;
+  return {
+    inspect: (currentHeight, tipHeight) => {
+      const current = Number(currentHeight);
+      const tip = Number(tipHeight);
+      const progress = tip > 0 ? Math.min(1, current / tip) : 0;
+      inspector.inspect({ currentHeight: current, tipHeight: tip, progress });
+    },
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  Async wallet factory
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -529,6 +622,27 @@ export class BdkWallet {
     );
   }
 
+  // ── Sync (Bitcoin Core RPC) ─────────────────────────────────────────────
+
+  /**
+   * Sync against a Bitcoin Core node by downloading full blocks from
+   * `startHeight` to the node's tip. Use the wallet's birthday height for
+   * `startHeight` on first sync; it acts as a floor once the wallet has a
+   * checkpoint. `fetchMempool` (default true) also applies unconfirmed txs.
+   */
+  syncWithRpc(
+    client: RpcInput,
+    startHeight: number,
+    opts?: { fetchMempool?: boolean; inspector?: RpcSyncProgressInspectorN }
+  ): Promise<void> {
+    return this.inner.syncWithRpc(
+      resolveRpc(client),
+      startHeight,
+      opts?.fetchMempool ?? true,
+      adaptRpcInspector(opts?.inspector)
+    );
+  }
+
   // ── Broadcast ───────────────────────────────────────────────────────────
 
   broadcastWithEsplora(client: EsploraInput, psbt: PsbtLike): Promise<string> {
@@ -537,6 +651,10 @@ export class BdkWallet {
 
   broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string> {
     return this.inner.broadcastWithElectrum(resolveElectrum(client), psbt);
+  }
+
+  broadcastWithRpc(client: RpcInput, psbt: PsbtLike): Promise<string> {
+    return this.inner.broadcastWithRpc(resolveRpc(client), psbt);
   }
 
   // ── Sync / Broadcast (Kyoto) ────────────────────────────────────────────

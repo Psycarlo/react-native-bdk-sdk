@@ -90,6 +90,24 @@ pub trait FullScanProgressInspector: Send + Sync {
     fn inspect(&self, keychain: KeychainKind, index: u32, visited: u64);
 }
 
+/// Callback invoked while syncing a wallet against a Bitcoin Core node over RPC.
+///
+/// Unlike Electrum/Esplora — which reveal an open-ended set of scripts and have
+/// no fixed total — an RPC sync walks blocks from a start height to the node's
+/// chain tip, so progress has a *real* denominator: `current_height` vs
+/// `tip_height`, giving a meaningful 0..1 completion fraction.
+///
+/// Calls are throttled (≈1000 over a full chain scan, regardless of range) so a
+/// from-genesis rescan doesn't fire hundreds of thousands of FFI hops, and a
+/// final call always lands exactly at the tip. `inspect` runs on a background
+/// thread and must return quickly — it must not block.
+#[uniffi::export(with_foreign)]
+pub trait RpcSyncProgressInspector: Send + Sync {
+    /// `current_height`: height of the block just applied.
+    /// `tip_height`: the node's chain tip at the start of this sync.
+    fn inspect(&self, current_height: u32, tip_height: u32);
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Enum)]
 pub enum ChangeSpendPolicy {
     ChangeAllowed,

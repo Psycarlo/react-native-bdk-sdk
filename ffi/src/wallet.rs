@@ -6,11 +6,14 @@ use bdk_wallet::rusqlite::Connection;
 use bdk_wallet::SignOptions;
 use bdk_wallet::PersistedWallet;
 
+use bdk_bitcoind_rpc::Emitter;
+
 use crate::electrum::ElectrumClient;
 use crate::error::BdkError;
 use crate::esplora::EsploraClient;
 use crate::kyoto::KyotoClient;
 use crate::psbt::Psbt;
+use crate::rpc::RpcClient;
 use crate::types::*;
 
 #[derive(uniffi::Object)]
@@ -410,6 +413,105 @@ impl Wallet {
         Ok(())
     }
 
+    // ── Sync (Bitcoin Core RPC) ──────────────────────────────────────────────
+
+    /// Sync by downloading full blocks from a Bitcoin Core node.
+    ///
+    /// Walks blocks from `start_height` up to the node's chain tip, applying each
+    /// to the wallet. `start_height` only matters on a wallet with no history yet
+    /// (use the wallet's birthday height); once the wallet has a checkpoint, the
+    /// emitter resumes from there and `start_height` is effectively a floor.
+    ///
+    /// If `fetch_mempool` is true, unconfirmed mempool transactions are applied
+    /// after the chain is caught up, and txs that dropped out of the mempool are
+    /// marked evicted.
+    ///
+    /// Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
+    /// blocking task that owns the wallet across many RPC round-trips, rather than
+    /// collecting every block into memory first.
+    pub async fn sync_with_rpc(
+        self: Arc<Self>,
+        client: Arc<RpcClient>,
+        start_height: u32,
+        fetch_mempool: bool,
+        inspector: Option<Arc<dyn RpcSyncProgressInspector>>,
+    ) -> Result<(), BdkError> {
+        // Snapshot the wallet's checkpoint before handing ownership to the task.
+        let last_cp = {
+            let w = self.inner.lock().unwrap();
+            w.latest_checkpoint()
+        };
+
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                use bdk_bitcoind_rpc::bitcoincore_rpc::RpcApi;
+                let rpc = client.inner.lock().unwrap();
+
+                // The node's tip is the denominator for a real progress fraction.
+                let tip_height = rpc.get_block_count().map_err(|e| BdkError::SyncFailed {
+                    message: format!("RPC get_block_count failed: {}", e),
+                })? as u32;
+
+                // Aim for ≈1000 callbacks across the whole range so a from-genesis
+                // scan stays smooth without flooding the FFI boundary.
+                let stride = (tip_height.saturating_sub(start_height) / 1000).max(1);
+
+                let mut emitter = Emitter::new(
+                    &*rpc,
+                    last_cp,
+                    start_height,
+                    core::iter::empty::<Arc<bitcoin::Transaction>>(),
+                );
+
+                // Confirmed blocks.
+                while let Some(event) = emitter.next_block().map_err(|e| BdkError::SyncFailed {
+                    message: format!("RPC next_block failed: {}", e),
+                })? {
+                    let height = event.block_height();
+                    let connected_to = event.connected_to();
+
+                    {
+                        let mut w = self.inner.lock().unwrap();
+                        w.apply_block_connected_to(&event.block, height, connected_to)
+                            .map_err(|e| BdkError::CannotConnect {
+                                message: format!("Failed to apply block {}: {}", height, e),
+                            })?;
+                    }
+
+                    if let Some(insp) = &inspector {
+                        if height % stride == 0 {
+                            insp.inspect(height, tip_height.max(height));
+                        }
+                    }
+                }
+
+                // Unconfirmed mempool, if requested.
+                if fetch_mempool {
+                    let mempool = emitter.mempool().map_err(|e| BdkError::SyncFailed {
+                        message: format!("RPC mempool fetch failed: {}", e),
+                    })?;
+                    let mut w = self.inner.lock().unwrap();
+                    w.apply_evicted_txs(mempool.evicted);
+                    w.apply_unconfirmed_txs(mempool.update);
+                }
+
+                // Guarantee a terminal 100% callback.
+                if let Some(insp) = &inspector {
+                    insp.inspect(tip_height, tip_height);
+                }
+
+                let mut w = self.inner.lock().unwrap();
+                self.persist_wallet(&mut w)?;
+                Ok::<_, BdkError>(())
+            })
+            .await
+            .map_err(|e| BdkError::SyncFailed {
+                message: format!("RPC sync task panicked: {}", e),
+            })?
+        })
+        .await
+    }
+
     // ── Sync (Kyoto) ─────────────────────────────────────────────────────────
 
     /// Drive a single sync against the Kyoto light client. Awaits until the node
@@ -494,6 +596,44 @@ impl Wallet {
                 message: format!("Electrum broadcast task panicked: {}", e),
             })?
         }).await?;
+
+        Ok(txid)
+    }
+
+    // ── Broadcast (Bitcoin Core RPC) ─────────────────────────────────────────
+
+    pub async fn broadcast_with_rpc(
+        &self,
+        client: Arc<RpcClient>,
+        psbt: Arc<Psbt>,
+    ) -> Result<String, BdkError> {
+        let tx = {
+            let psbt_inner = psbt.inner.lock().unwrap();
+            psbt_inner
+                .clone()
+                .extract_tx()
+                .map_err(|e| BdkError::InvalidPsbt {
+                    message: format!("Failed to extract tx from PSBT: {}", e),
+                })?
+        };
+
+        let txid = tx.compute_txid().to_string();
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                use bdk_bitcoind_rpc::bitcoincore_rpc::RpcApi;
+                let c = client.inner.lock().unwrap();
+                c.send_raw_transaction(&tx)
+                    .map_err(|e| BdkError::BroadcastFailed {
+                        message: format!("RPC broadcast failed: {}", e),
+                    })?;
+                Ok::<_, BdkError>(())
+            })
+            .await
+            .map_err(|e| BdkError::BroadcastFailed {
+                message: format!("RPC broadcast task panicked: {}", e),
+            })?
+        })
+        .await?;
 
         Ok(txid)
     }
