@@ -150,6 +150,13 @@ extern "C" {
     void * uniffi_out_return, RustCallStatus* rust_call_status
     );
     typedef void
+    (*UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0)(
+    uint64_t uniffi_handle, 
+    uint32_t current_height, 
+    uint32_t tip_height, 
+    void * uniffi_out_return, RustCallStatus* rust_call_status
+    );
+    typedef void
     (*UniffiCallbackInterfaceSyncProgressInspectorMethod0)(
     uint64_t uniffi_handle, 
     uint64_t consumed, 
@@ -164,7 +171,11 @@ extern "C" {
         UniffiCallbackInterfaceFree uniffi_free;
         UniffiCallbackInterfaceClone uniffi_clone;
         UniffiCallbackInterfaceFullScanProgressInspectorMethod0 inspect;
-    } UniffiVTableCallbackInterfaceFullScanProgressInspector;typedef struct UniffiVTableCallbackInterfaceSyncProgressInspector {
+    } UniffiVTableCallbackInterfaceFullScanProgressInspector;typedef struct UniffiVTableCallbackInterfaceRpcSyncProgressInspector {
+        UniffiCallbackInterfaceFree uniffi_free;
+        UniffiCallbackInterfaceClone uniffi_clone;
+        UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0 inspect;
+    } UniffiVTableCallbackInterfaceRpcSyncProgressInspector;typedef struct UniffiVTableCallbackInterfaceSyncProgressInspector {
         UniffiCallbackInterfaceFree uniffi_free;
         UniffiCallbackInterfaceClone uniffi_clone;
         UniffiCallbackInterfaceSyncProgressInspectorMethod0 inspect;
@@ -324,6 +335,25 @@ extern "C" {
         RustCallStatus *uniffi_out_err
     );
     RustBuffer uniffi_bdk_ffi_fn_method_psbt_txid(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_rpcclient(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_free_rpcclient(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_rpcclient_new(
+        RustBuffer url, 
+        RustBuffer username, 
+        RustBuffer password, 
+        RustBuffer cookie_file, 
+        RustCallStatus *uniffi_out_err
+    );
+    uint32_t uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(
         /*handle*/ uint64_t ptr, 
         RustCallStatus *uniffi_out_err
     );
@@ -498,6 +528,23 @@ extern "C" {
         uint64_t visited, 
         RustCallStatus *uniffi_out_err
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(
+        UniffiVTableCallbackInterfaceRpcSyncProgressInspector * vtable
+    );
+    void uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(
+        /*handle*/ uint64_t ptr, 
+        uint32_t current_height, 
+        uint32_t tip_height, 
+        RustCallStatus *uniffi_out_err
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_syncprogressinspector(
         /*handle*/ uint64_t handle, 
         RustCallStatus *uniffi_out_err
@@ -541,6 +588,11 @@ extern "C" {
         /*handle*/ uint64_t psbt
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t client, 
+        /*handle*/ uint64_t psbt
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t client, 
         /*handle*/ uint64_t psbt
@@ -745,6 +797,13 @@ extern "C" {
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t client
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t client, 
+        uint32_t start_height, 
+        int8_t fetch_mempool, 
+        RustBuffer inspector
     );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_transactions(
         /*handle*/ uint64_t ptr, 
@@ -1072,6 +1131,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_psbt_txid(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_add_data(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs(
@@ -1134,6 +1195,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum(
@@ -1141,6 +1204,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(
     );
@@ -1220,6 +1285,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_transactions(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_tx_details(
@@ -1243,6 +1310,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_constructor_mnemonic_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_psbt_new(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_constructor_rpcclient_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_txbuilder_new(
     );
@@ -1937,6 +2006,121 @@ namespace uniffi::bdk_ffi::st::vtablecallbackinterfacefullscanprogressinspector:
         rsLambda = nullptr;
     }
 } // namespace uniffi::bdk_ffi::st::vtablecallbackinterfacefullscanprogressinspector::vtablecallbackinterfacefullscanprogressinspector::free
+
+// Callback function: uniffi::bdk_ffi::st::vtablecallbackinterfacerpcsyncprogressinspector::vtablecallbackinterfacerpcsyncprogressinspector::free::UniffiCallbackInterfaceFree
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::st::vtablecallbackinterfacerpcsyncprogressinspector::vtablecallbackinterfacerpcsyncprogressinspector::free {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_handle) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_handle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_handle);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_handle
+            );
+
+            
+
+            
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceFree: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static void callback(uint64_t rs_handle) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return;
+        }
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_handle);
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceFree
+    makeCallbackFunction( // uniffi::bdk_ffi::st::vtablecallbackinterfacerpcsyncprogressinspector::vtablecallbackinterfacerpcsyncprogressinspector::free
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_handle) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_handle](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_handle);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                
+                callInvoker->invokeNonBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::st::vtablecallbackinterfacerpcsyncprogressinspector::vtablecallbackinterfacerpcsyncprogressinspector::free
 
 // Callback function: uniffi::bdk_ffi::st::vtablecallbackinterfacesyncprogressinspector::vtablecallbackinterfacesyncprogressinspector::free::UniffiCallbackInterfaceFree
 //
@@ -3700,6 +3884,304 @@ template <> struct Bridging<UniffiVTableCallbackInterfaceFullScanProgressInspect
 };
 
 } // namespace uniffi::bdk_ffi
+    // Implementation of CallbackInterfaceClone for vtable field uniffi_clone in VTableCallbackInterfaceRpcSyncProgressInspector
+
+
+// Callback function: uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacerpcsyncprogressinspector::UniffiCallbackInterfaceClone
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacerpcsyncprogressinspector {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t, uint64_t*)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_handle
+            , uint64_t* uniffi_direct_return) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_handle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_handle);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_handle
+            );
+
+            
+
+            
+            // Write the direct return value back to the caller.
+            if (uniffi_direct_return != nullptr) {
+                *uniffi_direct_return = uniffi_jsi::Bridging<uint64_t>::fromJs(
+                    rt, callInvoker, uniffiResult
+                );
+            }
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceClone: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static uint64_t callback(uint64_t rs_handle) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return 0;
+        }
+        uint64_t uniffi_result = 0;
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_handle, 
+            &uniffi_result);
+        return uniffi_result;
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceClone
+    makeCallbackFunction( // uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacerpcsyncprogressinspector
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_handle, uint64_t* uniffi_direct_return) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_handle, uniffi_direct_return](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_handle, uniffi_direct_return);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                callInvoker->invokeBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacerpcsyncprogressinspector
+    // Implementation of CallbackInterfaceRpcSyncProgressInspectorMethod0 for vtable field inspect in VTableCallbackInterfaceRpcSyncProgressInspector
+
+
+// Callback function: uniffi::bdk_ffi::cb::callbackinterfacerpcsyncprogressinspectormethod0::vtablecallbackinterfacerpcsyncprogressinspector::UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0
+//
+// We have the following constraints:
+// - we need to pass a function pointer to Rust.
+// - we need a jsi::Runtime and jsi::Function to call into JS.
+// - function pointers can't store state, so we can't use a lamda.
+//
+// For this, we store a lambda as a global, as `rsLambda`. The `callback` function calls
+// the lambda, which itself calls the `body` which then calls into JS.
+//
+// We then give the `callback` function pointer to Rust which will call the lambda sometime in the
+// future.
+namespace uniffi::bdk_ffi::cb::callbackinterfacerpcsyncprogressinspectormethod0::vtablecallbackinterfacerpcsyncprogressinspector {
+    using namespace facebook;
+
+    // We need to store a lambda in a global so we can call it from
+    // a function pointer. The function pointer is passed to Rust.
+    static std::function<void(uint64_t, uint32_t, uint32_t, void *, RustCallStatus*)> rsLambda = nullptr;
+
+    // This is the main body of the callback. It's called from the lambda,
+    // which itself is called from the callback function which is passed to Rust.
+    static void body(jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     std::shared_ptr<jsi::Value> callbackValue
+            ,uint64_t rs_uniffiHandle
+            ,uint32_t rs_currentHeight
+            ,uint32_t rs_tipHeight
+            ,void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+
+        // Convert the arguments from Rust, into jsi::Values.
+        // We'll use the Bridging class to do this…
+        auto js_uniffiHandle = uniffi_jsi::Bridging<uint64_t>::toJs(rt, callInvoker, rs_uniffiHandle);
+        auto js_currentHeight = uniffi_jsi::Bridging<uint32_t>::toJs(rt, callInvoker, rs_currentHeight);
+        auto js_tipHeight = uniffi_jsi::Bridging<uint32_t>::toJs(rt, callInvoker, rs_tipHeight);
+
+        // Now we are ready to call the callback.
+        // We are already on the JS thread, because this `body` function was
+        // invoked from the CallInvoker.
+        try {
+            // Getting the callback function
+            auto cb = callbackValue->asObject(rt).asFunction(rt);
+            auto uniffiResult = cb.call(rt, js_uniffiHandle, js_currentHeight, js_tipHeight
+            );
+
+            // Now copy the result back from JS into the RustCallStatus object.
+            uniffi::bdk_ffi::Bridging<RustCallStatus>::copyFromJs(rt, callInvoker, uniffiResult, uniffi_call_status);
+
+            if (uniffi_call_status->code != UNIFFI_CALL_STATUS_OK) {
+                // The JS callback finished abnormally, so we cannot retrieve the return value.
+                return;
+            }
+
+            
+        } catch (const jsi::JSError &error) {
+            std::cout << "Error in callback UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0: "
+                    << error.what() << std::endl;
+            throw error;
+        }
+    }
+
+    static void callback(uint64_t rs_uniffiHandle, uint32_t rs_currentHeight, uint32_t rs_tipHeight, void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+        // If the runtime has shutdown, then there is no point in trying to
+        // call into Javascript. BUT how do we tell if the runtime has shutdown?
+        //
+        // Answer: the module destructor calls into callback `cleanup` method,
+        // which nulls out the rsLamda.
+        //
+        // If rsLamda is null, then there is no runtime to call into.
+        if (rsLambda == nullptr) {
+            // This only occurs when destructors are calling into Rust free/drop,
+            // which causes the JS callback to be dropped.
+            return;
+        }
+
+        // The runtime, the actual callback jsi::funtion, and the callInvoker
+        // are all in the lambda.
+        rsLambda(
+            rs_uniffiHandle, 
+            rs_currentHeight, 
+            rs_tipHeight, 
+            rs_uniffiOutReturn, uniffi_call_status);
+    }
+
+    [[maybe_unused]] static UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0
+    makeCallbackFunction( // uniffi::bdk_ffi::cb::callbackinterfacerpcsyncprogressinspectormethod0::vtablecallbackinterfacerpcsyncprogressinspector
+                    jsi::Runtime &rt,
+                     std::shared_ptr<uniffi_runtime::UniffiCallInvoker> callInvoker,
+                     const jsi::Value &value) {
+        if (rsLambda != nullptr) {
+            // `makeCallbackFunction` is called in two circumstances:
+            //
+            // 1. at startup, when initializing callback interface vtables.
+            // 2. when polling futures. This happens at least once per future that is
+            //    exposed to Javascript. We know that this is always the same function,
+            //    `uniffiFutureContinuationCallback` in `async-rust-calls.ts`.
+            //
+            // We can therefore return the callback function without making anything
+            // new if we've been initialized already.
+            return callback;
+        }
+        auto callbackFunction = value.asObject(rt).asFunction(rt);
+        auto callbackValue = std::make_shared<jsi::Value>(rt, callbackFunction);
+        rsLambda = [&rt, callInvoker, callbackValue](uint64_t rs_uniffiHandle, uint32_t rs_currentHeight, uint32_t rs_tipHeight, void * rs_uniffiOutReturn, RustCallStatus* uniffi_call_status) {
+                // We immediately make a lambda which will do the work of transforming the
+                // arguments into JSI values and calling the callback.
+                uniffi_runtime::UniffiCallFunc jsLambda = [
+                    callInvoker,
+                    callbackValue
+                    , rs_uniffiHandle
+                    , rs_currentHeight
+                    , rs_tipHeight
+                    , rs_uniffiOutReturn, uniffi_call_status](jsi::Runtime &rt) mutable {
+                    body(rt, callInvoker, callbackValue
+                        , rs_uniffiHandle
+                        , rs_currentHeight
+                        , rs_tipHeight
+                        , rs_uniffiOutReturn, uniffi_call_status);
+                };
+                // We'll then call that lambda from the callInvoker which will
+                // look after calling it on the correct thread.
+                callInvoker->invokeBlocking(rt, jsLambda);
+        };
+        return callback;
+    }
+
+    // This method is called from the destructor of NativeBdkFfi, which only happens
+    // when the jsi::Runtime is being destroyed.
+    static void cleanup() {
+        // The lambda holds a reference to the the Runtime, so when this is nulled out,
+        // then the pointer will no longer be left dangling.
+        rsLambda = nullptr;
+    }
+} // namespace uniffi::bdk_ffi::cb::callbackinterfacerpcsyncprogressinspectormethod0::vtablecallbackinterfacerpcsyncprogressinspector
+namespace uniffi::bdk_ffi {
+using namespace facebook;
+using CallInvoker = uniffi_runtime::UniffiCallInvoker;
+
+template <> struct Bridging<UniffiVTableCallbackInterfaceRpcSyncProgressInspector> {
+  static UniffiVTableCallbackInterfaceRpcSyncProgressInspector fromJs(jsi::Runtime &rt,
+    std::shared_ptr<CallInvoker> callInvoker,
+    const jsi::Value &jsValue
+  ) {
+    // Check if the input is an object
+    if (!jsValue.isObject()) {
+      throw jsi::JSError(rt, "Expected an object for UniffiVTableCallbackInterfaceRpcSyncProgressInspector");
+    }
+
+    // Get the object from the jsi::Value
+    auto jsObject = jsValue.getObject(rt);
+
+    // Create the vtable struct
+    UniffiVTableCallbackInterfaceRpcSyncProgressInspector rsObject;
+
+    // Create the vtable from the js callbacks.
+    rsObject.uniffi_free = uniffi::bdk_ffi::st::vtablecallbackinterfacerpcsyncprogressinspector::vtablecallbackinterfacerpcsyncprogressinspector::free::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "uniffiFree")
+        );
+    rsObject.uniffi_clone = uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacerpcsyncprogressinspector::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "uniffiClone")
+        );
+    rsObject.inspect = uniffi::bdk_ffi::cb::callbackinterfacerpcsyncprogressinspectormethod0::vtablecallbackinterfacerpcsyncprogressinspector::makeCallbackFunction(
+          rt, callInvoker, jsObject.getProperty(rt, "inspect")
+        );
+
+    return rsObject;
+  }
+};
+
+} // namespace uniffi::bdk_ffi
     // Implementation of CallbackInterfaceClone for vtable field uniffi_clone in VTableCallbackInterfaceSyncProgressInspector
 
 
@@ -4349,6 +4831,38 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_psbt_txid(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_clone_rpcclient"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_rpcclient"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_clone_rpcclient(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_free_rpcclient"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_free_rpcclient"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_free_rpcclient(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new"),
+        4,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_constructor_rpcclient_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_clone_txbuilder"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_txbuilder"),
@@ -4645,6 +5159,38 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_clone_syncprogressinspector"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_syncprogressinspector"),
@@ -4723,6 +5269,14 @@ NativeBdkFfi::NativeBdkFfi(
         3,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump"] = jsi::Function::createFromHostFunction(
@@ -5035,6 +5589,14 @@ NativeBdkFfi::NativeBdkFfi(
         2,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc"),
+        5,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions"] = jsi::Function::createFromHostFunction(
@@ -5741,6 +6303,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_psbt_txid(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_data"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_data"),
@@ -5989,6 +6559,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect"),
@@ -6019,6 +6597,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump"] = jsi::Function::createFromHostFunction(
@@ -6333,6 +6919,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions"),
@@ -6429,6 +7023,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_constructor_psbt_new(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new"),
@@ -6501,6 +7103,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_internal_fn_method_psbt_ffi__bless_pointer(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer"),
@@ -6515,6 +7125,14 @@ NativeBdkFfi::NativeBdkFfi(
         1,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_internal_fn_method_fullscanprogressinspector_ffi__bless_pointer(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_internal_fn_method_syncprogressinspector_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
@@ -6573,12 +7191,14 @@ uniffi::bdk_ffi::cb::rustfuturecontinuationcallback::cleanup();
     // Cleanup for callback function ForeignFutureDroppedCallback
 uniffi::bdk_ffi::cb::foreignfuturedroppedcallback::cleanup();
     // Cleanup for "free" callback function CallbackInterfaceFree
-uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free::cleanup();uniffi::bdk_ffi::st::vtablecallbackinterfacefullscanprogressinspector::vtablecallbackinterfacefullscanprogressinspector::free::cleanup();uniffi::bdk_ffi::st::vtablecallbackinterfacesyncprogressinspector::vtablecallbackinterfacesyncprogressinspector::free::cleanup();
+uniffi::bdk_ffi::st::vtablecallbackinterfacekyotonodeeventhandler::vtablecallbackinterfacekyotonodeeventhandler::free::cleanup();uniffi::bdk_ffi::st::vtablecallbackinterfacefullscanprogressinspector::vtablecallbackinterfacefullscanprogressinspector::free::cleanup();uniffi::bdk_ffi::st::vtablecallbackinterfacerpcsyncprogressinspector::vtablecallbackinterfacerpcsyncprogressinspector::free::cleanup();uniffi::bdk_ffi::st::vtablecallbackinterfacesyncprogressinspector::vtablecallbackinterfacesyncprogressinspector::free::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacekyotonodeeventhandler::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod0::vtablecallbackinterfacekyotonodeeventhandler::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfacekyotonodeeventhandlermethod1::vtablecallbackinterfacekyotonodeeventhandler::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacefullscanprogressinspector::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfacefullscanprogressinspectormethod0::vtablecallbackinterfacefullscanprogressinspector::cleanup();
+uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacerpcsyncprogressinspector::cleanup();
+uniffi::bdk_ffi::cb::callbackinterfacerpcsyncprogressinspectormethod0::vtablecallbackinterfacerpcsyncprogressinspector::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfaceclone::vtablecallbackinterfacesyncprogressinspector::cleanup();
 uniffi::bdk_ffi::cb::callbackinterfacesyncprogressinspectormethod0::vtablecallbackinterfacesyncprogressinspector::cleanup();
 }
@@ -6648,6 +7268,15 @@ jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_func_ffi__arraybuffer_to_string(
     auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
     auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
     return jsi::Value(rt, obj);
+}jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
+    auto static destructor = [](uint64_t p) {
+        RustCallStatus status = {0};
+        uniffi_bdk_ffi_fn_free_rpcclient(p, &status);
+    };
+    auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
+    auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
+    return jsi::Value(rt, obj);
 }jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
     auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
     auto static destructor = [](uint64_t p) {
@@ -6662,6 +7291,15 @@ jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_func_ffi__arraybuffer_to_string(
     auto static destructor = [](uint64_t p) {
         RustCallStatus status = {0};
         uniffi_bdk_ffi_fn_free_fullscanprogressinspector(p, &status);
+    };
+    auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
+    auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
+    return jsi::Value(rt, obj);
+}jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
+    auto static destructor = [](uint64_t p) {
+        RustCallStatus status = {0};
+        uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(p, &status);
     };
     auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
     auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
@@ -7064,6 +7702,46 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbt_txid(jsi::Runtime& rt
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_rpcclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_clone_rpcclient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_rpcclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_free_rpcclient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_rpcclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_constructor_rpcclient_new(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging<uint32_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_txbuilder(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_clone_txbuilder(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
@@ -7437,6 +8115,53 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_
         
         return jsi::Value::undefined();
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto vtableInstance =
+        uniffi::bdk_ffi::Bridging<UniffiVTableCallbackInterfaceRpcSyncProgressInspector>::fromJs(
+            rt,
+            callInvoker,
+            args[0]
+        );
+
+    std::lock_guard<std::mutex> lock(uniffi::bdk_ffi::registry::vtableMutex);
+    uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(
+        uniffi::bdk_ffi::registry::putTable(
+            "UniffiVTableCallbackInterfaceRpcSyncProgressInspector",
+            vtableInstance
+        )
+    );
+    return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[2]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_syncprogressinspector(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_clone_syncprogressinspector(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
@@ -7530,6 +8255,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_espl
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2])
         );
 
         
@@ -7893,6 +8625,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(j
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[2]), uniffi_jsi::Bridging<int8_t>::fromJs(rt, callInvoker, args[3]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[4])
         );
 
         
@@ -8588,6 +9327,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbt_txid(jsi::Runti
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_add_data(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_txbuilder_add_data(
         );
@@ -8805,6 +9551,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_fullscanprogressinsp
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(
         );
@@ -8828,6 +9581,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_wit
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc(
         );
 
         
@@ -9106,6 +9866,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyo
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_transactions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_transactions(
         );
@@ -9185,6 +9952,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_new(js
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_psbt_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_constructor_psbt_new(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_constructor_rpcclient_new(
         );
 
         

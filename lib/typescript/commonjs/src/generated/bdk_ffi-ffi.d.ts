@@ -40,6 +40,10 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_psbt_get_utxo_for(ptr: bigint, inputIndex: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_psbt_to_base64(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_psbt_txid(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
+    ubrn_uniffi_bdk_ffi_fn_clone_rpcclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_free_rpcclient(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new(url: Uint8Array, username: Uint8Array, password: Uint8Array, cookieFile: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): number;
     ubrn_uniffi_bdk_ffi_fn_clone_txbuilder(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_txbuilder(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_txbuilder_new(uniffi_out_err: UniffiRustCallStatus): bigint;
@@ -77,6 +81,10 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_free_fullscanprogressinspector(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_fullscanprogressinspector(vtable: UniffiVTableCallbackInterfaceFullScanProgressInspector): void;
     ubrn_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(ptr: bigint, keychain: Uint8Array, index: number, visited: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
+    ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(vtable: UniffiVTableCallbackInterfaceRpcSyncProgressInspector): void;
+    ubrn_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(ptr: bigint, currentHeight: number, tipHeight: number, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_clone_syncprogressinspector(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_syncprogressinspector(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_syncprogressinspector(vtable: UniffiVTableCallbackInterfaceSyncProgressInspector): void;
@@ -87,6 +95,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(ptr: bigint, client: bigint, psbt: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(ptr: bigint, txid: Uint8Array, newFeeRate: number, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(ptr: bigint, txHex: Uint8Array, uniffi_out_err: UniffiRustCallStatus): number;
@@ -126,6 +135,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(ptr: bigint, client: bigint, stopGap: bigint, inspector: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(ptr: bigint, client: bigint, stopGap: bigint, inspector: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(ptr: bigint, client: bigint): bigint;
+    ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(ptr: bigint, client: bigint, startHeight: number, fetchMempool: number, inspector: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions(ptr: bigint, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(ptr: bigint, txid: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_unmark_used(ptr: bigint, keychain: Uint8Array, index: number, uniffi_out_err: UniffiRustCallStatus): number;
@@ -214,6 +224,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_psbt_to_base64(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_data(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_recipient(): number;
@@ -245,10 +256,12 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_tx_version(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_build_fee_bump(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(): number;
@@ -288,6 +301,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(): number;
+    ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details(): number;
     ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(): number;
@@ -300,6 +314,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string_in(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_psbt_new(): number;
+    ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new(): number;
     ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
@@ -309,8 +324,10 @@ interface NativeModuleInterface {
     ubrn_uniffi_internal_fn_method_kyotonodeeventhandler_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_mnemonic_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
+    ubrn_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_fullscanprogressinspector_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
+    ubrn_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_syncprogressinspector_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_wallet_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
 }
@@ -386,6 +403,7 @@ export type UniffiForeignFutureCompleteVoid = (callbackData: bigint, result: Uni
 type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0 = (uniffiHandle: bigint, message: Uint8Array) => UniffiResult<void>;
 type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1 = (uniffiHandle: bigint, message: Uint8Array) => UniffiResult<void>;
 type UniffiCallbackInterfaceFullScanProgressInspectorMethod0 = (uniffiHandle: bigint, keychain: Uint8Array, index: number, visited: bigint) => UniffiResult<void>;
+type UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0 = (uniffiHandle: bigint, currentHeight: number, tipHeight: number) => UniffiResult<void>;
 type UniffiCallbackInterfaceSyncProgressInspectorMethod0 = (uniffiHandle: bigint, consumed: bigint, total: bigint) => UniffiResult<void>;
 export type UniffiVTableCallbackInterfaceKyotoNodeEventHandler = {
     uniffiFree: UniffiCallbackInterfaceFree;
@@ -397,6 +415,11 @@ export type UniffiVTableCallbackInterfaceFullScanProgressInspector = {
     uniffiFree: UniffiCallbackInterfaceFree;
     uniffiClone: UniffiCallbackInterfaceClone;
     inspect: UniffiCallbackInterfaceFullScanProgressInspectorMethod0;
+};
+export type UniffiVTableCallbackInterfaceRpcSyncProgressInspector = {
+    uniffiFree: UniffiCallbackInterfaceFree;
+    uniffiClone: UniffiCallbackInterfaceClone;
+    inspect: UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0;
 };
 export type UniffiVTableCallbackInterfaceSyncProgressInspector = {
     uniffiFree: UniffiCallbackInterfaceFree;
