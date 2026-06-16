@@ -25,6 +25,10 @@ just release
 just generate
 ```
 
-4. Create `release/v{version}` branch and PR
+4. Update Changelog
+
+[CHANGELOG.md](CHANGELOG.md)
+
+5. Create `release/v{version}` branch and PR
 
 Release workflow will take care of the rest.

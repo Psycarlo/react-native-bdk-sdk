@@ -34,6 +34,7 @@ import nativeModule, {
   type UniffiForeignFutureCompleteVoid,
   type UniffiVTableCallbackInterfaceKyotoNodeEventHandler,
   type UniffiVTableCallbackInterfaceFullScanProgressInspector,
+  type UniffiVTableCallbackInterfaceRpcSyncProgressInspector,
   type UniffiVTableCallbackInterfaceSyncProgressInspector,
 } from "./bdk_ffi-ffi";
 import {
@@ -6033,6 +6034,397 @@ const FfiConverterTypePsbt = new FfiConverterObject(
 );
 
 /**
+ * A reusable Bitcoin Core JSON-RPC connection.
+ *
+ * Unlike Electrum/Esplora (which query a third-party indexer), this talks to a
+ * full node the user runs themselves and downloads *whole blocks*: the node
+ * never learns which scripts belong to the wallet, so it offers the strongest
+ * privacy of any backend — at the cost of bandwidth. Create once, then drive
+ * sync via [`Wallet::sync_with_rpc`] and broadcast via
+ * [`Wallet::broadcast_with_rpc`].
+ */
+export interface RpcClientLike {
+  /**
+   * The node's current chain-tip height. Blocks the calling thread on a
+   * single RPC round-trip (fast against a local node).
+   */
+  getBlockHeight(): /*throws*/ /*u32*/ number;
+}
+/**
+ * @deprecated Use `RpcClientLike` instead.
+ */
+export type RpcClientInterface = RpcClientLike;
+
+/**
+ * A reusable Bitcoin Core JSON-RPC connection.
+ *
+ * Unlike Electrum/Esplora (which query a third-party indexer), this talks to a
+ * full node the user runs themselves and downloads *whole blocks*: the node
+ * never learns which scripts belong to the wallet, so it offers the strongest
+ * privacy of any backend — at the cost of bandwidth. Create once, then drive
+ * sync via [`Wallet::sync_with_rpc`] and broadcast via
+ * [`Wallet::broadcast_with_rpc`].
+ */
+export class RpcClient extends UniffiAbstractObject implements RpcClientLike {
+  readonly [uniffiTypeNameSymbol] = "RpcClient";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Connect to a Bitcoin Core node.
+   *
+   * - `url`: e.g. `"http://127.0.0.1:8332"` (mainnet) or `":18443"` for regtest.
+   * - Auth precedence: if `username` + `password` are both set, use them;
+   * else if `cookie_file` is set, read the node's `.cookie`; else no auth.
+   *
+   * The TS wrapper exposes this as a tagged `auth` union for a nicer API.
+   */
+  constructor(
+    url: string,
+    username: string | undefined,
+    password: string | undefined,
+    cookieFile: string | undefined
+  ) /*throws*/ {
+    super();
+    const pointer = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new(
+          FfiConverterString.lower(url),
+          FfiConverterOptionalString.lower(username),
+          FfiConverterOptionalString.lower(password),
+          FfiConverterOptionalString.lower(cookieFile),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeRpcClientObjectFactory.bless(pointer);
+  }
+
+  /**
+   * The node's current chain-tip height. Blocks the calling thread on a
+   * single RPC round-trip (fast against a local node).
+   */
+  getBlockHeight(): /*u32*/ number /*throws*/ {
+    return FfiConverterUInt32.lift(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
+        /*caller:*/ (callStatus) => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(
+            uniffiTypeRpcClientObjectFactory.clonePointer(this),
+            callStatus
+          );
+        },
+        /*liftString:*/ FfiConverterString.lift
+      )
+    );
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer = uniffiTypeRpcClientObjectFactory.pointer(this);
+      uniffiTypeRpcClientObjectFactory.freePointer(pointer);
+      uniffiTypeRpcClientObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is RpcClient {
+    return uniffiTypeRpcClientObjectFactory.isConcreteType(obj);
+  }
+}
+
+const uniffiTypeRpcClientObjectFactory: UniffiObjectFactory<RpcClientLike> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): RpcClientLike {
+        const instance = Object.create(RpcClient.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "RpcClient";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: RpcClientLike): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: RpcClientLike): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_rpcclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_rpcclient(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is RpcClientLike {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "RpcClient"
+        );
+      },
+    };
+  })();
+// FfiConverter for RpcClientLike
+const FfiConverterTypeRpcClient = new FfiConverterObject(
+  uniffiTypeRpcClientObjectFactory
+);
+
+/**
+ * Callback invoked while syncing a wallet against a Bitcoin Core node over RPC.
+ *
+ * Unlike Electrum/Esplora — which reveal an open-ended set of scripts and have
+ * no fixed total — an RPC sync walks blocks from a start height to the node's
+ * chain tip, so progress has a *real* denominator: `current_height` vs
+ * `tip_height`, giving a meaningful 0..1 completion fraction.
+ *
+ * Calls are throttled (≈1000 over a full chain scan, regardless of range) so a
+ * from-genesis rescan doesn't fire hundreds of thousands of FFI hops, and a
+ * final call always lands exactly at the tip. `inspect` runs on a background
+ * thread and must return quickly — it must not block.
+ */
+export interface RpcSyncProgressInspector {
+  /**
+   * `current_height`: height of the block just applied.
+   * `tip_height`: the node's chain tip at the start of this sync.
+   */
+  inspect(currentHeight: /*u32*/ number, tipHeight: /*u32*/ number): void;
+}
+
+/**
+ * Callback invoked while syncing a wallet against a Bitcoin Core node over RPC.
+ *
+ * Unlike Electrum/Esplora — which reveal an open-ended set of scripts and have
+ * no fixed total — an RPC sync walks blocks from a start height to the node's
+ * chain tip, so progress has a *real* denominator: `current_height` vs
+ * `tip_height`, giving a meaningful 0..1 completion fraction.
+ *
+ * Calls are throttled (≈1000 over a full chain scan, regardless of range) so a
+ * from-genesis rescan doesn't fire hundreds of thousands of FFI hops, and a
+ * final call always lands exactly at the tip. `inspect` runs on a background
+ * thread and must return quickly — it must not block.
+ */
+export class RpcSyncProgressInspectorImpl
+  extends UniffiAbstractObject
+  implements RpcSyncProgressInspector
+{
+  readonly [uniffiTypeNameSymbol] = "RpcSyncProgressInspectorImpl";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  // No primary constructor declared for this class.
+  private constructor(pointer: UniffiHandle) {
+    super();
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeRpcSyncProgressInspectorImplObjectFactory.bless(pointer);
+  }
+
+  /**
+   * `current_height`: height of the block just applied.
+   * `tip_height`: the node's chain tip at the start of this sync.
+   */
+  inspect(currentHeight: /*u32*/ number, tipHeight: /*u32*/ number): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(
+          uniffiTypeRpcSyncProgressInspectorImplObjectFactory.clonePointer(
+            this
+          ),
+          FfiConverterUInt32.lower(currentHeight),
+          FfiConverterUInt32.lower(tipHeight),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift
+    );
+  }
+
+  /**
+   * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+   */
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer =
+        uniffiTypeRpcSyncProgressInspectorImplObjectFactory.pointer(this);
+      uniffiTypeRpcSyncProgressInspectorImplObjectFactory.freePointer(pointer);
+      uniffiTypeRpcSyncProgressInspectorImplObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj: any): obj is RpcSyncProgressInspectorImpl {
+    return uniffiTypeRpcSyncProgressInspectorImplObjectFactory.isConcreteType(
+      obj
+    );
+  }
+}
+
+const uniffiTypeRpcSyncProgressInspectorImplObjectFactory: UniffiObjectFactory<RpcSyncProgressInspector> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): RpcSyncProgressInspector {
+        const instance = Object.create(RpcSyncProgressInspectorImpl.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "RpcSyncProgressInspectorImpl";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr: UniffiGcObject) {
+        ptr.markDestroyed();
+      },
+
+      pointer(obj: RpcSyncProgressInspector): UniffiHandle {
+        if ((obj as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj: RpcSyncProgressInspector): UniffiHandle {
+        const pointer = this.pointer(obj);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj: any): obj is RpcSyncProgressInspector {
+        return (
+          obj[destructorGuardSymbol] &&
+          obj[uniffiTypeNameSymbol] === "RpcSyncProgressInspectorImpl"
+        );
+      },
+    };
+  })();
+// FfiConverter for RpcSyncProgressInspector
+const FfiConverterTypeRpcSyncProgressInspector =
+  new FfiConverterObjectWithCallbacks(
+    uniffiTypeRpcSyncProgressInspectorImplObjectFactory
+  );
+
+// Add a vtavble for the callbacks that go in RpcSyncProgressInspector.
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+const uniffiCallbackInterfaceRpcSyncProgressInspector: {
+  vtable: UniffiVTableCallbackInterfaceRpcSyncProgressInspector;
+  register: () => void;
+} = {
+  // Create the VTable using a series of closures.
+  // ts automatically converts these into C callback functions.
+  vtable: {
+    inspect: (
+      uniffiHandle: bigint,
+      currentHeight: number,
+      tipHeight: number
+    ) => {
+      const uniffiMakeCall = (): void => {
+        const jsCallback =
+          FfiConverterTypeRpcSyncProgressInspector.lift(uniffiHandle);
+        return jsCallback.inspect(
+          FfiConverterUInt32.lift(currentHeight),
+          FfiConverterUInt32.lift(tipHeight)
+        );
+      };
+      const uniffiResult = UniffiResult.ready<void>();
+      const uniffiHandleSuccess = (obj: any) => {};
+      const uniffiHandleError = (code: number, errBuf: UniffiByteArray) => {
+        UniffiResult.writeError(uniffiResult, code, errBuf);
+      };
+      uniffiTraitInterfaceCall(
+        /*makeCall:*/ uniffiMakeCall,
+        /*handleSuccess:*/ uniffiHandleSuccess,
+        /*handleError:*/ uniffiHandleError,
+        /*lowerString:*/ FfiConverterString.lower
+      );
+      return uniffiResult;
+    },
+    uniffiFree: (uniffiHandle: UniffiHandle): void => {
+      // RpcSyncProgressInspector: this will throw a stale handle error if the handle isn't found.
+      FfiConverterTypeRpcSyncProgressInspector.drop(uniffiHandle);
+    },
+    uniffiClone: (uniffiHandle: UniffiHandle): UniffiHandle => {
+      return FfiConverterTypeRpcSyncProgressInspector.clone(uniffiHandle);
+    },
+  },
+  register: () => {
+    nativeModule().ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(
+      uniffiCallbackInterfaceRpcSyncProgressInspector.vtable
+    );
+  },
+};
+
+/**
  * Callback invoked on each item visited while syncing a wallet against a
  * chain source (Electrum/Esplora). Implemented on the JS side and passed to
  * the `sync_with_*` methods to drive a progress indicator.
@@ -6811,6 +7203,11 @@ export interface WalletLike {
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<string>;
+  broadcastWithRpc(
+    client: RpcClientLike,
+    psbt: PsbtLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<string>;
   buildFeeBump(txid: string, newFeeRate: /*f64*/ number): /*throws*/ PsbtLike;
   calculateFee(txHex: string): /*throws*/ /*u64*/ bigint;
   calculateFeeRate(txHex: string): /*throws*/ /*f64*/ number;
@@ -6905,6 +7302,29 @@ export interface WalletLike {
    */
   syncWithKyoto(
     client: KyotoClientLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): /*throws*/ Promise<void>;
+  /**
+   * Sync by downloading full blocks from a Bitcoin Core node.
+   *
+   * Walks blocks from `start_height` up to the node's chain tip, applying each
+   * to the wallet. `start_height` only matters on a wallet with no history yet
+   * (use the wallet's birthday height); once the wallet has a checkpoint, the
+   * emitter resumes from there and `start_height` is effectively a floor.
+   *
+   * If `fetch_mempool` is true, unconfirmed mempool transactions are applied
+   * after the chain is caught up, and txs that dropped out of the mempool are
+   * marked evicted.
+   *
+   * Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
+   * blocking task that owns the wallet across many RPC round-trips, rather than
+   * collecting every block into memory first.
+   */
+  syncWithRpc(
+    client: RpcClientLike,
+    startHeight: /*u32*/ number,
+    fetchMempool: boolean,
+    inspector: RpcSyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
   ): /*throws*/ Promise<void>;
   transactions(): /*throws*/ Array<TxDetails>;
@@ -7040,6 +7460,45 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
           return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(
             uniffiTypeWalletObjectFactory.clonePointer(this),
             FfiConverterTypeKyotoClient.lower(client),
+            FfiConverterTypePsbt.lower(psbt)
+          );
+        },
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        /*liftFunc:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  async broadcastWithRpc(
+    client: RpcClientLike,
+    psbt: PsbtLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<string> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypeRpcClient.lower(client),
             FfiConverterTypePsbt.lower(psbt)
           );
         },
@@ -7943,6 +8402,62 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
+  /**
+   * Sync by downloading full blocks from a Bitcoin Core node.
+   *
+   * Walks blocks from `start_height` up to the node's chain tip, applying each
+   * to the wallet. `start_height` only matters on a wallet with no history yet
+   * (use the wallet's birthday height); once the wallet has a checkpoint, the
+   * emitter resumes from there and `start_height` is effectively a floor.
+   *
+   * If `fetch_mempool` is true, unconfirmed mempool transactions are applied
+   * after the chain is caught up, and txs that dropped out of the mempool are
+   * marked evicted.
+   *
+   * Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
+   * blocking task that owns the wallet across many RPC round-trips, rather than
+   * collecting every block into memory first.
+   */
+  async syncWithRpc(
+    client: RpcClientLike,
+    startHeight: /*u32*/ number,
+    fetchMempool: boolean,
+    inspector: RpcSyncProgressInspector | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypeRpcClient.lower(client),
+            FfiConverterUInt32.lower(startHeight),
+            FfiConverterBool.lower(fetchMempool),
+            FfiConverterOptionalTypeRpcSyncProgressInspector.lower(inspector)
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift,
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
   transactions(): Array<TxDetails> /*throws*/ {
     return FfiConverterArrayTypeTxDetails.lift(
       uniffiCaller.rustCallWithError(
@@ -8175,6 +8690,10 @@ const FfiConverterArrayString = new FfiConverterArray(FfiConverterString);
 const FfiConverterOptionalTypeFullScanProgressInspector =
   new FfiConverterOptional(FfiConverterTypeFullScanProgressInspector);
 
+// FfiConverter for RpcSyncProgressInspector | undefined
+const FfiConverterOptionalTypeRpcSyncProgressInspector =
+  new FfiConverterOptional(FfiConverterTypeRpcSyncProgressInspector);
+
 // FfiConverter for SyncProgressInspector | undefined
 const FfiConverterOptionalTypeSyncProgressInspector = new FfiConverterOptional(
   FfiConverterTypeSyncProgressInspector
@@ -8401,6 +8920,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_txid"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height() !==
+    10505
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height"
     );
   }
   if (
@@ -8652,6 +9179,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect() !==
+    55656
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect() !==
     21297
   ) {
@@ -8681,6 +9216,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc() !==
+    30693
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_rpc"
     );
   }
   if (
@@ -8992,6 +9535,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc() !==
+    38475
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions() !==
     4241
   ) {
@@ -9087,6 +9638,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new() !==
+    40131
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_rpcclient_new"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new() !==
     63178
   ) {
@@ -9105,6 +9664,7 @@ function uniffiEnsureInitialized() {
 
   uniffiCallbackInterfaceFullScanProgressInspector.register();
   uniffiCallbackInterfaceKyotoNodeEventHandler.register();
+  uniffiCallbackInterfaceRpcSyncProgressInspector.register();
   uniffiCallbackInterfaceSyncProgressInspector.register();
 }
 
@@ -9135,6 +9695,8 @@ export default Object.freeze({
     FfiConverterTypeOutPoint,
     FfiConverterTypePsbt,
     FfiConverterTypeRecipient,
+    FfiConverterTypeRpcClient,
+    FfiConverterTypeRpcSyncProgressInspector,
     FfiConverterTypeSentAndReceived,
     FfiConverterTypeSingleKeyDescriptorTemplate,
     FfiConverterTypeSyncProgressInspector,

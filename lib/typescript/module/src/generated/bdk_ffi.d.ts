@@ -5094,6 +5094,111 @@ export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
     static instanceOf(obj: any): obj is Psbt;
 }
 /**
+ * A reusable Bitcoin Core JSON-RPC connection.
+ *
+ * Unlike Electrum/Esplora (which query a third-party indexer), this talks to a
+ * full node the user runs themselves and downloads *whole blocks*: the node
+ * never learns which scripts belong to the wallet, so it offers the strongest
+ * privacy of any backend — at the cost of bandwidth. Create once, then drive
+ * sync via [`Wallet::sync_with_rpc`] and broadcast via
+ * [`Wallet::broadcast_with_rpc`].
+ */
+export interface RpcClientLike {
+    /**
+     * The node's current chain-tip height. Blocks the calling thread on a
+     * single RPC round-trip (fast against a local node).
+     */
+    getBlockHeight(): number;
+}
+/**
+ * @deprecated Use `RpcClientLike` instead.
+ */
+export type RpcClientInterface = RpcClientLike;
+/**
+ * A reusable Bitcoin Core JSON-RPC connection.
+ *
+ * Unlike Electrum/Esplora (which query a third-party indexer), this talks to a
+ * full node the user runs themselves and downloads *whole blocks*: the node
+ * never learns which scripts belong to the wallet, so it offers the strongest
+ * privacy of any backend — at the cost of bandwidth. Create once, then drive
+ * sync via [`Wallet::sync_with_rpc`] and broadcast via
+ * [`Wallet::broadcast_with_rpc`].
+ */
+export declare class RpcClient extends UniffiAbstractObject implements RpcClientLike {
+    readonly [uniffiTypeNameSymbol] = "RpcClient";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Connect to a Bitcoin Core node.
+     *
+     * - `url`: e.g. `"http://127.0.0.1:8332"` (mainnet) or `":18443"` for regtest.
+     * - Auth precedence: if `username` + `password` are both set, use them;
+     * else if `cookie_file` is set, read the node's `.cookie`; else no auth.
+     *
+     * The TS wrapper exposes this as a tagged `auth` union for a nicer API.
+     */
+    constructor(url: string, username: string | undefined, password: string | undefined, cookieFile: string | undefined);
+    /**
+     * The node's current chain-tip height. Blocks the calling thread on a
+     * single RPC round-trip (fast against a local node).
+     */
+    getBlockHeight(): number;
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is RpcClient;
+}
+/**
+ * Callback invoked while syncing a wallet against a Bitcoin Core node over RPC.
+ *
+ * Unlike Electrum/Esplora — which reveal an open-ended set of scripts and have
+ * no fixed total — an RPC sync walks blocks from a start height to the node's
+ * chain tip, so progress has a *real* denominator: `current_height` vs
+ * `tip_height`, giving a meaningful 0..1 completion fraction.
+ *
+ * Calls are throttled (≈1000 over a full chain scan, regardless of range) so a
+ * from-genesis rescan doesn't fire hundreds of thousands of FFI hops, and a
+ * final call always lands exactly at the tip. `inspect` runs on a background
+ * thread and must return quickly — it must not block.
+ */
+export interface RpcSyncProgressInspector {
+    /**
+     * `current_height`: height of the block just applied.
+     * `tip_height`: the node's chain tip at the start of this sync.
+     */
+    inspect(currentHeight: number, tipHeight: number): void;
+}
+/**
+ * Callback invoked while syncing a wallet against a Bitcoin Core node over RPC.
+ *
+ * Unlike Electrum/Esplora — which reveal an open-ended set of scripts and have
+ * no fixed total — an RPC sync walks blocks from a start height to the node's
+ * chain tip, so progress has a *real* denominator: `current_height` vs
+ * `tip_height`, giving a meaningful 0..1 completion fraction.
+ *
+ * Calls are throttled (≈1000 over a full chain scan, regardless of range) so a
+ * from-genesis rescan doesn't fire hundreds of thousands of FFI hops, and a
+ * final call always lands exactly at the tip. `inspect` runs on a background
+ * thread and must return quickly — it must not block.
+ */
+export declare class RpcSyncProgressInspectorImpl extends UniffiAbstractObject implements RpcSyncProgressInspector {
+    readonly [uniffiTypeNameSymbol] = "RpcSyncProgressInspectorImpl";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    private constructor();
+    /**
+     * `current_height`: height of the block just applied.
+     * `tip_height`: the node's chain tip at the start of this sync.
+     */
+    inspect(currentHeight: number, tipHeight: number): void;
+    /**
+     * {@inheritDoc uniffi-bindgen-react-native#UniffiAbstractObject.uniffiDestroy}
+     */
+    uniffiDestroy(): void;
+    static instanceOf(obj: any): obj is RpcSyncProgressInspectorImpl;
+}
+/**
  * Callback invoked on each item visited while syncing a wallet against a
  * chain source (Electrum/Esplora). Implemented on the JS side and passed to
  * the `sync_with_*` methods to drive a progress indicator.
@@ -5233,6 +5338,9 @@ export interface WalletLike {
     broadcastWithKyoto(client: KyotoClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
+    broadcastWithRpc(client: RpcClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     calculateFee(txHex: string): bigint;
     calculateFeeRate(txHex: string): number;
@@ -5296,6 +5404,25 @@ export interface WalletLike {
     syncWithKyoto(client: KyotoClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
+    /**
+     * Sync by downloading full blocks from a Bitcoin Core node.
+     *
+     * Walks blocks from `start_height` up to the node's chain tip, applying each
+     * to the wallet. `start_height` only matters on a wallet with no history yet
+     * (use the wallet's birthday height); once the wallet has a checkpoint, the
+     * emitter resumes from there and `start_height` is effectively a floor.
+     *
+     * If `fetch_mempool` is true, unconfirmed mempool transactions are applied
+     * after the chain is caught up, and txs that dropped out of the mempool are
+     * marked evicted.
+     *
+     * Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
+     * blocking task that owns the wallet across many RPC round-trips, rather than
+     * collecting every block into memory first.
+     */
+    syncWithRpc(client: RpcClientLike, startHeight: number, fetchMempool: boolean, inspector: RpcSyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     transactions(): Array<TxDetails>;
     txDetails(txid: string): /*throws*/ TxDetails | undefined;
     unmarkUsed(keychain: KeychainKind, index: number): boolean;
@@ -5319,6 +5446,9 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
         signal: AbortSignal;
     }): Promise<string>;
     broadcastWithKyoto(client: KyotoClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    broadcastWithRpc(client: RpcClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
@@ -5382,6 +5512,25 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
      * `KyotoClient` is built. Safe to call repeatedly while the node is running.
      */
     syncWithKyoto(client: KyotoClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    /**
+     * Sync by downloading full blocks from a Bitcoin Core node.
+     *
+     * Walks blocks from `start_height` up to the node's chain tip, applying each
+     * to the wallet. `start_height` only matters on a wallet with no history yet
+     * (use the wallet's birthday height); once the wallet has a checkpoint, the
+     * emitter resumes from there and `start_height` is effectively a floor.
+     *
+     * If `fetch_mempool` is true, unconfirmed mempool transactions are applied
+     * after the chain is caught up, and txs that dropped out of the mempool are
+     * marked evicted.
+     *
+     * Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
+     * blocking task that owns the wallet across many RPC round-trips, rather than
+     * collecting every block into memory first.
+     */
+    syncWithRpc(client: RpcClientLike, startHeight: number, fetchMempool: boolean, inspector: RpcSyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
     transactions(): Array<TxDetails>;
@@ -5533,6 +5682,8 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): Recipient;
             lower(value: Recipient): UniffiByteArray;
         };
+        FfiConverterTypeRpcClient: FfiConverterObject<RpcClientLike>;
+        FfiConverterTypeRpcSyncProgressInspector: FfiConverterObjectWithCallbacks<RpcSyncProgressInspector>;
         FfiConverterTypeSentAndReceived: {
             read(from: RustBuffer): SentAndReceived;
             write(value: SentAndReceived, into: RustBuffer): void;

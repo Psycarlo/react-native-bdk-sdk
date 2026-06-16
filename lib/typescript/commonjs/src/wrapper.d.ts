@@ -8,7 +8,7 @@
  * JS `number` safely handles up to 2^53 (~9 quadrillion), which covers
  * the entire Bitcoin supply in satoshis (2.1 quadrillion).
  */
-import type { AddressInfo, BlockId, ChangeSpendPolicy, DerivationInfo, ElectrumClientLike, EsploraClientLike, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, TxOrdering } from './generated/bdk_ffi';
+import type { AddressInfo, BlockId, ChangeSpendPolicy, DerivationInfo, ElectrumClientLike, EsploraClientLike, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, RpcClientLike, TxOrdering } from './generated/bdk_ffi';
 import { TxBuilder, Wallet } from './generated/bdk_ffi';
 export type BalanceN = {
     immature: number;
@@ -38,6 +38,23 @@ export type SyncProgressInspectorN = {
  */
 export type FullScanProgressInspectorN = {
     inspect(keychain: KeychainKind, index: number, visited: number): void;
+};
+/** Progress of an in-flight Bitcoin Core RPC sync. */
+export type RpcSyncProgressN = {
+    /** Height of the block just applied. */
+    currentHeight: number;
+    /** The node's chain tip at the start of this sync. */
+    tipHeight: number;
+    /** Completion fraction in `[0, 1]` (`currentHeight / tipHeight`). */
+    progress: number;
+};
+/**
+ * Number-friendly RPC sync progress callback. Unlike Electrum/Esplora, an RPC
+ * sync walks blocks toward a known tip, so `progress` is a real fraction (not a
+ * raw count). Called from a background thread; keep it fast and non-blocking.
+ */
+export type RpcSyncProgressInspectorN = {
+    inspect(progress: RpcSyncProgressN): void;
 };
 export type TxOutN = {
     value: number;
@@ -122,6 +139,41 @@ export declare class BdkKyotoClient {
 }
 /** A Kyoto client is stateful, so only an existing instance can be reused. */
 export type KyotoInput = BdkKyotoClient;
+/**
+ * How to authenticate against the node's JSON-RPC endpoint.
+ * - `cookieFile`: path to bitcoind's auto-generated `.cookie` (easiest locally).
+ * - `userPass`: the `rpcuser` / `rpcpassword` from `bitcoin.conf`.
+ * - `none`: no auth (e.g. behind an already-authenticated proxy).
+ */
+export type RpcAuth = {
+    type: 'cookieFile';
+    path: string;
+} | {
+    type: 'userPass';
+    username: string;
+    password: string;
+} | {
+    type: 'none';
+};
+export type RpcOptions = {
+    /** Node RPC URL, e.g. `"http://127.0.0.1:8332"`. */
+    url: string;
+    auth: RpcAuth;
+};
+/**
+ * Wraps a Bitcoin Core RPC connection. Downloads full blocks (max privacy — the
+ * node never sees the wallet's scripts) at the cost of bandwidth. Build once and
+ * reuse across {@link BdkWallet.syncWithRpc} / {@link BdkWallet.broadcastWithRpc}.
+ */
+export declare class BdkRpcClient {
+    private readonly inner;
+    constructor(opts: RpcOptions);
+    get raw(): RpcClientLike;
+    /** The node's current chain-tip height. */
+    getBlockHeight(): number;
+}
+/** An RPC client owns a connection, so only an existing instance can be reused. */
+export type RpcInput = BdkRpcClient;
 export declare function bdkCreateWallet(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string): Promise<BdkWallet>;
 export declare class BdkWallet {
     private readonly inner;
@@ -155,8 +207,19 @@ export declare class BdkWallet {
     syncWithEsplora(client: EsploraInput, stopGap: number, inspector?: SyncProgressInspectorN): Promise<void>;
     fullScanWithElectrum(client: ElectrumInput, stopGap: number, inspector?: FullScanProgressInspectorN): Promise<void>;
     syncWithElectrum(client: ElectrumInput, stopGap: number, inspector?: SyncProgressInspectorN): Promise<void>;
+    /**
+     * Sync against a Bitcoin Core node by downloading full blocks from
+     * `startHeight` to the node's tip. Use the wallet's birthday height for
+     * `startHeight` on first sync; it acts as a floor once the wallet has a
+     * checkpoint. `fetchMempool` (default true) also applies unconfirmed txs.
+     */
+    syncWithRpc(client: RpcInput, startHeight: number, opts?: {
+        fetchMempool?: boolean;
+        inspector?: RpcSyncProgressInspectorN;
+    }): Promise<void>;
     broadcastWithEsplora(client: EsploraInput, psbt: PsbtLike): Promise<string>;
     broadcastWithElectrum(client: ElectrumInput, psbt: PsbtLike): Promise<string>;
+    broadcastWithRpc(client: RpcInput, psbt: PsbtLike): Promise<string>;
     /** Drives one sync against the Kyoto node; resolves once caught up to tip. */
     syncWithKyoto(client: KyotoInput): Promise<void>;
     broadcastWithKyoto(client: KyotoInput, psbt: PsbtLike): Promise<string>;
