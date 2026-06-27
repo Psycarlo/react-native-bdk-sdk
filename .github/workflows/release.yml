@@ -142,21 +142,46 @@ jobs:
 
       - name: Create tag
         run: |
-          git tag "v${{ needs.detect-release.outputs.version }}"
-          git push origin "v${{ needs.detect-release.outputs.version }}"
+          TAG="v${{ needs.detect-release.outputs.version }}"
+          # Idempotent: skip if the tag already points at this commit (rerun-safe)
+          if git ls-remote --exit-code --tags origin "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists on remote, skipping"
+          else
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "v${{ needs.detect-release.outputs.version }}"
-          generate_release_notes: true
-          body: |
-            ## Checksums (SHA-256)
-            - **android-artifacts.zip**: `${{ env.ANDROID_CHECKSUM }}`
-            - **ios-artifacts.zip**: `${{ env.IOS_CHECKSUM }}`
-          files: |
-            artifacts/android-artifacts/android-artifacts.zip
-            artifacts/ios-artifacts/ios-artifacts.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: "v${{ needs.detect-release.outputs.version }}"
+        run: |
+          BODY=$(printf '## Checksums (SHA-256)\n- **android-artifacts.zip**: `%s`\n- **ios-artifacts.zip**: `%s`\n' \
+            "$ANDROID_CHECKSUM" "$IOS_CHECKSUM")
+
+          # Rerun-safe: if a release already exists, just (re)upload assets
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG exists, uploading assets"
+            gh release upload "$TAG" \
+              artifacts/android-artifacts/android-artifacts.zip \
+              artifacts/ios-artifacts/ios-artifacts.zip --clobber
+            exit 0
+          fi
+
+          # Retry to ride out transient GitHub API 5xx errors
+          for attempt in 1 2 3 4 5; do
+            if gh release create "$TAG" \
+                artifacts/android-artifacts/android-artifacts.zip \
+                artifacts/ios-artifacts/ios-artifacts.zip \
+                --generate-notes \
+                --notes "$BODY"; then
+              exit 0
+            fi
+            echo "Release creation failed (attempt $attempt), retrying in $((attempt * 10))s..."
+            sleep $((attempt * 10))
+          done
+          echo "::error::Failed to create GitHub release after retries"
+          exit 1
 
   publish-npm:
     needs: [detect-release, release]
