@@ -92,6 +92,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_clone_wallet(handle: bigint, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_free_wallet(handle: bigint, uniffi_out_err: UniffiRustCallStatus): void;
     ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(descriptor: Uint8Array, changeDescriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
+    ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(descriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array, uniffi_out_err: UniffiRustCallStatus): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(ptr: bigint, client: bigint, psbt: bigint): bigint;
     ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(ptr: bigint, client: bigint, psbt: bigint): bigint;
@@ -145,6 +146,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_fn_func_create_public_descriptor(xpub: Uint8Array, template: Uint8Array, keychain: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_func_create_single_key_descriptor(key: Uint8Array, template: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_func_create_wallet(descriptor: Uint8Array, changeDescriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array): bigint;
+    ubrn_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(descriptor: Uint8Array, network: Uint8Array, dbPath: Uint8Array): bigint;
     ubrn_uniffi_bdk_ffi_fn_func_export_wallet(wallet: bigint, label: Uint8Array, includeBlockHeight: number, uniffi_out_err: UniffiRustCallStatus): Uint8Array;
     ubrn_uniffi_bdk_ffi_fn_func_is_valid_address(address: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): number;
     ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor(descriptor: Uint8Array, network: Uint8Array, uniffi_out_err: UniffiRustCallStatus): number;
@@ -204,6 +206,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_func_create_public_descriptor(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_create_single_key_descriptor(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_create_wallet(): number;
+    ubrn_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_export_wallet(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_is_valid_address(): number;
     ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor(): number;
@@ -317,6 +320,7 @@ interface NativeModuleInterface {
     ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(): number;
     ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new(): number;
+    ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(): number;
     ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
     ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;
     ubrn_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(pointer: bigint, uniffi_out_err: UniffiRustCallStatus): UniffiGcObject;

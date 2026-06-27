@@ -577,6 +577,12 @@ extern "C" {
         RustBuffer db_path, 
         RustCallStatus *uniffi_out_err
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(
+        RustBuffer descriptor, 
+        RustBuffer network, 
+        RustBuffer db_path, 
+        RustCallStatus *uniffi_out_err
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t client, 
@@ -858,6 +864,11 @@ extern "C" {
         RustBuffer network, 
         RustBuffer db_path
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(
+        RustBuffer descriptor, 
+        RustBuffer network, 
+        RustBuffer db_path
+    );
     RustBuffer uniffi_bdk_ffi_fn_func_export_wallet(
         /*handle*/ uint64_t wallet, 
         RustBuffer label, 
@@ -1091,6 +1102,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_func_create_wallet(
     );
+    uint16_t uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(
+    );
     uint16_t uniffi_bdk_ffi_checksum_func_export_wallet(
     );
     uint16_t uniffi_bdk_ffi_checksum_func_is_valid_address(
@@ -1316,6 +1329,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_constructor_txbuilder_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_wallet_new(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(
     );
     uint32_t ffi_bdk_ffi_uniffi_contract_version(
     );
@@ -5247,6 +5262,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_constructor_wallet_new(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum"),
@@ -5669,6 +5692,14 @@ NativeBdkFfi::NativeBdkFfi(
         4,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_func_create_wallet(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_func_export_wallet"] = jsi::Function::createFromHostFunction(
@@ -6141,6 +6172,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_func_create_wallet(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_func_export_wallet"] = jsi::Function::createFromHostFunction(
@@ -7045,6 +7084,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_constructor_wallet_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(rt, thisVal, args, count);
         }
     );
     props["ubrn_ffi_bdk_ffi_uniffi_contract_version"] = jsi::Function::createFromHostFunction(
@@ -8239,6 +8286,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_wallet_new(jsi::Runti
         
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[2])
         );
@@ -8724,6 +8781,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_create_wallet(jsi::Runtime& 
         
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_export_wallet(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_func_export_wallet(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<int8_t>::fromJs(rt, callInvoker, args[2]), 
@@ -9182,6 +9246,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_create_single_key_desc
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_create_wallet(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_func_create_wallet(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(
         );
 
         
@@ -9973,6 +10044,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(j
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_wallet_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_constructor_wallet_new(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(
         );
 
         

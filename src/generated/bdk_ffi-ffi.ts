@@ -425,6 +425,12 @@ interface NativeModuleInterface {
     dbPath: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(
+    descriptor: Uint8Array,
+    network: Uint8Array,
+    dbPath: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
     ptr: bigint,
     client: bigint,
@@ -706,6 +712,11 @@ interface NativeModuleInterface {
     network: Uint8Array,
     dbPath: Uint8Array
   ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(
+    descriptor: Uint8Array,
+    network: Uint8Array,
+    dbPath: Uint8Array
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_func_export_wallet(
     wallet: bigint,
     label: Uint8Array,
@@ -869,6 +880,7 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_func_create_public_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_single_key_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_wallet(): number;
+  ubrn_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_export_wallet(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_is_valid_address(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor(): number;
@@ -982,6 +994,7 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(): number;
   ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
   ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(
     pointer: bigint,

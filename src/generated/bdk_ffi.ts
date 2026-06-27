@@ -258,6 +258,42 @@ export async function createWallet(
     throw __error;
   }
 }
+export async function createWalletFromMultipath(
+  descriptor: string,
+  network: Network,
+  dbPath: string,
+  asyncOpts_?: { signal: AbortSignal }
+): Promise<WalletLike> /*throws*/ {
+  const __stack = uniffiIsDebug ? new Error().stack : undefined;
+  try {
+    return await uniffiRustCallAsync(
+      /*rustCaller:*/ uniffiCaller,
+      /*rustFutureFunc:*/ () => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_create_wallet_from_multipath(
+          FfiConverterString.lower(descriptor),
+          FfiConverterTypeNetwork.lower(network),
+          FfiConverterString.lower(dbPath)
+        );
+      },
+      /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_u64,
+      /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_u64,
+      /*completeFunc:*/ nativeModule()
+        .ubrn_ffi_bdk_ffi_rust_future_complete_u64,
+      /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_u64,
+      /*liftFunc:*/ FfiConverterTypeWallet.lift.bind(FfiConverterTypeWallet),
+      /*liftString:*/ FfiConverterString.lift,
+      /*asyncOpts:*/ asyncOpts_,
+      /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      )
+    );
+  } catch (__error: any) {
+    if (uniffiIsDebug && __error instanceof Error) {
+      __error.stack = __stack;
+    }
+    throw __error;
+  }
+}
 /**
  * Export a wallet in FullyNoded-compatible JSON format for backup.
  */
@@ -7369,6 +7405,29 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     this[destructorGuardSymbol] = uniffiTypeWalletObjectFactory.bless(pointer);
   }
 
+  static newFromMultipath(
+    descriptor: string,
+    network: Network,
+    dbPath: string
+  ): WalletLike /*throws*/ {
+    return FfiConverterTypeWallet.lift(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
+        /*caller:*/ (callStatus) => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(
+            FfiConverterString.lower(descriptor),
+            FfiConverterTypeNetwork.lower(network),
+            FfiConverterString.lower(dbPath),
+            callStatus
+          );
+        },
+        /*liftString:*/ FfiConverterString.lift
+      )
+    );
+  }
+
   async broadcastWithElectrum(
     client: ElectrumClientLike,
     psbt: PsbtLike,
@@ -8769,6 +8828,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath() !==
+    55216
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_export_wallet() !== 61696
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
@@ -9659,6 +9726,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_wallet_new"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath() !==
+    35912
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath"
     );
   }
 
