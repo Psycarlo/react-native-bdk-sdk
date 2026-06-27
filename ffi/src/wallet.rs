@@ -59,6 +59,37 @@ impl Wallet {
         })
     }
 
+    #[uniffi::constructor]
+    pub fn new_from_multipath(
+        descriptor: String,
+        network: Network,
+        db_path: String,
+    ) -> Result<Self, BdkError> {
+        let net: bitcoin::Network = network.into();
+        let mut conn = Connection::open(&db_path)?;
+
+        let load_result = bdk_wallet::Wallet::load()
+            .two_path_descriptor(descriptor.clone())
+            .extract_keys()
+            .check_network(net)
+            .load_wallet(&mut conn);
+
+        let wallet = match load_result {
+            Ok(Some(w)) => w,
+            Ok(None) => {
+                bdk_wallet::Wallet::create_from_two_path_descriptor(descriptor)
+                    .network(net)
+                    .create_wallet(&mut conn)?
+            }
+            Err(e) => return Err(e.into()),
+        };
+
+        Ok(Self {
+            inner: Mutex::new(wallet),
+            conn: Mutex::new(conn),
+        })
+    }
+
     // ── Address management ────────────────────────────────────────────────────
 
     pub fn next_unused_address(&self, keychain: KeychainKind) -> Result<AddressInfo, BdkError> {

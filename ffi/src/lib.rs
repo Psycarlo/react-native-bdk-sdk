@@ -119,6 +119,23 @@ pub async fn create_wallet(
     }).await
 }
 
+#[uniffi::export(async_runtime = "tokio")]
+pub async fn create_wallet_from_multipath(
+    descriptor: String,
+    network: Network,
+    db_path: String,
+) -> Result<Arc<Wallet>, BdkError> {
+    run_async(async move {
+        tokio::task::spawn_blocking(move || {
+            Wallet::new_from_multipath(descriptor, network, db_path).map(Arc::new)
+        })
+        .await
+        .map_err(|e| BdkError::WalletCreationFailed {
+            message: format!("Wallet creation task panicked: {}", e),
+        })?
+    }).await
+}
+
 /// Generate an output descriptor string from a mnemonic using a standard BIP template.
 #[uniffi::export]
 pub fn create_descriptor(

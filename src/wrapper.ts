@@ -39,6 +39,7 @@ import {
   TxBuilder,
   Wallet,
   createWallet as rawCreateWallet,
+  createWalletFromMultipath as rawCreateWalletFromMultipath,
 } from './generated/bdk_ffi';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -449,6 +450,15 @@ export async function bdkCreateWallet(
   return BdkWallet.fromRaw(inner as Wallet);
 }
 
+export async function bdkCreateWalletFromMultipath(
+  descriptor: string,
+  network: Network,
+  dbPath: string
+): Promise<BdkWallet> {
+  const inner = await rawCreateWalletFromMultipath(descriptor, network, dbPath);
+  return BdkWallet.fromRaw(inner as Wallet);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Wallet wrapper
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -469,6 +479,14 @@ export class BdkWallet {
     const instance = Object.create(BdkWallet.prototype) as BdkWallet;
     (instance as any).inner = wallet;
     return instance;
+  }
+
+  static fromMultipath(
+    descriptor: string,
+    network: Network,
+    dbPath: string
+  ): BdkWallet {
+    return BdkWallet.fromRaw(Wallet.newFromMultipath(descriptor, network, dbPath) as Wallet);
   }
 
   get raw(): Wallet {
