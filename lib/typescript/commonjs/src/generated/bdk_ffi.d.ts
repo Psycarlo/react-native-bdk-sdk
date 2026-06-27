@@ -27,6 +27,9 @@ export declare function createSingleKeyDescriptor(key: string, template: SingleK
 export declare function createWallet(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string, asyncOpts_?: {
     signal: AbortSignal;
 }): Promise<WalletLike>;
+export declare function createWalletFromMultipath(descriptor: string, network: Network, dbPath: string, asyncOpts_?: {
+    signal: AbortSignal;
+}): Promise<WalletLike>;
 /**
  * Export a wallet in FullyNoded-compatible JSON format for backup.
  */
@@ -5439,6 +5442,7 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
      * Create or load a persisted wallet (sync — for async use create_wallet()).
      */
     constructor(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string);
+    static newFromMultipath(descriptor: string, network: Network, dbPath: string): WalletLike;
     broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;

@@ -175,10 +175,12 @@ export declare class BdkRpcClient {
 /** An RPC client owns a connection, so only an existing instance can be reused. */
 export type RpcInput = BdkRpcClient;
 export declare function bdkCreateWallet(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string): Promise<BdkWallet>;
+export declare function bdkCreateWalletFromMultipath(descriptor: string, network: Network, dbPath: string): Promise<BdkWallet>;
 export declare class BdkWallet {
     private readonly inner;
     constructor(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string);
     static fromRaw(wallet: Wallet): BdkWallet;
+    static fromMultipath(descriptor: string, network: Network, dbPath: string): BdkWallet;
     get raw(): Wallet;
     nextUnusedAddress(keychain: KeychainKind): AddressInfo;
     revealNextAddress(keychain: KeychainKind): AddressInfo;
