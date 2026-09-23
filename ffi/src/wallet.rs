@@ -36,6 +36,8 @@ impl Wallet {
         let change_desc = change_descriptor.unwrap_or_else(|| descriptor.clone());
         let mut conn = Connection::open(&db_path)?;
 
+        // bdk_wallet 3.2 deprecates wallet-owned keys (extract_keys, sign, policies, policy_path).
+        #[allow(deprecated)]
         let load_result = bdk_wallet::Wallet::load()
             .descriptor(bdk_wallet::KeychainKind::External, Some(descriptor.clone()))
             .descriptor(bdk_wallet::KeychainKind::Internal, Some(change_desc.clone()))
@@ -68,6 +70,7 @@ impl Wallet {
         let net: bitcoin::Network = network.into();
         let mut conn = Connection::open(&db_path)?;
 
+        #[allow(deprecated)]
         let load_result = bdk_wallet::Wallet::load()
             .two_path_descriptor(descriptor.clone())
             .extract_keys()
@@ -273,6 +276,7 @@ impl Wallet {
     pub fn sign(&self, psbt: Arc<Psbt>) -> Result<bool, BdkError> {
         let w = self.inner.lock().unwrap();
         let mut psbt_inner = psbt.inner.lock().unwrap();
+        #[allow(deprecated)]
         let finalized = w.sign(&mut psbt_inner, SignOptions::default())?;
         Ok(finalized)
     }
@@ -890,6 +894,7 @@ impl Wallet {
 
     pub fn policies(&self, keychain: KeychainKind) -> Result<Option<String>, BdkError> {
         let w = self.inner.lock().unwrap();
+        #[allow(deprecated)]
         let policy = w
             .policies(keychain.into())
             .map_err(|e| BdkError::InvalidDescriptor {
@@ -1040,6 +1045,7 @@ impl Wallet {
             .fee_rate(fr);
 
         let mut psbt = builder.finish()?;
+        #[allow(deprecated)]
         w.sign(&mut psbt, SignOptions::default())?;
 
         psbt.extract_tx().map_err(|e| BdkError::InvalidPsbt {
@@ -1076,6 +1082,7 @@ impl Wallet {
             .fee_rate(fr);
 
         let mut psbt = builder.finish()?;
+        #[allow(deprecated)]
         w.sign(&mut psbt, SignOptions::default())?;
 
         psbt.extract_tx().map_err(|e| BdkError::InvalidPsbt {
