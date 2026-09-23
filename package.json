@@ -1,6 +1,6 @@
 {
   "name": "react-native-bdk-sdk",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "React Native language bindings for the Bitcoin Development Kit",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -84,22 +84,23 @@
     "ios": ""
   },
   "dependencies": {
-    "uniffi-bindgen-react-native": "0.31.0-2"
+    "@ubjs/core": "0.31.0-5",
+    "uniffi-bindgen-react-native": "0.31.0-5"
   },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
   "devDependencies": {
-    "@expo/config-plugins": "^55.0.6",
-    "@react-native-community/cli": "^20.1.2",
-    "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "expo-module-scripts": "^55.0.2",
-    "react": "^19.2.4",
-    "react-native": "^0.84.1",
-    "react-native-builder-bob": "^0.40.18",
-    "typescript": "^5.9.3"
+    "@expo/config-plugins": "^57.0.9",
+    "@react-native-community/cli": "^20.2.0",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "expo-module-scripts": "^56.0.3",
+    "react": "^19.3.0",
+    "react-native": "^0.87.1",
+    "react-native-builder-bob": "^0.43.1",
+    "typescript": "^7.0.2"
   },
   "react-native-builder-bob": {
     "source": "src",

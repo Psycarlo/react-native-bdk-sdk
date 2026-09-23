@@ -356,6 +356,7 @@ impl TxBuilder {
                 serde_json::from_str(json).map_err(|e| BdkError::TransactionBuildFailed {
                     message: format!("Invalid policy path JSON: {}", e),
                 })?;
+            #[allow(deprecated)]
             builder.policy_path(path, (*keychain).into());
         }
 

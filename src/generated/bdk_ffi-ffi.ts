@@ -12,668 +12,266 @@ import {
   type UniffiGcObject,
   type UniffiRustFutureContinuationCallback as RuntimeUniffiRustFutureContinuationCallback,
   type UniffiResult,
-} from "uniffi-bindgen-react-native";
+} from "@ubjs/core";
 
 interface NativeModuleInterface {
   ubrn_uniffi_internal_fn_func_ffi__string_to_byte_length(
     string: string,
     uniffi_out_err: UniffiRustCallStatus
   ): number;
-  ubrn_uniffi_internal_fn_func_ffi__string_to_arraybuffer(
+  ubrn_uniffi_internal_fn_func_ffi__string_to_buffer(
     string: string,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
-  ubrn_uniffi_internal_fn_func_ffi__arraybuffer_to_string(
+  ubrn_uniffi_internal_fn_func_ffi__string_from_buffer(
     buffer: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): string;
-  ubrn_uniffi_bdk_ffi_fn_clone_electrumclient(
+  ubrn_uniffi_internal_fn_func_ffi__read_string_from_buffer(
+    buffer: any,
+    offset: number,
+    length: number
+  ): string;
+  ubrn_ffi_bdk_ffi_rust_future_poll_u8(
     handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_u8(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_u8(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_u8(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_i8(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_i8(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_i8(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_i8(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_u16(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_u16(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_u16(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_u16(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_i16(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_i16(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_i16(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_i16(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_u32(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_u32(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_u32(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_u32(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_i32(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_i32(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_i32(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_i32(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_u64(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_u64(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_u64(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_ffi_bdk_ffi_rust_future_free_u64(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_i64(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_i64(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_i64(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_ffi_bdk_ffi_rust_future_free_i64(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_f32(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_f32(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_f32(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_f32(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_f64(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_f64(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_f64(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_rust_future_free_f64(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_poll_void(
+    handle: bigint,
+    callback: UniffiRustFutureContinuationCallback,
+    callbackData: bigint
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_cancel_void(handle: bigint): void;
+  ubrn_ffi_bdk_ffi_rust_future_complete_void(
+    handle: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_ffi_bdk_ffi_rust_future_free_void(handle: bigint): void;
+  ubrn_uniffi_bdk_ffi_fn_clone_electrumclient(
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_electrumclient(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_new(
-    url: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_clone_esploraclient(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_esploraclient(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_new(
-    url: Uint8Array,
+  ubrn_uniffi_bdk_ffi_fn_clone_fullscanprogressinspector(
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_free_fullscanprogressinspector(
+    ptr: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_kyotoclient(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_kyotoclient(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(
-    wallet: bigint,
-    scanType: Uint8Array,
-    requiredPeers: number,
-    peers: Uint8Array,
-    dataDir: Uint8Array,
-    handler: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_kyotonodeeventhandler(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_kyotonodeeventhandler(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(
-    vtable: UniffiVTableCallbackInterfaceKyotoNodeEventHandler
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(
     ptr: bigint,
-    message: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(
-    ptr: bigint,
-    message: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_mnemonic(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_mnemonic(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(
-    entropy: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy_in(
-    entropy: Uint8Array,
-    language: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_string(
-    mnemonic: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_string_in(
-    mnemonic: Uint8Array,
-    language: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_new(
-    wordCount: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_language(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_to_seed_hex(
-    ptr: bigint,
-    passphrase: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_to_string(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_word_count(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_words(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_clone_psbt(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_psbt(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_psbt_new(
-    psbtBase64: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_psbt_extract_tx_hex(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_amount(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_rate(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_psbt_get_utxo_for(
-    ptr: bigint,
-    inputIndex: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_psbt_to_base64(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_psbt_txid(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_clone_rpcclient(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_rpcclient(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new(
-    url: Uint8Array,
-    username: Uint8Array,
-    password: Uint8Array,
-    cookieFile: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(
     ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_clone_txbuilder(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_free_txbuilder(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_txbuilder_new(
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_data(
-    ptr: bigint,
-    data: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_global_xpubs(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_recipient(
-    ptr: bigint,
-    address: Uint8Array,
-    amountSats: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_unspendable(
-    ptr: bigint,
-    outpoint: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_utxo(
-    ptr: bigint,
-    outpoint: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_utxos(
-    ptr: bigint,
-    outpoints: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_allow_dust(
-    ptr: bigint,
-    allow: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_change_policy(
-    ptr: bigint,
-    policy: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_current_height(
-    ptr: bigint,
-    height: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_do_not_spend_change(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_drain_to(
-    ptr: bigint,
-    address: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_drain_wallet(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_enable_rbf(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_enable_rbf_with_sequence(
-    ptr: bigint,
-    nsequence: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_exclude_below_confirmations(
-    ptr: bigint,
-    minConfirms: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_exclude_unconfirmed(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_absolute(
-    ptr: bigint,
-    feeSats: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_rate(
-    ptr: bigint,
-    satPerVbyte: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_finish(
-    ptr: bigint,
-    wallet: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_nlocktime(
-    ptr: bigint,
-    lockHeight: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_only_spend_change(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_only_witness_utxo(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_ordering(
-    ptr: bigint,
-    ordering: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_policy_path(
-    ptr: bigint,
-    pathMapJson: Uint8Array,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence(
-    ptr: bigint,
-    nsequence: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_recipients(
-    ptr: bigint,
-    recipients: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_sighash(
-    ptr: bigint,
-    sighashType: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_tx_version(
-    ptr: bigint,
-    version: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_unspendable(
-    ptr: bigint,
-    outpoints: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_clone_fullscanprogressinspector(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_free_fullscanprogressinspector(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_fullscanprogressinspector(
-    vtable: UniffiVTableCallbackInterfaceFullScanProgressInspector
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(
-    ptr: bigint,
-    keychain: Uint8Array,
-    index: number,
-    visited: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_rpcsyncprogressinspector(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_rpcsyncprogressinspector(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(
-    vtable: UniffiVTableCallbackInterfaceRpcSyncProgressInspector
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(
     ptr: bigint,
-    currentHeight: number,
-    tipHeight: number,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_syncprogressinspector(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_syncprogressinspector(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_syncprogressinspector(
-    vtable: UniffiVTableCallbackInterfaceSyncProgressInspector
-  ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_syncprogressinspector_inspect(
+  ubrn_uniffi_bdk_ffi_fn_clone_txbuilder(
     ptr: bigint,
-    consumed: bigint,
-    total: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_free_txbuilder(
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_wallet(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_wallet(
-    handle: bigint,
+    ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(
-    descriptor: Uint8Array,
-    changeDescriptor: Uint8Array,
-    network: Uint8Array,
-    dbPath: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(
-    descriptor: Uint8Array,
-    network: Uint8Array,
-    dbPath: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
-    ptr: bigint,
-    client: bigint,
-    psbt: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(
-    ptr: bigint,
-    client: bigint,
-    psbt: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(
-    ptr: bigint,
-    client: bigint,
-    psbt: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(
-    ptr: bigint,
-    client: bigint,
-    psbt: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(
-    ptr: bigint,
-    txid: Uint8Array,
-    newFeeRate: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(
-    ptr: bigint,
-    txHex: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(
-    ptr: bigint,
-    txHex: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_checkpoints(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_index(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_of_spk(
-    ptr: bigint,
-    scriptHex: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_descriptor_checksum(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_drain(
-    ptr: bigint,
-    address: Uint8Array,
-    feeRate: number,
-    client: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_drain_with_electrum(
-    ptr: bigint,
-    address: Uint8Array,
-    feeRate: number,
-    client: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_finalize_psbt(
-    ptr: bigint,
-    psbt: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
-    ptr: bigint,
-    client: bigint,
-    stopGap: bigint,
-    inspector: Uint8Array
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
-    ptr: bigint,
-    client: bigint,
-    stopGap: bigint,
-    inspector: Uint8Array
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_get_balance(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_get_tx(
-    ptr: bigint,
-    txid: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_get_utxo(
-    ptr: bigint,
-    outpoint: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_insert_txout(
-    ptr: bigint,
-    outpoint: Uint8Array,
-    txout: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
+  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_fullscanprogressinspector(
+    vtable: UniffiVTableCallbackInterfaceBdkFfiFullScanProgressInspector
   ): void;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_is_mine(
-    ptr: bigint,
-    scriptHex: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_keychains(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_latest_checkpoint(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_list_output(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_list_unspent(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_list_unused_addresses(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_mark_used(
-    ptr: bigint,
-    keychain: Uint8Array,
-    index: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_network(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_next_derivation_index(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_next_unused_address(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_peek_address(
-    ptr: bigint,
-    keychain: Uint8Array,
-    index: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_persist(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_policies(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_public_descriptor(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to(
-    ptr: bigint,
-    keychain: Uint8Array,
-    index: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_next_address(
-    ptr: bigint,
-    keychain: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_send(
-    ptr: bigint,
-    address: Uint8Array,
-    amountSats: bigint,
-    feeRate: number,
-    client: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_send_with_electrum(
-    ptr: bigint,
-    address: Uint8Array,
-    amountSats: bigint,
-    feeRate: number,
-    client: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_sent_and_received(
-    ptr: bigint,
-    txHex: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_sign(
-    ptr: bigint,
-    psbt: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
-    ptr: bigint,
-    client: bigint,
-    stopGap: bigint,
-    inspector: Uint8Array
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
-    ptr: bigint,
-    client: bigint,
-    stopGap: bigint,
-    inspector: Uint8Array
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(
-    ptr: bigint,
-    client: bigint
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(
-    ptr: bigint,
-    client: bigint,
-    startHeight: number,
-    fetchMempool: number,
-    inspector: Uint8Array
-  ): bigint;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions(
-    ptr: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(
-    ptr: bigint,
-    txid: Uint8Array,
-    uniffi_out_err: UniffiRustCallStatus
-  ): Uint8Array;
-  ubrn_uniffi_bdk_ffi_fn_method_wallet_unmark_used(
-    ptr: bigint,
-    keychain: Uint8Array,
-    index: number,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
+  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_kyotonodeeventhandler(
+    vtable: UniffiVTableCallbackInterfaceBdkFfiKyotoNodeEventHandler
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_rpcsyncprogressinspector(
+    vtable: UniffiVTableCallbackInterfaceBdkFfiRpcSyncProgressInspector
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_init_callback_vtable_syncprogressinspector(
+    vtable: UniffiVTableCallbackInterfaceBdkFfiSyncProgressInspector
+  ): void;
   ubrn_uniffi_bdk_ffi_fn_func_address_from_script(
     scriptHex: Uint8Array,
     network: Uint8Array,
@@ -742,138 +340,546 @@ interface NativeModuleInterface {
     network: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
-  ubrn_ffi_bdk_ffi_rust_future_poll_u8(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_u8(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_u8(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_u8(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_i8(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_i8(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_i8(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_i8(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_u16(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_u16(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_u16(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_u16(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_i16(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_i16(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_i16(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_i16(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_u32(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_u32(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_u32(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_u32(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_i32(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_i32(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_i32(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_i32(
-    handle: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_u64(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_u64(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_u64(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_u64(
-    handle: bigint,
+  ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_new(
+    url: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
-  ubrn_ffi_bdk_ffi_rust_future_poll_i64(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_i64(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_i64(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_i64(
-    handle: bigint,
+  ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_new(
+    url: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
-  ubrn_ffi_bdk_ffi_rust_future_poll_f32(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
+  ubrn_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    index: number,
+    visited: bigint,
+    uniffi_out_err: UniffiRustCallStatus
   ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_f32(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_f32(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_f32(
-    handle: bigint,
+  ubrn_uniffi_bdk_ffi_fn_constructor_kyotoclient_new(
+    wallet: bigint,
+    scanType: Uint8Array,
+    requiredPeers: number,
+    peers: Uint8Array,
+    dataDir: Uint8Array,
+    handler: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_is_running(
+    uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_f64(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_f64(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_f64(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_f64(
-    handle: bigint,
+  ubrn_uniffi_bdk_ffi_fn_method_kyotoclient_shutdown(
+    uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus
-  ): number;
-  ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
   ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer(
-    handle: bigint,
+  ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_info(
+    uniffiSelf: bigint,
+    message: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_kyotonodeeventhandler_on_warning(
+    uniffiSelf: bigint,
+    message: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy(
+    entropy: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_entropy_in(
+    entropy: Uint8Array,
+    language: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_string(
+    mnemonic: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_from_string_in(
+    mnemonic: Uint8Array,
+    language: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_mnemonic_new(
+    wordCount: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_language(
+    uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
-  ubrn_ffi_bdk_ffi_rust_future_poll_void(
-    handle: bigint,
-    callback: UniffiRustFutureContinuationCallback,
-    callbackData: bigint
-  ): void;
-  ubrn_ffi_bdk_ffi_rust_future_cancel_void(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_free_void(handle: bigint): void;
-  ubrn_ffi_bdk_ffi_rust_future_complete_void(
-    handle: bigint,
+  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_to_seed_hex(
+    uniffiSelf: bigint,
+    passphrase: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_to_string(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_word_count(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_mnemonic_words(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_constructor_psbt_new(
+    psbtBase64: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_psbt_extract_tx_hex(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_amount(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_rate(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_psbt_get_utxo_for(
+    uniffiSelf: bigint,
+    inputIndex: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_psbt_to_base64(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_psbt_txid(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new(
+    url: Uint8Array,
+    username: Uint8Array,
+    password: Uint8Array,
+    cookieFile: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_rpcclient_get_block_height(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_rpcsyncprogressinspector_inspect(
+    uniffiSelf: bigint,
+    currentHeight: number,
+    tipHeight: number,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_syncprogressinspector_inspect(
+    uniffiSelf: bigint,
+    consumed: bigint,
+    total: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_constructor_txbuilder_new(
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_data(
+    uniffiSelf: bigint,
+    data: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_global_xpubs(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_recipient(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    amountSats: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_unspendable(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_utxo(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_add_utxos(
+    uniffiSelf: bigint,
+    outpoints: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_allow_dust(
+    uniffiSelf: bigint,
+    allow: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_change_policy(
+    uniffiSelf: bigint,
+    policy: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_current_height(
+    uniffiSelf: bigint,
+    height: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_do_not_spend_change(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_drain_to(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_drain_wallet(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_enable_rbf(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_enable_rbf_with_sequence(
+    uniffiSelf: bigint,
+    nsequence: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_exclude_below_confirmations(
+    uniffiSelf: bigint,
+    minConfirms: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_exclude_unconfirmed(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_absolute(
+    uniffiSelf: bigint,
+    feeSats: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_fee_rate(
+    uniffiSelf: bigint,
+    satPerVbyte: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_finish(
+    uniffiSelf: bigint,
+    wallet: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_manually_selected_only(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_nlocktime(
+    uniffiSelf: bigint,
+    lockHeight: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_only_spend_change(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_only_witness_utxo(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_ordering(
+    uniffiSelf: bigint,
+    ordering: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_policy_path(
+    uniffiSelf: bigint,
+    pathMapJson: Uint8Array,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence(
+    uniffiSelf: bigint,
+    nsequence: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_recipients(
+    uniffiSelf: bigint,
+    recipients: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_sighash(
+    uniffiSelf: bigint,
+    sighashType: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_tx_version(
+    uniffiSelf: bigint,
+    version: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_unspendable(
+    uniffiSelf: bigint,
+    outpoints: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new(
+    descriptor: Uint8Array,
+    changeDescriptor: Uint8Array,
+    network: Uint8Array,
+    dbPath: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_wallet_new_from_multipath(
+    descriptor: Uint8Array,
+    network: Uint8Array,
+    dbPath: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_electrum(
+    uniffiSelf: bigint,
+    client: bigint,
+    psbt: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_esplora(
+    uniffiSelf: bigint,
+    client: bigint,
+    psbt: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_kyoto(
+    uniffiSelf: bigint,
+    client: bigint,
+    psbt: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_broadcast_with_rpc(
+    uniffiSelf: bigint,
+    client: bigint,
+    psbt: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_build_fee_bump(
+    uniffiSelf: bigint,
+    txid: Uint8Array,
+    newFeeRate: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee(
+    uniffiSelf: bigint,
+    txHex: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_calculate_fee_rate(
+    uniffiSelf: bigint,
+    txHex: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_checkpoints(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_index(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_of_spk(
+    uniffiSelf: bigint,
+    scriptHex: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_descriptor_checksum(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_drain(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    feeRate: number,
+    client: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_drain_with_electrum(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    feeRate: number,
+    client: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_finalize_psbt(
+    uniffiSelf: bigint,
+    psbt: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_electrum(
+    uniffiSelf: bigint,
+    client: bigint,
+    stopGap: bigint,
+    inspector: Uint8Array
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_full_scan_with_esplora(
+    uniffiSelf: bigint,
+    client: bigint,
+    stopGap: bigint,
+    inspector: Uint8Array
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_get_balance(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_get_tx(
+    uniffiSelf: bigint,
+    txid: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_get_utxo(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_insert_txout(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    txout: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_is_mine(
+    uniffiSelf: bigint,
+    scriptHex: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_keychains(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_latest_checkpoint(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_list_output(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_list_unspent(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_list_unused_addresses(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_mark_used(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    index: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_network(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_next_derivation_index(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_next_unused_address(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_peek_address(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    index: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_persist(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_policies(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_public_descriptor(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    index: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_next_address(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_send(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    amountSats: bigint,
+    feeRate: number,
+    client: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_send_with_electrum(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    amountSats: bigint,
+    feeRate: number,
+    client: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sent_and_received(
+    uniffiSelf: bigint,
+    txHex: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sign(
+    uniffiSelf: bigint,
+    psbt: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
+    uniffiSelf: bigint,
+    client: bigint,
+    stopGap: bigint,
+    inspector: Uint8Array
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_esplora(
+    uniffiSelf: bigint,
+    client: bigint,
+    stopGap: bigint,
+    inspector: Uint8Array
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_kyoto(
+    uniffiSelf: bigint,
+    client: bigint
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(
+    uniffiSelf: bigint,
+    client: bigint,
+    startHeight: number,
+    fetchMempool: number,
+    inspector: Uint8Array
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_transactions(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(
+    uniffiSelf: bigint,
+    txid: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_unmark_used(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    index: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_address_from_script(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_create_descriptor_from_string(): number;
@@ -886,22 +892,36 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_shutdown(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_info(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_kyotonodeeventhandler_on_warning(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string_in(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_language(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_seed_hex(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_to_string(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_word_count(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_mnemonic_words(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_psbt_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_extract_tx_hex(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_amount(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_fee_rate(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_to_base64(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_data(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_global_xpubs(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_add_recipient(): number;
@@ -932,9 +952,8 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_sighash(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_tx_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_unspendable(): number;
-  ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(): number;
-  ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(): number;
-  ubrn_uniffi_bdk_ffi_checksum_method_syncprogressinspector_inspect(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_electrum(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_esplora(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_broadcast_with_kyoto(): number;
@@ -982,25 +1001,15 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_entropy_in(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_from_string_in(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_mnemonic_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_psbt_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_txbuilder_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new(): number;
-  ubrn_uniffi_bdk_ffi_checksum_constructor_wallet_new_from_multipath(): number;
-  ubrn_ffi_bdk_ffi_uniffi_contract_version(): number;
   ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
   ubrn_uniffi_internal_fn_method_esploraclient_ffi__bless_pointer(
+    pointer: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): UniffiGcObject;
+  ubrn_uniffi_internal_fn_method_fullscanprogressinspector_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
@@ -1024,14 +1033,6 @@ interface NativeModuleInterface {
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
-  ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(
-    pointer: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): UniffiGcObject;
-  ubrn_uniffi_internal_fn_method_fullscanprogressinspector_ffi__bless_pointer(
-    pointer: bigint,
-    uniffi_out_err: UniffiRustCallStatus
-  ): UniffiGcObject;
   ubrn_uniffi_internal_fn_method_rpcsyncprogressinspector_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -1044,13 +1045,18 @@ interface NativeModuleInterface {
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
+  ubrn_uniffi_internal_fn_method_txbuilder_ffi__bless_pointer(
+    pointer: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): UniffiGcObject;
+  // Codegen call sites use these via `nativeModule().rustbuffer_alloc(...)`
+  // and `nativeModule().rustbuffer_free(...)`. The JSI host object exposes
+  // them as properties; see `props["rustbuffer_alloc"]` / `props["rustbuffer_free"]`
+  // in the C++ wrapper template.
+  rustbuffer_alloc(n: number): Uint8Array;
+  rustbuffer_free(view: Uint8Array): void;
 }
 
-// Casting globalThis to any allows us to look for `NativeBdkFfi`
-// if it was added via JSI.
-//
-// We use a getter here rather than simply `globalThis.NativeBdkFfi` so that
-// if/when the startup sequence isn't just so, an empty value isn't inadvertantly cached.
 const getter: () => NativeModuleInterface = () =>
   (globalThis as any).NativeBdkFfi;
 export default getter;
@@ -1061,183 +1067,85 @@ export type UniffiRustFutureContinuationCallback = (
   pollResult: number
 ) => void;
 export type UniffiForeignFutureDroppedCallback = (handle: bigint) => void;
-type UniffiCallbackInterfaceFree = (handle: bigint) => void;
-type UniffiCallbackInterfaceClone = (handle: bigint) => UniffiResult<void>;
 export type UniffiForeignFutureDroppedCallbackStruct = {
   handle: bigint;
   free: UniffiForeignFutureDroppedCallback;
 };
-export type UniffiForeignFutureResultU8 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteU8 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultU8
-) => void;
-export type UniffiForeignFutureResultI8 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteI8 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultI8
-) => void;
-export type UniffiForeignFutureResultU16 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteU16 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultU16
-) => void;
-export type UniffiForeignFutureResultI16 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteI16 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultI16
-) => void;
-export type UniffiForeignFutureResultU32 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteU32 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultU32
-) => void;
-export type UniffiForeignFutureResultI32 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteI32 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultI32
-) => void;
-export type UniffiForeignFutureResultU64 = {
-  returnValue: bigint;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteU64 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultU64
-) => void;
-export type UniffiForeignFutureResultI64 = {
-  returnValue: bigint;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteI64 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultI64
-) => void;
-export type UniffiForeignFutureResultF32 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteF32 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultF32
-) => void;
-export type UniffiForeignFutureResultF64 = {
-  returnValue: number;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteF64 = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultF64
-) => void;
-export type UniffiForeignFutureResultRustBuffer = {
-  returnValue: Uint8Array;
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteRustBuffer = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultRustBuffer
-) => void;
-export type UniffiForeignFutureResultVoid = {
-  callStatus: UniffiRustCallStatus;
-};
-export type UniffiForeignFutureCompleteVoid = (
-  callbackData: bigint,
-  result: UniffiForeignFutureResultVoid
-) => void;
-type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0 = (
-  uniffiHandle: bigint,
-  message: Uint8Array
-) => UniffiResult<void>;
-type UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1 = (
-  uniffiHandle: bigint,
-  message: Uint8Array
-) => UniffiResult<void>;
-type UniffiCallbackInterfaceFullScanProgressInspectorMethod0 = (
+type UniffiCallbackInterfaceBdkFfiFullScanProgressInspectorMethod0 = (
   uniffiHandle: bigint,
   keychain: Uint8Array,
   index: number,
   visited: bigint
 ) => UniffiResult<void>;
-type UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0 = (
+type UniffiCallbackInterfaceCloneBdkFfiFullScanProgressInspector = (
+  handle: bigint
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceFreeBdkFfiFullScanProgressInspector = (
+  handle: bigint
+) => void;
+export type UniffiVTableCallbackInterfaceBdkFfiFullScanProgressInspector = {
+  uniffi_free: UniffiCallbackInterfaceFreeBdkFfiFullScanProgressInspector;
+  uniffi_clone: UniffiCallbackInterfaceCloneBdkFfiFullScanProgressInspector;
+  inspect: UniffiCallbackInterfaceBdkFfiFullScanProgressInspectorMethod0;
+};
+type UniffiCallbackInterfaceBdkFfiKyotoNodeEventHandlerMethod0 = (
+  uniffiHandle: bigint,
+  message: Uint8Array
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceBdkFfiKyotoNodeEventHandlerMethod1 = (
+  uniffiHandle: bigint,
+  message: Uint8Array
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceCloneBdkFfiKyotoNodeEventHandler = (
+  handle: bigint
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceFreeBdkFfiKyotoNodeEventHandler = (
+  handle: bigint
+) => void;
+export type UniffiVTableCallbackInterfaceBdkFfiKyotoNodeEventHandler = {
+  uniffi_free: UniffiCallbackInterfaceFreeBdkFfiKyotoNodeEventHandler;
+  uniffi_clone: UniffiCallbackInterfaceCloneBdkFfiKyotoNodeEventHandler;
+  on_info: UniffiCallbackInterfaceBdkFfiKyotoNodeEventHandlerMethod0;
+  on_warning: UniffiCallbackInterfaceBdkFfiKyotoNodeEventHandlerMethod1;
+};
+type UniffiCallbackInterfaceBdkFfiRpcSyncProgressInspectorMethod0 = (
   uniffiHandle: bigint,
   currentHeight: number,
   tipHeight: number
 ) => UniffiResult<void>;
-type UniffiCallbackInterfaceSyncProgressInspectorMethod0 = (
+type UniffiCallbackInterfaceCloneBdkFfiRpcSyncProgressInspector = (
+  handle: bigint
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceFreeBdkFfiRpcSyncProgressInspector = (
+  handle: bigint
+) => void;
+export type UniffiVTableCallbackInterfaceBdkFfiRpcSyncProgressInspector = {
+  uniffi_free: UniffiCallbackInterfaceFreeBdkFfiRpcSyncProgressInspector;
+  uniffi_clone: UniffiCallbackInterfaceCloneBdkFfiRpcSyncProgressInspector;
+  inspect: UniffiCallbackInterfaceBdkFfiRpcSyncProgressInspectorMethod0;
+};
+type UniffiCallbackInterfaceBdkFfiSyncProgressInspectorMethod0 = (
   uniffiHandle: bigint,
   consumed: bigint,
   total: bigint
 ) => UniffiResult<void>;
-export type UniffiVTableCallbackInterfaceKyotoNodeEventHandler = {
-  uniffiFree: UniffiCallbackInterfaceFree;
-  uniffiClone: UniffiCallbackInterfaceClone;
-  onInfo: UniffiCallbackInterfaceKyotoNodeEventHandlerMethod0;
-  onWarning: UniffiCallbackInterfaceKyotoNodeEventHandlerMethod1;
-};
-export type UniffiVTableCallbackInterfaceFullScanProgressInspector = {
-  uniffiFree: UniffiCallbackInterfaceFree;
-  uniffiClone: UniffiCallbackInterfaceClone;
-  inspect: UniffiCallbackInterfaceFullScanProgressInspectorMethod0;
-};
-export type UniffiVTableCallbackInterfaceRpcSyncProgressInspector = {
-  uniffiFree: UniffiCallbackInterfaceFree;
-  uniffiClone: UniffiCallbackInterfaceClone;
-  inspect: UniffiCallbackInterfaceRpcSyncProgressInspectorMethod0;
-};
-export type UniffiVTableCallbackInterfaceSyncProgressInspector = {
-  uniffiFree: UniffiCallbackInterfaceFree;
-  uniffiClone: UniffiCallbackInterfaceClone;
-  inspect: UniffiCallbackInterfaceSyncProgressInspectorMethod0;
+type UniffiCallbackInterfaceCloneBdkFfiSyncProgressInspector = (
+  handle: bigint
+) => UniffiResult<void>;
+type UniffiCallbackInterfaceFreeBdkFfiSyncProgressInspector = (
+  handle: bigint
+) => void;
+export type UniffiVTableCallbackInterfaceBdkFfiSyncProgressInspector = {
+  uniffi_free: UniffiCallbackInterfaceFreeBdkFfiSyncProgressInspector;
+  uniffi_clone: UniffiCallbackInterfaceCloneBdkFfiSyncProgressInspector;
+  inspect: UniffiCallbackInterfaceBdkFfiSyncProgressInspectorMethod0;
 };
 
 // UniffiRustFutureContinuationCallback is generated as part of the component interface's
 // ffi_definitions. However, we need it in the runtime.
-// We could:
-// (a) do some complicated template logic to ensure the declaration is not generated here (possible)
-// (b) import the generated declaration into the runtime (m a y b e) or…
-// (c) generate the declaration anyway, and use a different declaration in the runtime.
-//
-// We chose (c) here as the simplest. In addition, we perform a compile time check that
-// the two versions of `UniffiRustFutureContinuationCallback` are structurally equivalent.
-//
-// If you see the error:
-// ```
-// Type 'true' is not assignable to type 'false'.(2322)
-// ```
-// Then a new version of uniffi has changed the signature of the callback. Most likely, code in
-// `typescript/src/async-rust-call.ts` will need to be changed.
-//
-// If you see the error:
-// ```
-// Cannot find name 'UniffiRustFutureContinuationCallback'. Did you mean 'RuntimeUniffiRustFutureContinuationCallback'?(2552)
-// ```
-// then you may not be using callbacks or promises, and uniffi is now not generating Futures and callbacks.
-// You should not generate this if that is the case.
-//
-// ('You' being the bindings generator maintainer).
+// We chose to generate the declaration anyway, and use a different declaration in the runtime.
+// We perform a compile time check that the two versions are structurally equivalent.
 const isRustFutureContinuationCallbackTypeCompatible: UniffiStructuralEquality<
   RuntimeUniffiRustFutureContinuationCallback,
   UniffiRustFutureContinuationCallback
-> = true;
-const isUniffiForeignFutureTypeCompatible: UniffiStructuralEquality<
-  RuntimeUniffiForeignFuture,
-  UniffiForeignFuture
 > = true;

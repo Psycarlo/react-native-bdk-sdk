@@ -8,8 +8,8 @@
  * JS `number` safely handles up to 2^53 (~9 quadrillion), which covers
  * the entire Bitcoin supply in satoshis (2.1 quadrillion).
  */
-import type { AddressInfo, BlockId, ChangeSpendPolicy, DerivationInfo, ElectrumClientLike, EsploraClientLike, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, RpcClientLike, TxOrdering } from './generated/bdk_ffi';
-import { TxBuilder, Wallet } from './generated/bdk_ffi';
+import type { AddressInfo, BlockId, ChangeSpendPolicy, DerivationInfo, ElectrumClientLike, EsploraClientLike, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, RpcClientLike, TxOrdering } from './generated/bdk_ffi.js';
+import { TxBuilder, Wallet } from './generated/bdk_ffi.js';
 export type BalanceN = {
     immature: number;
     trustedPending: number;
