@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bumped `bdk_kyoto` to 0.17.1
 - Bumped `uniffi` to 0.31.2
 - Bumped `uniffi-bindgen-react-native` to 0.31.0-5
-- Generated bindings now import their runtime from `@ubjs/core` (renamed upstream in `uniffi-bindgen-react-native` 0.31.0-3), added as a dependency
+- Added `@ubjs/core` dependency: `uniffi-bindgen-react-native` moved its JS runtime into this package in 0.31.0-3, and the generated bindings now import from it. Installed automatically, no action needed
 
 ### Fixed
 
