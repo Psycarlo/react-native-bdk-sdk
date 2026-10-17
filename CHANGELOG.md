@@ -5,6 +5,34 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-10-17
+
+Exposes the new `bdk_wallet` 3.2 APIs. No breaking changes.
+
+### Added
+
+- `BdkWallet.tryFinalizePsbt` — finalizes like `finalizePsbt` and also returns a per-input outcome (`FinalizePsbtOutcome`) that explains why an input was not finalized
+- `BdkWallet.signWithDescriptors` — signs a PSBT with private descriptors passed per call, so the wallet itself can stay watch-only
+- `BdkWallet.spendingPolicy` and `BdkWallet.policyCondition` — read the spending policy and turn a chosen path into a `Condition` (CSV / absolute timelock)
+- `BdkTxBuilder.setCondition` — applies a spending path's timelocks directly. Takes precedence over `policyPath`
+- `mergeConditions` — combines two `Condition`s
+- Experimental `bdk-tx` transaction building: `BdkWallet.createPsbt` and `BdkWallet.replaceByFee`, configured with `BdkPsbtParams`. Both return the PSBT together with a `Finalizer`. Supports coin selection strategies (`SelectionStrategy`), spending-path assets (`SpendAssets`), maturity and anti-fee-sniping heights, per-input sequence overrides and v3 transactions. These APIs may change in future releases
+- `KyotoScanType.NewWallet` — scans only from the current tip, for freshly generated wallets
+
+### Changed
+
+- Bumped `bdk_esplora` to 0.22.3
+- Bumped `bdk_electrum` to 0.24.1
+- Bumped `bdk_kyoto` to 0.18.1
+- Bumped `bdk_bitcoind_rpc` to 0.22.1
+- `bdk_wallet` is pinned to `~3.2.0` with the `bdk-tx` feature enabled, because its unstable APIs may break in minor releases
+- Coin selection for v3 (TRUC) transactions now follows BIP-431 rule 2: unconfirmed v3 parents and non-v3 parents are no longer mixed. UTXOs added manually are not checked
+
+### Deprecated
+
+- `KyotoOptions.dataDir` — ignored since `bdk_kyoto` 0.18 and now optional
+- `BdkWallet.sign`, `BdkWallet.policies` and `BdkTxBuilder.policyPath` keep working, but new code should prefer `signWithDescriptors`, `spendingPolicy` / `policyCondition` and `setCondition`
+
 ## [0.7.0] - 2026-09-23
 
 ### Changed

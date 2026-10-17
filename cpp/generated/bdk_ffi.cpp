@@ -338,6 +338,157 @@ extern "C" {
         /*handle*/ uint64_t ptr, 
         RustCallStatus *uniffi_out_err
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_finalizer(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_free_finalizer(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    RustBuffer uniffi_bdk_ffi_fn_method_finalizer_finalize(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t psbt, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_psbtparams(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_free_psbtparams(
+        /*handle*/ uint64_t handle, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_psbtparams_new(RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_assets(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer assets, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_data(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer data, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_recipient(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer address, 
+        uint64_t amount_sats, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_recipients(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer recipients, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer outpoint, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_utxo(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer outpoint, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_add_utxos(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer outpoints, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height(
+        /*handle*/ uint64_t ptr, 
+        uint32_t tip_height, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer txids, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_change_address(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer address, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_change_policy(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer policy, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_coin_selection(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer strategy, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations(
+        /*handle*/ uint64_t ptr, 
+        uint32_t min_confirms, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence(
+        /*handle*/ uint64_t ptr, 
+        uint32_t nsequence, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_fee_rate(
+        /*handle*/ uint64_t ptr, 
+        double sat_per_vbyte, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_locktime(
+        /*handle*/ uint64_t ptr, 
+        uint32_t locktime, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_maturity_height(
+        /*handle*/ uint64_t ptr, 
+        uint32_t height, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo(
+        /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_ordering(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer ordering, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer outpoint, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_sequence_override(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer outpoint, 
+        uint32_t nsequence, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_unspendable(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer outpoints, 
+        RustCallStatus *uniffi_out_err
+    );
+    void uniffi_bdk_ffi_fn_method_psbtparams_version(
+        /*handle*/ uint64_t ptr, 
+        int32_t version, 
+        RustCallStatus *uniffi_out_err
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_rpcclient(
         /*handle*/ uint64_t handle, 
         RustCallStatus *uniffi_out_err
@@ -485,6 +636,11 @@ extern "C" {
         RustBuffer keychain, 
         RustCallStatus *uniffi_out_err
     );
+    void uniffi_bdk_ffi_fn_method_txbuilder_set_condition(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer condition, 
+        RustCallStatus *uniffi_out_err
+    );
     void uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence(
         /*handle*/ uint64_t ptr, 
         uint32_t nsequence, 
@@ -623,6 +779,10 @@ extern "C" {
         /*handle*/ uint64_t ptr, 
         RustCallStatus *uniffi_out_err
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_create_psbt(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t params
+    );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_derivation_index(
         /*handle*/ uint64_t ptr, 
         RustBuffer keychain, 
@@ -748,10 +908,21 @@ extern "C" {
         RustBuffer keychain, 
         RustCallStatus *uniffi_out_err
     );
+    RustBuffer uniffi_bdk_ffi_fn_method_wallet_policy_condition(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer path_map_json, 
+        RustBuffer keychain, 
+        RustCallStatus *uniffi_out_err
+    );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_public_descriptor(
         /*handle*/ uint64_t ptr, 
         RustBuffer keychain, 
         RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_replace_by_fee(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t params, 
+        RustBuffer txids
     );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to(
         /*handle*/ uint64_t ptr, 
@@ -788,6 +959,17 @@ extern "C" {
         /*handle*/ uint64_t psbt, 
         RustCallStatus *uniffi_out_err
     );
+    int8_t uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t psbt, 
+        RustBuffer descriptors, 
+        RustCallStatus *uniffi_out_err
+    );
+    RustBuffer uniffi_bdk_ffi_fn_method_wallet_spending_policy(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer keychain, 
+        RustCallStatus *uniffi_out_err
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
         /*handle*/ uint64_t ptr, 
         /*handle*/ uint64_t client, 
@@ -813,6 +995,11 @@ extern "C" {
     );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_transactions(
         /*handle*/ uint64_t ptr, 
+        RustCallStatus *uniffi_out_err
+    );
+    RustBuffer uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t psbt, 
         RustCallStatus *uniffi_out_err
     );
     RustBuffer uniffi_bdk_ffi_fn_method_wallet_tx_details(
@@ -878,6 +1065,11 @@ extern "C" {
     int8_t uniffi_bdk_ffi_fn_func_is_valid_address(
         RustBuffer address, 
         RustBuffer network, 
+        RustCallStatus *uniffi_out_err
+    );
+    RustBuffer uniffi_bdk_ffi_fn_func_merge_conditions(
+        RustBuffer a, 
+        RustBuffer b, 
         RustCallStatus *uniffi_out_err
     );
     int8_t uniffi_bdk_ffi_fn_func_validate_descriptor(
@@ -1108,6 +1300,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_func_is_valid_address(
     );
+    uint16_t uniffi_bdk_ffi_checksum_func_merge_conditions(
+    );
     uint16_t uniffi_bdk_ffi_checksum_func_validate_descriptor(
     );
     uint16_t uniffi_bdk_ffi_checksum_func_version(
@@ -1143,6 +1337,60 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_method_psbt_to_base64(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_psbt_txid(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_finalizer_finalize(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_assets(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_data(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_change_address(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_change_policy(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_locktime(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_ordering(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_unspendable(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_psbtparams_version(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(
     );
@@ -1196,6 +1444,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_policy_path(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_set_condition(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_txbuilder_set_recipients(
@@ -1227,6 +1477,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_checkpoints(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_create_psbt(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_derivation_index(
     );
@@ -1278,7 +1530,11 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_policies(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_policy_condition(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_public_descriptor(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to(
     );
@@ -1292,6 +1548,10 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sign(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_spending_policy(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(
@@ -1301,6 +1561,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_transactions(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_tx_details(
     );
@@ -1323,6 +1585,8 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_constructor_mnemonic_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_psbt_new(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_constructor_psbtparams_new(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_rpcclient_new(
     );
@@ -4914,6 +5178,262 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_psbt_txid(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_clone_finalizer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_finalizer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_clone_finalizer(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_free_finalizer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_free_finalizer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_free_finalizer(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_finalizer_finalize"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_finalizer_finalize"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_finalizer_finalize(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_clone_psbtparams"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_psbtparams"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_clone_psbtparams(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_free_psbtparams"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_free_psbtparams"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_free_psbtparams(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_constructor_psbtparams_new"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_constructor_psbtparams_new"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_constructor_psbtparams_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_assets"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_assets"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_assets(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_data"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_data"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_data(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipient"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipient"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_recipient(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipients"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipients"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_recipients(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxo"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxo"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_utxo(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxos"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxos"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_utxos(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_address"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_address"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_change_address(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_policy"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_policy"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_change_policy(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_coin_selection"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_coin_selection"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_coin_selection(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fee_rate"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fee_rate"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_fee_rate(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_locktime"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_locktime"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_locktime(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_maturity_height"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_maturity_height"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_maturity_height(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_ordering"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_ordering"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_ordering(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_sequence_override"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_sequence_override"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_sequence_override(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_unspendable"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_unspendable"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_unspendable(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_psbtparams_version"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_psbtparams_version"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_psbtparams_version(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_clone_rpcclient"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_rpcclient"),
@@ -5170,6 +5690,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_txbuilder_policy_path(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_condition"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_condition"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_txbuilder_set_condition(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence"),
@@ -5402,6 +5930,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_checkpoints(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_create_psbt"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_create_psbt"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_create_psbt(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_index"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_index"),
@@ -5602,12 +6138,28 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_policies(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_policy_condition"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_policy_condition"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_policy_condition(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_public_descriptor"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_public_descriptor"),
         2,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_public_descriptor(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_replace_by_fee"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_replace_by_fee"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_replace_by_fee(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to"] = jsi::Function::createFromHostFunction(
@@ -5658,6 +6210,22 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sign(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors"),
+        3,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_spending_policy"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_spending_policy"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_spending_policy(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum"),
@@ -5696,6 +6264,14 @@ NativeBdkFfi::NativeBdkFfi(
         1,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_transactions(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details"] = jsi::Function::createFromHostFunction(
@@ -5784,6 +6360,14 @@ NativeBdkFfi::NativeBdkFfi(
         2,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_func_is_valid_address(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_func_merge_conditions"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_func_merge_conditions"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_func_merge_conditions(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor"] = jsi::Function::createFromHostFunction(
@@ -6266,6 +6850,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_func_is_valid_address(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_func_merge_conditions"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_merge_conditions"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_func_merge_conditions(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor"),
@@ -6408,6 +7000,222 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_psbt_txid(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_finalizer_finalize"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_finalizer_finalize"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_finalizer_finalize(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_assets"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_assets"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_assets(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_data"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_data"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_data(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_address"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_address"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_change_address(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_policy"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_policy"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_change_policy(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_locktime"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_locktime"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_locktime(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_ordering"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_ordering"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_ordering(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_unspendable"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_unspendable"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_unspendable(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_version"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_version"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_psbtparams_version(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height"] = jsi::Function::createFromHostFunction(
@@ -6618,6 +7426,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_txbuilder_policy_path(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_condition"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_condition"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_txbuilder_set_condition(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence"),
@@ -6744,6 +7560,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_checkpoints(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_create_psbt"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_create_psbt"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_create_psbt(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_index"] = jsi::Function::createFromHostFunction(
@@ -6946,12 +7770,28 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_policies(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_policy_condition"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_policy_condition"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_policy_condition(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor"),
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to"] = jsi::Function::createFromHostFunction(
@@ -7002,6 +7842,22 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sign(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_spending_policy"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_spending_policy"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_spending_policy(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"),
@@ -7040,6 +7896,14 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_transactions(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details"] = jsi::Function::createFromHostFunction(
@@ -7130,6 +7994,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_constructor_psbt_new(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_constructor_psbtparams_new"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_psbtparams_new"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_constructor_psbtparams_new(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new"),
@@ -7216,6 +8088,22 @@ NativeBdkFfi::NativeBdkFfi(
         1,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_internal_fn_method_psbt_ffi__bless_pointer(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_internal_fn_method_finalizer_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_finalizer_ffi__bless_pointer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_internal_fn_method_finalizer_ffi__bless_pointer(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_internal_fn_method_psbtparams_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_internal_fn_method_psbtparams_ffi__bless_pointer"),
+        1,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_internal_fn_method_psbtparams_ffi__bless_pointer(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_internal_fn_method_rpcclient_ffi__bless_pointer"] = jsi::Function::createFromHostFunction(
@@ -7478,6 +8366,24 @@ jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_func_ffi__read_string_from_buffe
     auto static destructor = [](uint64_t p) {
         RustCallStatus status = {0};
         uniffi_bdk_ffi_fn_free_psbt(p, &status);
+    };
+    auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
+    auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
+    return jsi::Value(rt, obj);
+}jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_finalizer_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
+    auto static destructor = [](uint64_t p) {
+        RustCallStatus status = {0};
+        uniffi_bdk_ffi_fn_free_finalizer(p, &status);
+    };
+    auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
+    auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
+    return jsi::Value(rt, obj);
+}jsi::Value NativeBdkFfi::cpp_uniffi_internal_fn_method_psbtparams_ffi__bless_pointer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+    auto pointer = uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[0]);
+    auto static destructor = [](uint64_t p) {
+        RustCallStatus status = {0};
+        uniffi_bdk_ffi_fn_free_psbtparams(p, &status);
     };
     auto ptrObj = std::make_shared<uniffi_jsi::DestructibleObject>(pointer, destructor);
     auto obj = jsi::Object::createFromHostObject(rt, ptrObj);
@@ -7916,6 +8822,325 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbt_txid(jsi::Runtime& rt
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_finalizer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_clone_finalizer(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_finalizer(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_free_finalizer(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_finalizer_finalize(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_finalizer_finalize(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_psbtparams(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_clone_psbtparams(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_psbtparams(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_free_psbtparams(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_psbtparams_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_constructor_psbtparams_new(&status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_assets(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_assets(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_data(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_data(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_recipient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_recipient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_recipients(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_recipients(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_utxo(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_utxo(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_add_utxos(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_add_utxos(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_change_address(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_change_address(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_change_policy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_change_policy(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_coin_selection(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_coin_selection(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_fee_rate(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<double>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_locktime(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_locktime(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_maturity_height(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_maturity_height(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_ordering(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_ordering(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_sequence_override(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_sequence_override(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[2]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_unspendable(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_unspendable(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_psbtparams_version(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_psbtparams_version(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<int32_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_rpcclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_clone_rpcclient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
@@ -8232,6 +9457,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_txbuilder_policy_path(jsi:
         
         return jsi::Value::undefined();
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_txbuilder_set_condition(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        uniffi_bdk_ffi_fn_method_txbuilder_set_condition(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return jsi::Value::undefined();
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint32_t>::fromJs(rt, callInvoker, args[1]), 
@@ -8531,6 +9766,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_checkpoints(jsi::Ru
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_create_psbt(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_create_psbt(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_derivation_index(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_method_wallet_derivation_index(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
@@ -8769,6 +10011,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_policies(jsi::Runti
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_policy_condition(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_wallet_policy_condition(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_public_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_method_wallet_public_descriptor(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
@@ -8778,6 +10030,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_public_descriptor(j
 
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_replace_by_fee(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_replace_by_fee(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
@@ -8833,6 +10092,26 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sign(jsi::Runtime& 
         
         return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_spending_policy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_wallet_spending_policy(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3])
         );
@@ -8864,6 +10143,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_rpc(jsi::
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_transactions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_method_wallet_transactions(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), 
             &status
         );
         uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
@@ -8974,6 +10263,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_is_valid_address(jsi::Runtim
 
         
         return uniffi_jsi::Bridging<int8_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_merge_conditions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_func_merge_conditions(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_func_validate_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
@@ -9439,6 +10738,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_is_valid_address(jsi::
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_merge_conditions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_func_merge_conditions(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_func_validate_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_func_validate_descriptor(
         );
@@ -9560,6 +10866,195 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbt_to_base64(jsi::
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbt_txid(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_psbt_txid(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_finalizer_finalize(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_finalizer_finalize(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_assets(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_assets(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_data(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_data(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_change_address(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_change_address(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_change_policy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_change_policy(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_locktime(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_locktime(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_ordering(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_ordering(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_unspendable(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_unspendable(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_psbtparams_version(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_psbtparams_version(
         );
 
         
@@ -9747,6 +11242,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_policy_pat
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_set_condition(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_txbuilder_set_condition(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence(
         );
@@ -9854,6 +11356,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_checkpoints(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_checkpoints(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_create_psbt(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_create_psbt(
         );
 
         
@@ -10034,8 +11543,22 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_policies(jsi:
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_policy_condition(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_policy_condition(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_public_descriptor(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee(
         );
 
         
@@ -10083,6 +11606,20 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sign(jsi::Run
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_spending_policy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_spending_policy(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(
         );
@@ -10113,6 +11650,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_transactions(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_transactions(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt(
         );
 
         
@@ -10190,6 +11734,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_mnemonic_new(js
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_psbt_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_constructor_psbt_new(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_psbtparams_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_constructor_psbtparams_new(
         );
 
         

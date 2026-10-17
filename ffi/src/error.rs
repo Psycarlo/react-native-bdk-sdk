@@ -177,6 +177,62 @@ impl From<bdk_wallet::error::BuildFeeBumpError> for BdkError {
     }
 }
 
+impl From<bdk_wallet::error::CreatePsbtError> for BdkError {
+    fn from(e: bdk_wallet::error::CreatePsbtError) -> Self {
+        use bdk_wallet::error::CreatePsbtError::*;
+        let msg = e.to_string();
+        match e {
+            NoRecipients => Self::NoRecipients { message: msg },
+            AllOutputsBelowDust => Self::OutputBelowDustLimit { message: msg },
+            InsufficientFunds(_)
+            | Selector(bdk_wallet::bdk_tx::SelectorError::CannotMeetTarget(_)) => {
+                Self::InsufficientFunds { message: msg }
+            }
+            MissingKeyOrigin(_) => Self::MissingKeyOrigin { message: msg },
+            UnknownUtxo(_) => Self::OutpointNotFound { message: msg },
+            Selector(bdk_wallet::bdk_tx::SelectorError::LockTypeMismatch) => {
+                Self::LockTimeConflict { message: msg }
+            }
+            _ => Self::TransactionBuildFailed { message: msg },
+        }
+    }
+}
+
+impl From<bdk_wallet::error::ReplaceByFeeError> for BdkError {
+    fn from(e: bdk_wallet::error::ReplaceByFeeError) -> Self {
+        use bdk_wallet::error::ReplaceByFeeError::*;
+        let msg = e.to_string();
+        match e {
+            CreatePsbt(inner) => inner.into(),
+            MissingTransaction(_) | NoOriginalTransactions => {
+                Self::FeeBumpTargetNotFound { message: msg }
+            }
+            TransactionConfirmed(_) => Self::FeeBumpAlreadyConfirmed { message: msg },
+            PreviousFee(_) => Self::FeeBumpFeeRateUnavailable { message: msg },
+            _ => Self::TransactionBuildFailed { message: msg },
+        }
+    }
+}
+
+impl From<bdk_wallet::IndexOutOfBoundsError> for BdkError {
+    fn from(e: bdk_wallet::IndexOutOfBoundsError) -> Self {
+        Self::InvalidPsbt {
+            message: e.to_string(),
+        }
+    }
+}
+
+impl From<bdk_wallet::descriptor::policy::PolicyError> for BdkError {
+    fn from(e: bdk_wallet::descriptor::policy::PolicyError) -> Self {
+        use bdk_wallet::descriptor::policy::PolicyError::*;
+        let msg = e.to_string();
+        match e {
+            MixedTimelockUnits | IncompatibleConditions => Self::LockTimeConflict { message: msg },
+            _ => Self::SpendingPolicyRequired { message: msg },
+        }
+    }
+}
+
 impl From<bdk_wallet::signer::SignerError> for BdkError {
     fn from(e: bdk_wallet::signer::SignerError) -> Self {
         use bdk_wallet::signer::SignerError::*;

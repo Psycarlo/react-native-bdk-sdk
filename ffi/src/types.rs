@@ -239,6 +239,10 @@ pub enum KyotoScanType {
         /// Block height/hash at which to begin the rescan.
         start: KyotoRecoveryStart,
     },
+    /// A brand-new wallet with no revealed scripts. Syncs block headers only
+    /// (no filter downloads) from taproot activation on mainnet, or genesis on
+    /// other networks. Later syncs on new blocks check filters as usual.
+    NewWallet,
 }
 
 /// Where a Kyoto recovery scan should begin in the chain.
@@ -470,6 +474,151 @@ pub struct DerivationInfo {
 pub struct KeychainInfo {
     pub keychain: KeychainKind,
     pub descriptor: String,
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  SPENDING CONDITIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Extra timelock requirements of a chosen spending path, applied to the
+/// transaction by [`crate::TxBuilder::set_condition`].
+///
+/// Derive one from a policy path with [`crate::Wallet::policy_condition`], or
+/// build it directly when the values are known (e.g. a fixed `older(144)`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, uniffi::Record)]
+pub struct Condition {
+    /// Relative timelock (`older(n)`) as a consensus nSequence value.
+    pub csv: Option<u32>,
+    /// Absolute timelock (`after(n)`) as a consensus nLockTime value: a block
+    /// height below 500,000,000, otherwise a UNIX timestamp.
+    pub timelock: Option<u32>,
+}
+
+impl From<bdk_wallet::descriptor::Condition> for Condition {
+    fn from(c: bdk_wallet::descriptor::Condition) -> Self {
+        Self {
+            csv: c.csv.map(|s| s.0),
+            timelock: c.timelock.map(|l| l.to_consensus_u32()),
+        }
+    }
+}
+
+impl From<Condition> for bdk_wallet::descriptor::Condition {
+    fn from(c: Condition) -> Self {
+        Self {
+            csv: c.csv.map(bitcoin::Sequence),
+            timelock: c.timelock.map(bitcoin::absolute::LockTime::from_consensus),
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PSBT FINALIZATION OUTCOMES
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Finalization status of a single PSBT input.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Enum)]
+pub enum FinalizeInputOutcome {
+    /// The input was already finalized before this call.
+    AlreadyFinalized,
+    /// The input was finalized during this call.
+    Finalized,
+    /// No descriptor (or spending plan) is known for the input, e.g. a foreign input.
+    MissingDescriptor,
+    /// The descriptor is known but the input could not be satisfied (missing
+    /// signatures, unmet timelocks, …).
+    CouldNotSatisfy { message: String },
+}
+
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct FinalizeInputResult {
+    pub input_index: u32,
+    pub outcome: FinalizeInputOutcome,
+}
+
+/// Per-input result of a PSBT finalization attempt.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct FinalizePsbtOutcome {
+    /// Whether every input is finalized after the call.
+    pub is_finalized: bool,
+    /// One entry per PSBT input, ordered by input index.
+    pub inputs: Vec<FinalizeInputResult>,
+}
+
+impl From<bdk_wallet::FinalizeInputOutcome> for FinalizeInputOutcome {
+    fn from(o: bdk_wallet::FinalizeInputOutcome) -> Self {
+        use bdk_wallet::FinalizeInputOutcome as O;
+        match o {
+            O::AlreadyFinalized => Self::AlreadyFinalized,
+            O::Finalized => Self::Finalized,
+            O::MissingDescriptor => Self::MissingDescriptor,
+            O::CouldNotSatisfy(e) => Self::CouldNotSatisfy {
+                message: e.to_string(),
+            },
+        }
+    }
+}
+
+impl From<bdk_wallet::FinalizePsbtOutcome> for FinalizePsbtOutcome {
+    fn from(o: bdk_wallet::FinalizePsbtOutcome) -> Self {
+        let is_finalized = o.is_finalized();
+        let inputs = o
+            .into_outcomes()
+            .into_iter()
+            .map(|(index, outcome)| FinalizeInputResult {
+                input_index: index as u32,
+                outcome: outcome.into(),
+            })
+            .collect();
+        Self {
+            is_finalized,
+            inputs,
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  UNSTABLE PSBT API (bdk-tx)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/// Coin selection strategy for [`crate::PsbtParams`].
+#[derive(Debug, Clone, Copy, PartialEq, uniffi::Enum)]
+pub enum SelectionStrategy {
+    /// Single random draw (default).
+    SingleRandomDraw,
+    /// Branch-and-bound variant that minimizes fees while allowing change.
+    LowestFee {
+        /// Expected long-term fee rate (sat/vB) for spending the change output later.
+        longterm_fee_rate: f64,
+        /// How many BnB rounds to try before giving up.
+        max_rounds: u32,
+    },
+    /// Spend every eligible coin (drain). With no recipients, requires a
+    /// change address to sweep to.
+    All,
+}
+
+/// Spending assets used to plan inputs: which keys will sign and which
+/// timelocks the spend may rely on. Selects the spending path for complex
+/// descriptors (the bdk-tx equivalent of a policy path).
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct SpendAssets {
+    /// Descriptor public keys that will sign, e.g. `[fingerprint/path]xpub…/0/*`
+    /// or a hex public key. Empty means every key in the wallet's descriptors.
+    pub keys: Vec<String>,
+    /// Absolute timelock (`after(n)`, consensus nLockTime) the spend may use.
+    pub after: Option<u32>,
+    /// Relative timelock (`older(n)`, consensus nSequence) the spend may use.
+    pub older: Option<u32>,
+}
+
+impl TxOrdering {
+    pub(crate) fn to_bdk_generic<I, O>(self) -> bdk_wallet::tx_builder::TxOrdering<I, O> {
+        match self {
+            TxOrdering::Shuffle => bdk_wallet::tx_builder::TxOrdering::Shuffle,
+            TxOrdering::Untouched => bdk_wallet::tx_builder::TxOrdering::Untouched,
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

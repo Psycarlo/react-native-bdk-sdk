@@ -4,10 +4,14 @@ pub mod esplora;
 pub mod kyoto;
 pub mod mnemonic;
 pub mod psbt;
+pub mod psbt_params;
 pub mod rpc;
 pub mod tx_builder;
 pub mod types;
 pub mod wallet;
+
+#[cfg(test)]
+mod tests;
 
 pub use electrum::*;
 pub use error::*;
@@ -15,6 +19,7 @@ pub use esplora::*;
 pub use kyoto::*;
 pub use mnemonic::*;
 pub use psbt::*;
+pub use psbt_params::*;
 pub use rpc::*;
 pub use tx_builder::*;
 pub use types::*;
@@ -62,6 +67,14 @@ static SECP: LazyLock<secp256k1::Secp256k1<secp256k1::All>> =
 #[uniffi::export]
 pub fn version() -> String {
     bdk_wallet::version().to_string()
+}
+
+/// Combine two spending conditions (e.g. from different keychains or
+/// policies). Fails if their timelocks use different units (height vs time).
+#[uniffi::export]
+pub fn merge_conditions(a: Condition, b: Condition) -> Result<Condition, BdkError> {
+    let merged = bdk_wallet::descriptor::Condition::from(a).merge(&b.into())?;
+    Ok(merged.into())
 }
 
 /// Returns true if the address string is valid for the given network.
