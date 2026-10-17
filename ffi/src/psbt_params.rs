@@ -336,43 +336,52 @@ impl PsbtParams {
         let unspendable: HashSet<bitcoin::OutPoint> = p.unspendable.iter().copied().collect();
         let min_confirms = p.exclude_below_confirmations.unwrap_or(0);
         let change_policy = p.change_policy.unwrap_or(ChangeSpendPolicy::ChangeAllowed);
-        if !unspendable.is_empty()
-            || min_confirms > 0
-            || change_policy != ChangeSpendPolicy::ChangeAllowed
-        {
-            let tip = wallet.latest_checkpoint().height();
-            let change_spks: HashSet<ScriptBuf> = if change_policy == ChangeSpendPolicy::ChangeAllowed {
-                HashSet::new()
-            } else {
-                wallet
-                    .spk_index()
-                    .revealed_keychain_spks(bdk_wallet::KeychainKind::Internal)
-                    .map(|(_, spk)| spk)
-                    .collect()
-            };
-            params.utxo_filter(move |txo| {
-                if unspendable.contains(&txo.outpoint) {
+        let tip = wallet.latest_checkpoint().height();
+        let change_spks: HashSet<ScriptBuf> = if change_policy == ChangeSpendPolicy::ChangeAllowed {
+            HashSet::new()
+        } else {
+            wallet
+                .spk_index()
+                .revealed_keychain_spks(bdk_wallet::KeychainKind::Internal)
+                .map(|(_, spk)| spk)
+                .collect()
+        };
+        // BIP-431 rule 2, as `TxBuilder` does: don't mix unconfirmed v3 (TRUC)
+        // parents with other versions. bdk_wallet defaults to version 2.
+        let truc = p.version == Some(3);
+        let truc_txids: HashSet<bitcoin::Txid> = wallet
+            .tx_graph()
+            .full_txs()
+            .filter(|tx| tx.tx.version == bitcoin::transaction::Version(3))
+            .map(|tx| tx.txid)
+            .collect();
+        params.utxo_filter(move |txo| {
+            if unspendable.contains(&txo.outpoint) {
+                return false;
+            }
+            if !txo.chain_position.is_confirmed()
+                && truc_txids.contains(&txo.outpoint.txid) != truc
+            {
+                return false;
+            }
+            if min_confirms > 0 {
+                let confirms = match &txo.chain_position {
+                    ChainPosition::Confirmed { anchor, .. } => {
+                        tip.saturating_sub(anchor.block_id.height) + 1
+                    }
+                    ChainPosition::Unconfirmed { .. } => 0,
+                };
+                if confirms < min_confirms {
                     return false;
                 }
-                if min_confirms > 0 {
-                    let confirms = match &txo.chain_position {
-                        ChainPosition::Confirmed { anchor, .. } => {
-                            tip.saturating_sub(anchor.block_id.height) + 1
-                        }
-                        ChainPosition::Unconfirmed { .. } => 0,
-                    };
-                    if confirms < min_confirms {
-                        return false;
-                    }
-                }
-                let is_change = change_spks.contains(&txo.txout.script_pubkey);
-                match change_policy {
-                    ChangeSpendPolicy::ChangeAllowed => true,
-                    ChangeSpendPolicy::OnlyChange => is_change,
-                    ChangeSpendPolicy::ChangeForbidden => !is_change,
-                }
-            });
-        }
+            }
+            let is_change = change_spks.contains(&txo.txout.script_pubkey);
+            match change_policy {
+                ChangeSpendPolicy::ChangeAllowed => true,
+                ChangeSpendPolicy::OnlyChange => is_change,
+                ChangeSpendPolicy::ChangeForbidden => !is_change,
+            }
+        });
 
         // Layout
         if let Some(ord) = p.ordering {

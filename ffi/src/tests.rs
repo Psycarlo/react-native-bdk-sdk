@@ -38,15 +38,14 @@ fn block_on<F: std::future::Future>(f: F) -> F::Output {
     crate::RUNTIME.block_on(f)
 }
 
-/// Confirm an output of `sats` to the wallet in a new block and return its outpoint.
-/// `seed` keeps the dummy funding inputs distinct.
-fn fund(wallet: &Wallet, sats: u64, seed: u8) -> bitcoin::OutPoint {
-    let mut w = wallet.inner.lock().unwrap();
+/// A `version` tx paying `sats` to a new external address. `seed` keeps the
+/// dummy funding inputs distinct.
+fn funding_tx(w: &mut bdk_wallet::Wallet, sats: u64, seed: u8, version: i32) -> bitcoin::Transaction {
     let spk = w
         .reveal_next_address(bdk_wallet::KeychainKind::External)
         .script_pubkey();
-    let tx = bitcoin::Transaction {
-        version: transaction::Version::TWO,
+    bitcoin::Transaction {
+        version: transaction::Version(version),
         lock_time: absolute::LockTime::ZERO,
         input: vec![TxIn {
             previous_output: bitcoin::OutPoint::new(bitcoin::Txid::from_byte_array([seed; 32]), 0),
@@ -56,7 +55,13 @@ fn fund(wallet: &Wallet, sats: u64, seed: u8) -> bitcoin::OutPoint {
             value: Amount::from_sat(sats),
             script_pubkey: spk,
         }],
-    };
+    }
+}
+
+/// Confirm an output of `sats` to the wallet in a new block and return its outpoint.
+fn fund(wallet: &Wallet, sats: u64, seed: u8) -> bitcoin::OutPoint {
+    let mut w = wallet.inner.lock().unwrap();
+    let tx = funding_tx(&mut w, sats, seed, 2);
     let tip = w.latest_checkpoint().block_id();
     let block = Block {
         header: block::Header {
@@ -71,6 +76,15 @@ fn fund(wallet: &Wallet, sats: u64, seed: u8) -> bitcoin::OutPoint {
     };
     w.apply_block(&block, tip.height + 1).unwrap();
     bitcoin::OutPoint::new(tx.compute_txid(), 0)
+}
+
+/// Add an unconfirmed `version` output of `sats` to the wallet and return its outpoint.
+fn fund_unconfirmed(wallet: &Wallet, sats: u64, seed: u8, version: i32) -> bitcoin::OutPoint {
+    let mut w = wallet.inner.lock().unwrap();
+    let tx = funding_tx(&mut w, sats, seed, version);
+    let op = bitcoin::OutPoint::new(tx.compute_txid(), 0);
+    w.apply_unconfirmed_txs([(tx, 1)]);
+    op
 }
 
 fn ffi_outpoint(op: bitcoin::OutPoint) -> OutPoint {
@@ -221,6 +235,39 @@ fn create_psbt_utxo_filters() {
     let params = send_params(10_000, 1.0);
     params.change_policy(ChangeSpendPolicy::ChangeForbidden);
     assert!(block_on(wallet.clone().create_psbt(params)).is_ok());
+}
+
+#[test]
+fn create_psbt_truc_parents() {
+    let insufficient = |r: Result<CreatePsbtResult, BdkError>| {
+        matches!(r.err(), Some(BdkError::InsufficientFunds { .. }))
+    };
+    let v3_params = |amount| {
+        let params = send_params(amount, 1.0);
+        params.version(3);
+        params
+    };
+
+    // Unconfirmed v2 parent: v2 only.
+    let wallet = new_wallet();
+    fund_unconfirmed(&wallet, 100_000, 1, 2);
+    assert!(insufficient(block_on(wallet.clone().create_psbt(v3_params(10_000)))));
+    assert!(block_on(wallet.clone().create_psbt(send_params(10_000, 1.0))).is_ok());
+
+    // Unconfirmed v3 parent: v3 only, unless added manually.
+    let wallet = new_wallet();
+    let op = fund_unconfirmed(&wallet, 100_000, 1, 3);
+    assert!(insufficient(block_on(wallet.clone().create_psbt(send_params(10_000, 1.0)))));
+    let res = block_on(wallet.clone().create_psbt(v3_params(10_000))).unwrap();
+    assert_eq!(unsigned_tx(&res.psbt).input[0].previous_output, op);
+    let params = send_params(10_000, 1.0);
+    params.add_utxo(ffi_outpoint(op)).unwrap();
+    assert!(block_on(wallet.clone().create_psbt(params)).is_ok());
+
+    // Confirmed parents are always spendable.
+    let wallet = new_wallet();
+    fund(&wallet, 100_000, 1);
+    assert!(block_on(wallet.clone().create_psbt(v3_params(10_000))).is_ok());
 }
 
 #[test]
