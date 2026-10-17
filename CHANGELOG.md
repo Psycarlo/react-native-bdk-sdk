@@ -32,6 +32,12 @@ Exposes the new `bdk_wallet` 3.2 APIs. No breaking changes.
 - `KyotoOptions.dataDir` — ignored since `bdk_kyoto` 0.18 and now optional
 - `BdkWallet.sign`, `BdkWallet.policies` and `BdkTxBuilder.policyPath` keep working, but new code should prefer `signWithDescriptors`, `spendingPolicy` / `policyCondition` and `setCondition`
 
+### Fixed
+
+- `BdkTxBuilder.sighash` was ignored. It now sets the sighash type of every input. `BdkWallet.sign` and `signWithDescriptors` only sign `SIGHASH_ALL` / `SIGHASH_DEFAULT` inputs, so sign other types externally
+- `BdkTxBuilder.finish` and `BdkWallet.buildFeeBump` now persist the wallet, so a revealed change address is kept if the app restarts before the next sync
+- Release binaries are built with the Rust toolchain pinned in `ffi/rust-toolchain.toml` and the repository's linker flags (16KB page size on all Android ABIs)
+
 ## [0.7.0] - 2026-09-23
 
 ### Changed

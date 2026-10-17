@@ -349,6 +349,9 @@ impl TxBuilder {
         if params.add_global_xpubs {
             builder.add_global_xpubs();
         }
+        if let Some(s) = params.sighash {
+            builder.sighash(bitcoin::psbt::PsbtSighashType::from_u32(s));
+        }
 
         // Data
         for data in &params.data {
@@ -375,6 +378,8 @@ impl TxBuilder {
         }
 
         let psbt = builder.finish()?;
+        // A change address may have been revealed.
+        wallet.persist_wallet(&mut w)?;
         Ok(Arc::new(Psbt {
             inner: Mutex::new(psbt),
         }))

@@ -257,6 +257,7 @@ export declare class BdkWallet {
     drain(address: string, feeRate: number, esplora: EsploraInput): Promise<string>;
     sendWithElectrum(address: string, amountSats: number, feeRate: number, client: ElectrumInput): Promise<string>;
     drainWithElectrum(address: string, feeRate: number, client: ElectrumInput): Promise<string>;
+    /** Persists the wallet afterwards (a change address may be revealed). */
     buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
     /** Throws BdkError on invalid hex. */
     isMine(scriptHex: string): boolean;
@@ -321,6 +322,11 @@ export declare class BdkTxBuilder {
     currentHeight(height: number): void;
     onlyWitnessUtxo(): void;
     addGlobalXpubs(): void;
+    /**
+     * Sighash type for every input, e.g. `0x81` (ALL|ANYONECANPAY).
+     * `BdkWallet.sign` and `signWithDescriptors` only sign `SIGHASH_ALL` /
+     * `SIGHASH_DEFAULT` inputs, so other types must be signed externally.
+     */
     sighash(sighashType: number): void;
     policyPath(pathMapJson: string, keychain: KeychainKind): void;
     /**
@@ -329,6 +335,7 @@ export declare class BdkTxBuilder {
      * directly. Takes precedence over {@link policyPath} when both are set.
      */
     setCondition(condition: Condition): void;
+    /** Persists the wallet afterwards (a change address may be revealed). */
     finish(wallet: BdkWallet): Promise<PsbtLike>;
 }
 /**

@@ -546,3 +546,70 @@ fn tx_builder_set_condition() {
     assert_eq!(tx.lock_time.to_consensus_u32(), 50);
     assert!(tx.input.iter().all(|i| i.sequence.0 == 6));
 }
+
+#[test]
+fn tx_builder_sighash() {
+    let wallet = new_wallet();
+    fund(&wallet, 100_000, 1);
+
+    let builder = TxBuilder::new();
+    builder.add_recipient(RECIPIENT.into(), 10_000);
+    let psbt = block_on(builder.finish(wallet.clone())).unwrap();
+    assert!(psbt.inner.lock().unwrap().inputs.iter().all(|i| i.sighash_type.is_none()));
+
+    let builder = TxBuilder::new();
+    builder.add_recipient(RECIPIENT.into(), 10_000);
+    builder.sighash(0x81);
+    let psbt = block_on(builder.finish(wallet.clone())).unwrap();
+    let expected = Some(bitcoin::psbt::PsbtSighashType::from_u32(0x81));
+    assert!(psbt.inner.lock().unwrap().inputs.iter().all(|i| i.sighash_type == expected));
+    // The wallet's signers refuse non-standard sighashes.
+    assert!(matches!(
+        wallet.sign(psbt),
+        Err(BdkError::SignerNonStandardSighash { .. })
+    ));
+}
+
+#[test]
+fn tx_builder_finish_and_fee_bump_persist_change() {
+    let path = std::env::temp_dir().join(format!("bdk-ffi-persist-{}.sqlite", std::process::id()));
+    let _ = std::fs::remove_file(&path);
+    let open = || {
+        Arc::new(
+            Wallet::new(
+                external_desc(),
+                Some(internal_desc()),
+                Network::Regtest,
+                path.to_string_lossy().into(),
+            )
+            .unwrap(),
+        )
+    };
+
+    let wallet = open();
+    fund(&wallet, 100_000, 1);
+    let builder = TxBuilder::new();
+    builder.add_recipient(RECIPIENT.into(), 10_000);
+    builder.enable_rbf();
+    let psbt = block_on(builder.finish(wallet.clone())).unwrap();
+    assert_eq!(wallet.derivation_index(KeychainKind::Internal), Some(0));
+    drop(wallet);
+
+    // Reloaded from disk: the funding and the revealed change were persisted.
+    let wallet = open();
+    assert_eq!(wallet.derivation_index(KeychainKind::Internal), Some(0));
+    wallet.sign(psbt.clone()).unwrap();
+    let tx = psbt.inner.lock().unwrap().clone().extract_tx().unwrap();
+    let txid = tx.compute_txid();
+    wallet.inner.lock().unwrap().apply_unconfirmed_txs([(tx, 1)]);
+    wallet.build_fee_bump(txid.to_string(), 5.0).unwrap();
+    // The original change is in use, so the bump reveals a new one.
+    assert_eq!(wallet.derivation_index(KeychainKind::Internal), Some(1));
+    drop(wallet);
+
+    let wallet = open();
+    assert_eq!(wallet.derivation_index(KeychainKind::Internal), Some(1));
+    assert!(wallet.tx_details(txid.to_string()).unwrap().is_some());
+    drop(wallet);
+    let _ = std::fs::remove_file(&path);
+}

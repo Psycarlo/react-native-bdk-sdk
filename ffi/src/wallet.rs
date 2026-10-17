@@ -881,6 +881,8 @@ impl Wallet {
         let mut builder = w.build_fee_bump(tid)?;
         builder.fee_rate(fr);
         let psbt = builder.finish()?;
+        // A change address may have been revealed.
+        self.persist_wallet(&mut w)?;
 
         Ok(Arc::new(Psbt {
             inner: Mutex::new(psbt),
@@ -1093,7 +1095,7 @@ impl Wallet {
 
 // Private helpers — NOT exported via uniffi.
 impl Wallet {
-    fn persist_wallet(
+    pub(crate) fn persist_wallet(
         &self,
         wallet: &mut PersistedWallet<Connection>,
     ) -> Result<bool, BdkError> {

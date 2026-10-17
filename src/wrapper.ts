@@ -761,6 +761,7 @@ export class BdkWallet {
 
   // ── Fee bumping ─────────────────────────────────────────────────────────
 
+  /** Persists the wallet afterwards (a change address may be revealed). */
   buildFeeBump(txid: string, newFeeRate: number): PsbtLike {
     return this.inner.buildFeeBump(txid, newFeeRate);
   }
@@ -971,6 +972,11 @@ export class BdkTxBuilder {
     this.inner.addGlobalXpubs();
   }
 
+  /**
+   * Sighash type for every input, e.g. `0x81` (ALL|ANYONECANPAY).
+   * `BdkWallet.sign` and `signWithDescriptors` only sign `SIGHASH_ALL` /
+   * `SIGHASH_DEFAULT` inputs, so other types must be signed externally.
+   */
   sighash(sighashType: number): void {
     this.inner.sighash(sighashType);
   }
@@ -988,6 +994,7 @@ export class BdkTxBuilder {
     this.inner.setCondition(condition);
   }
 
+  /** Persists the wallet afterwards (a change address may be revealed). */
   async finish(wallet: BdkWallet): Promise<PsbtLike> {
     return this.inner.finish(wallet.raw);
   }
