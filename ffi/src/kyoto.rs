@@ -1,10 +1,9 @@
 use std::net::IpAddr;
-use std::path::PathBuf;
 use std::sync::Arc;
 
 use bdk_kyoto::builder::{Builder, BuilderExt};
 use bdk_kyoto::wallets::Single;
-use bdk_kyoto::{HashCheckpoint, LightClient, Requester, ScanType, TrustedPeer, UpdateSubscriber};
+use bdk_kyoto::{HashCheckpoint, LightClient, Requester, SyncConfig, TrustedPeer, UpdateSubscriber};
 use bdk_wallet::bitcoin::{self, BlockHash};
 use tokio::sync::Mutex as AsyncMutex;
 
@@ -42,10 +41,12 @@ impl KyotoClient {
     /// Build a light client for `wallet` and start its background node.
     ///
     /// - `scan_type`: [`KyotoScanType::Sync`] to continue from the wallet's
-    ///   checkpoint, or [`KyotoScanType::Recovery`] to rescan for restoration.
+    ///   checkpoint, [`KyotoScanType::NewWallet`] for a fresh wallet (headers
+    ///   only), or [`KyotoScanType::Recovery`] to rescan for restoration.
     /// - `required_peers`: how many peers to maintain (clamped to >= 1).
     /// - `peers`: optional explicit peer IPs; empty falls back to DNS discovery.
-    /// - `data_dir`: writable directory for header/peer persistence.
+    /// - `data_dir`: **deprecated and ignored**. Kyoto no longer persists
+    ///   headers/peers to disk; kept only for API compatibility.
     /// - `handler`: receives info/warning events from the node.
     #[uniffi::constructor]
     pub fn new(
@@ -56,12 +57,11 @@ impl KyotoClient {
         data_dir: String,
         handler: Arc<dyn KyotoNodeEventHandler>,
     ) -> Result<Self, BdkError> {
+        // Kyoto (bip157 >= 0.7) keeps all node state in memory.
+        let _ = data_dir;
         let network = wallet.inner.lock().unwrap().network();
-        let kyoto_scan = to_kyoto_scan_type(scan_type, network)?;
 
-        let mut builder = Builder::new(network)
-            .required_peers(required_peers.max(1))
-            .data_dir(PathBuf::from(data_dir));
+        let mut builder = Builder::new(network).required_peers(required_peers.max(1));
         for peer in &peers {
             let ip: IpAddr = peer.parse().map_err(|_| BdkError::SyncFailed {
                 message: format!("Invalid peer IP address: '{peer}'"),
@@ -73,7 +73,23 @@ impl KyotoClient {
         // client is independent of the wallet after construction (no borrow held).
         let light_client: LightClient<_, Single> = {
             let w = wallet.inner.lock().unwrap();
-            builder.build_with_wallet(&w, kyoto_scan)?
+            match scan_type {
+                KyotoScanType::Sync => builder
+                    .build_with_wallet(&w, SyncConfig::sync_from_last_checkpoint().build())?,
+                KyotoScanType::NewWallet => {
+                    builder.build_with_wallet(&w, SyncConfig::new_wallet_sync().build())?
+                }
+                KyotoScanType::Recovery {
+                    used_script_index,
+                    start,
+                } => {
+                    let cp = to_checkpoint(start, network)?;
+                    builder.build_with_wallet(
+                        &w,
+                        SyncConfig::wallet_recovery_sync(cp, used_script_index).build(),
+                    )?
+                }
+            }
         };
 
         let (client, logging, update_subscriber) = light_client.subscribe();
@@ -128,22 +144,6 @@ impl Drop for KyotoClient {
         // Best-effort: stop the background node when the client is dropped so we
         // don't leak a running P2P node. Errors (already-stopped) are ignored.
         let _ = self.requester.shutdown();
-    }
-}
-
-fn to_kyoto_scan_type(
-    scan: KyotoScanType,
-    network: bitcoin::Network,
-) -> Result<ScanType, BdkError> {
-    match scan {
-        KyotoScanType::Sync => Ok(ScanType::Sync),
-        KyotoScanType::Recovery {
-            used_script_index,
-            start,
-        } => Ok(ScanType::Recovery {
-            used_script_index,
-            checkpoint: to_checkpoint(start, network)?,
-        }),
     }
 }
 

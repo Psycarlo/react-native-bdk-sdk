@@ -50,6 +50,12 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          # Use the toolchain pinned in ffi/rust-toolchain.toml.
+          rust-src-dir: ffi
+          # Leave RUSTFLAGS unset: it would override ffi/.cargo/config.toml
+          # (bdk_wallet unstable cfg, Android 16KB page size) and ubrn's
+          # flags, so builds match a local `just generate`.
+          rustflags: ""
           target: >-
             aarch64-linux-android,
             armv7-linux-androideabi,
@@ -96,6 +102,12 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          # Use the toolchain pinned in ffi/rust-toolchain.toml.
+          rust-src-dir: ffi
+          # Leave RUSTFLAGS unset: it would override ffi/.cargo/config.toml
+          # (bdk_wallet unstable cfg, Android 16KB page size) and ubrn's
+          # flags, so builds match a local `just generate`.
+          rustflags: ""
           target: >-
             aarch64-apple-ios,
             aarch64-apple-ios-sim,

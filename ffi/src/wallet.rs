@@ -1,8 +1,12 @@
+use std::collections::BTreeMap;
 use std::ops::Deref;
 use std::sync::{Arc, Mutex};
 
 use bdk_wallet::bitcoin::{self, consensus, Amount, FeeRate, ScriptBuf, Transaction, Txid};
+use bdk_wallet::descriptor::policy::{BuildSatisfaction, Policy};
+use bdk_wallet::descriptor::{Descriptor, DescriptorPublicKey, ExtractPolicy};
 use bdk_wallet::rusqlite::Connection;
+use bdk_wallet::signer::SignersContainer;
 use bdk_wallet::SignOptions;
 use bdk_wallet::PersistedWallet;
 
@@ -13,6 +17,7 @@ use crate::error::BdkError;
 use crate::esplora::EsploraClient;
 use crate::kyoto::KyotoClient;
 use crate::psbt::Psbt;
+use crate::psbt_params::{CreatePsbtResult, PsbtParams};
 use crate::rpc::RpcClient;
 use crate::types::*;
 
@@ -286,6 +291,44 @@ impl Wallet {
         let mut psbt_inner = psbt.inner.lock().unwrap();
         let finalized = w.finalize_psbt(&mut psbt_inner, SignOptions::default())?;
         Ok(finalized)
+    }
+
+    /// Finalize the PSBT and report the outcome of every input (finalized,
+    /// already final, foreign input, or unsatisfied with the reason).
+    pub fn try_finalize_psbt(&self, psbt: Arc<Psbt>) -> Result<FinalizePsbtOutcome, BdkError> {
+        let w = self.inner.lock().unwrap();
+        let mut psbt_inner = psbt.inner.lock().unwrap();
+        Ok(w.try_finalize_psbt(&mut psbt_inner)?.into())
+    }
+
+    /// Sign with private keys from the given descriptors instead of keys held
+    /// by the wallet (the non-deprecated signing path in bdk_wallet 3.2).
+    /// Pass the wallet's private descriptor(s), or any descriptor containing
+    /// keys that should sign. Multipath (`<0;1>`) private descriptors are not
+    /// supported by miniscript; pass one descriptor per path instead.
+    /// Returns whether the PSBT was finalized.
+    pub fn sign_with_descriptors(
+        &self,
+        psbt: Arc<Psbt>,
+        descriptors: Vec<String>,
+    ) -> Result<bool, BdkError> {
+        let w = self.inner.lock().unwrap();
+        let secp = w.secp_ctx();
+        let signers = descriptors
+            .iter()
+            .map(|d| {
+                let (descriptor, keymap) =
+                    Descriptor::<DescriptorPublicKey>::parse_descriptor(secp, d).map_err(|e| {
+                        BdkError::InvalidDescriptor {
+                            message: format!("Invalid descriptor: {}", e),
+                        }
+                    })?;
+                Ok(SignersContainer::build(keymap, &descriptor, secp))
+            })
+            .collect::<Result<Vec<_>, BdkError>>()?;
+        let signer_refs: Vec<&SignersContainer> = signers.iter().collect();
+        let mut psbt_inner = psbt.inner.lock().unwrap();
+        Ok(w.sign_with_signers(&mut psbt_inner, &signer_refs, SignOptions::default())?)
     }
 
     // ── Sync (Esplora) ──────────────────────────────────────────────────────
@@ -838,6 +881,8 @@ impl Wallet {
         let mut builder = w.build_fee_bump(tid)?;
         builder.fee_rate(fr);
         let psbt = builder.finish()?;
+        // A change address may have been revealed.
+        self.persist_wallet(&mut w)?;
 
         Ok(Arc::new(Psbt {
             inner: Mutex::new(psbt),
@@ -903,6 +948,105 @@ impl Wallet {
         Ok(policy.map(|p| format!("{:?}", p)))
     }
 
+    /// Spending policy of the keychain's descriptor as JSON (`null` for a
+    /// plain single-key descriptor). Use the policy item `id`s to build a
+    /// path map for `policy_condition`. Ids may differ from the deprecated
+    /// `policies()` output when the wallet holds private keys, so don't mix
+    /// them with `TxBuilder.policy_path`.
+    pub fn spending_policy(&self, keychain: KeychainKind) -> Result<Option<String>, BdkError> {
+        let w = self.inner.lock().unwrap();
+        let policy = Self::extract_policy(&w, keychain)?;
+        policy
+            .map(|p| {
+                serde_json::to_string(&p).map_err(|e| BdkError::Generic {
+                    message: format!("Failed to serialize policy: {}", e),
+                })
+            })
+            .transpose()
+    }
+
+    /// Timelock requirements of a spending path, for `TxBuilder.set_condition`.
+    /// `path_map_json` maps policy item ids to the chosen child indexes, e.g.
+    /// `{"abcd1234": [1]}`. Returns an empty condition for descriptors without
+    /// a policy.
+    pub fn policy_condition(
+        &self,
+        path_map_json: String,
+        keychain: KeychainKind,
+    ) -> Result<Condition, BdkError> {
+        let path: BTreeMap<String, Vec<usize>> =
+            serde_json::from_str(&path_map_json).map_err(|e| BdkError::TransactionBuildFailed {
+                message: format!("Invalid policy path JSON: {}", e),
+            })?;
+        let w = self.inner.lock().unwrap();
+        match Self::extract_policy(&w, keychain)? {
+            Some(policy) => Ok(policy.get_condition(&path)?.into()),
+            None => Ok(Condition::default()),
+        }
+    }
+
+    // ── Experimental PSBT API (bdk-tx) ────────────────────────────────────────
+
+    /// **Experimental.** Create a PSBT with bdk_wallet's unstable bdk-tx API.
+    /// Sign the PSBT, then finalize it with the returned `finalizer`.
+    /// Persists the wallet afterwards (a change address may be revealed).
+    pub async fn create_psbt(
+        self: Arc<Self>,
+        params: Arc<PsbtParams>,
+    ) -> Result<CreatePsbtResult, BdkError> {
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                let mut w = self.inner.lock().unwrap();
+                let bdk_params = params.to_bdk(&w)?;
+                let (psbt, finalizer) = w.create_psbt(bdk_params)?;
+                self.persist_wallet(&mut w)?;
+                Ok(CreatePsbtResult::new(psbt, finalizer))
+            })
+            .await
+            .map_err(|e| BdkError::TransactionBuildFailed {
+                message: format!("Transaction build task panicked: {}", e),
+            })?
+        })
+        .await
+    }
+
+    /// **Experimental.** Replace one or more unconfirmed wallet transactions
+    /// (RBF) with bdk_wallet's unstable bdk-tx API. The replacement spends the
+    /// inputs of the originals, so `PsbtParams.add_utxo(s)` is ignored; add
+    /// recipients again (they are not copied from the originals).
+    /// Persists the wallet afterwards.
+    pub async fn replace_by_fee(
+        self: Arc<Self>,
+        params: Arc<PsbtParams>,
+        txids: Vec<String>,
+    ) -> Result<CreatePsbtResult, BdkError> {
+        crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                let mut w = self.inner.lock().unwrap();
+                let txs = txids
+                    .iter()
+                    .map(|t| {
+                        let txid = crate::psbt_params::parse_txid(t)?;
+                        w.get_tx(txid)
+                            .map(|c| Arc::clone(&c.tx_node.tx))
+                            .ok_or_else(|| BdkError::FeeBumpTargetNotFound {
+                                message: format!("Transaction {} not found in wallet", txid),
+                            })
+                    })
+                    .collect::<Result<Vec<_>, _>>()?;
+                let bdk_params = params.to_bdk(&w)?.replace_txs(txs);
+                let (psbt, finalizer) = w.replace_by_fee(bdk_params)?;
+                self.persist_wallet(&mut w)?;
+                Ok(CreatePsbtResult::new(psbt, finalizer))
+            })
+            .await
+            .map_err(|e| BdkError::TransactionBuildFailed {
+                message: format!("Transaction build task panicked: {}", e),
+            })?
+        })
+        .await
+    }
+
     pub fn derivation_index(&self, keychain: KeychainKind) -> Option<u32> {
         let w = self.inner.lock().unwrap();
         w.derivation_index(keychain.into())
@@ -951,7 +1095,7 @@ impl Wallet {
 
 // Private helpers — NOT exported via uniffi.
 impl Wallet {
-    fn persist_wallet(
+    pub(crate) fn persist_wallet(
         &self,
         wallet: &mut PersistedWallet<Connection>,
     ) -> Result<bool, BdkError> {
@@ -965,6 +1109,22 @@ impl Wallet {
 
     fn auto_persist(&self, wallet: &mut PersistedWallet<Connection>) {
         let _ = self.persist_wallet(wallet);
+    }
+
+    fn extract_policy(
+        wallet: &bdk_wallet::Wallet,
+        keychain: KeychainKind,
+    ) -> Result<Option<Policy>, BdkError> {
+        wallet
+            .public_descriptor(keychain.into())
+            .extract_policy(
+                &SignersContainer::default(),
+                BuildSatisfaction::None,
+                wallet.secp_ctx(),
+            )
+            .map_err(|e| BdkError::InvalidDescriptor {
+                message: format!("Failed to compute policy: {}", e),
+            })
     }
 
     fn decode_tx(&self, tx_hex: &str) -> Result<Transaction, BdkError> {

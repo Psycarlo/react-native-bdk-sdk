@@ -32,6 +32,7 @@ struct TxBuilderParams {
     add_global_xpubs: bool,
     sighash: Option<u32>,
     policy_path: Vec<(String, KeychainKind)>,
+    condition: Option<Condition>,
     data: Vec<Vec<u8>>,
     exclude_below_confirmations: Option<u32>,
     exclude_unconfirmed: bool,
@@ -203,6 +204,14 @@ impl TxBuilder {
         p.policy_path.push((path_map_json, keychain));
     }
 
+    /// Apply the timelocks of a spending path (nLockTime / nSequence) without a
+    /// policy path. Get one from `Wallet::policy_condition`, or build it
+    /// directly. Takes precedence over `policy_path` when both are set.
+    pub fn set_condition(&self, condition: Condition) {
+        let mut p = self.params.lock().unwrap();
+        p.condition = Some(condition);
+    }
+
     /// Build the transaction into a PSBT using the wallet.
     /// Runs on a background thread to avoid blocking the JS thread.
     #[uniffi::method(async_runtime = "tokio")]
@@ -340,6 +349,9 @@ impl TxBuilder {
         if params.add_global_xpubs {
             builder.add_global_xpubs();
         }
+        if let Some(s) = params.sighash {
+            builder.sighash(bitcoin::psbt::PsbtSighashType::from_u32(s));
+        }
 
         // Data
         for data in &params.data {
@@ -360,7 +372,14 @@ impl TxBuilder {
             builder.policy_path(path, (*keychain).into());
         }
 
+        // Condition
+        if let Some(condition) = params.condition {
+            builder.set_condition(condition.into());
+        }
+
         let psbt = builder.finish()?;
+        // A change address may have been revealed.
+        wallet.persist_wallet(&mut w)?;
         Ok(Arc::new(Psbt {
             inner: Mutex::new(psbt),
         }))

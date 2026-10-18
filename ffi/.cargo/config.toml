@@ -5,3 +5,12 @@ rustflags = [
   "-C", "link-arg=-z",
   "-C", "link-arg=common-page-size=16384",
 ]
+
+# Opt in to bdk_wallet's experimental bdk-tx APIs (`Wallet::create_psbt`,
+# `Wallet::replace_by_fee`). Required alongside the `bdk-tx` feature. Uses a
+# `cfg(all())` target section (matches every target) so it is joined with the
+# Android flags above instead of being overridden by them. A RUSTFLAGS env var
+# replaces all of these, so CI tests pass the cfg explicitly and release builds
+# leave RUSTFLAGS unset (see .github/workflows).
+[target.'cfg(all())']
+rustflags = ["--cfg", "bdk_wallet_unstable"]

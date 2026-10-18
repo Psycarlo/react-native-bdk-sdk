@@ -214,3 +214,37 @@ fn create_descriptor_from_string_result_validates() {
     .unwrap();
     assert!(validate_descriptor(desc, Network::Testnet));
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  merge_conditions
+// ═══════════════════════════════════════════════════════════════════════════════
+
+#[test]
+fn merge_conditions_combines_csv_and_timelock() {
+    let merged = merge_conditions(
+        Condition { csv: Some(144), timelock: None },
+        Condition { csv: None, timelock: Some(800_000) },
+    )
+    .unwrap();
+    assert_eq!(merged, Condition { csv: Some(144), timelock: Some(800_000) });
+}
+
+#[test]
+fn merge_conditions_keeps_max() {
+    let merged = merge_conditions(
+        Condition { csv: Some(10), timelock: Some(100) },
+        Condition { csv: Some(20), timelock: Some(50) },
+    )
+    .unwrap();
+    assert_eq!(merged, Condition { csv: Some(20), timelock: Some(100) });
+}
+
+#[test]
+fn merge_conditions_mixed_units_fails() {
+    // Block height vs UNIX timestamp.
+    let result = merge_conditions(
+        Condition { csv: None, timelock: Some(800_000) },
+        Condition { csv: None, timelock: Some(1_700_000_000) },
+    );
+    assert!(matches!(result, Err(BdkError::LockTimeConflict { .. })));
+}

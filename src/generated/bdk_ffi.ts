@@ -377,6 +377,32 @@ export function isValidAddress(address: string, network: Network): boolean {
 }
 
 /**
+ * Combine two spending conditions (e.g. from different keychains or
+ * policies). Fails if their timelocks use different units (height vs time).
+ */
+export function mergeConditions(
+  a: Condition,
+  b: Condition
+): Condition /*throws*/ {
+  const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+    /*liftError:*/ FfiConverterTypeBdkError.lift.bind(FfiConverterTypeBdkError),
+    /*caller:*/ (callStatus) => {
+      return nativeModule().ubrn_uniffi_bdk_ffi_fn_func_merge_conditions(
+        FfiConverterTypeCondition.lower(a, nativeModule().rustbuffer_alloc),
+        FfiConverterTypeCondition.lower(b, nativeModule().rustbuffer_alloc),
+        callStatus
+      );
+    },
+    /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+  );
+  try {
+    return FfiConverterTypeCondition.lift(__rb);
+  } finally {
+    nativeModule().rustbuffer_free(__rb);
+  }
+}
+
+/**
  * Validate a descriptor string for the given network without creating a wallet.
  */
 export function validateDescriptor(
@@ -693,6 +719,63 @@ const FfiConverterTypeBlockId = (() => {
   return new FFIConverter();
 })();
 
+/**
+ * Extra timelock requirements of a chosen spending path, applied to the
+ * transaction by [`crate::TxBuilder::set_condition`].
+ *
+ * Derive one from a policy path with [`crate::Wallet::policy_condition`], or
+ * build it directly when the values are known (e.g. a fixed `older(144)`).
+ */
+export type Condition = {
+  /**
+   * Relative timelock (`older(n)`) as a consensus nSequence value.
+   */
+  csv?: number;
+  /**
+   * Absolute timelock (`after(n)`) as a consensus nLockTime value: a block
+   * height below 500,000,000, otherwise a UNIX timestamp.
+   */
+  timelock?: number;
+};
+
+/**
+ * Generated factory for {@link Condition} record objects.
+ */
+export const Condition = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<Condition, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<Condition>,
+  });
+})();
+
+const FfiConverterTypeCondition = (() => {
+  type TypeName = Condition;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        csv: FfiConverterOptionalUInt32.readFromCursor(c),
+        timelock: FfiConverterOptionalUInt32.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterOptionalUInt32.writeIntoCursor(value.csv, c);
+      FfiConverterOptionalUInt32.writeIntoCursor(value.timelock, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterOptionalUInt32.allocationSize(value.csv) +
+        FfiConverterOptionalUInt32.allocationSize(value.timelock)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
 export type ConfirmationBlockTime = {
   height: number;
   blockHash: string;
@@ -737,524 +820,6 @@ const FfiConverterTypeConfirmationBlockTime = (() => {
         FfiConverterUInt32.allocationSize(value.height) +
         FfiConverterString.allocationSize(value.blockHash) +
         FfiConverterUInt64.allocationSize(value.timestamp)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type DerivationInfo = {
-  keychain: KeychainKind;
-  index: number;
-};
-
-/**
- * Generated factory for {@link DerivationInfo} record objects.
- */
-export const DerivationInfo = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<DerivationInfo, ReturnType<typeof defaults>>(
-      defaults
-    );
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<DerivationInfo>,
-  });
-})();
-
-const FfiConverterTypeDerivationInfo = (() => {
-  type TypeName = DerivationInfo;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
-        index: FfiConverterUInt32.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
-      FfiConverterUInt32.writeIntoCursor(value.index, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
-        FfiConverterUInt32.allocationSize(value.index)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type KeychainInfo = {
-  keychain: KeychainKind;
-  descriptor: string;
-};
-
-/**
- * Generated factory for {@link KeychainInfo} record objects.
- */
-export const KeychainInfo = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<KeychainInfo, ReturnType<typeof defaults>>(
-      defaults
-    );
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<KeychainInfo>,
-  });
-})();
-
-const FfiConverterTypeKeychainInfo = (() => {
-  type TypeName = KeychainInfo;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
-        descriptor: FfiConverterString.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
-      FfiConverterString.writeIntoCursor(value.descriptor, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
-        FfiConverterString.allocationSize(value.descriptor)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type OutPoint = {
-  txid: string;
-  vout: number;
-};
-
-/**
- * Generated factory for {@link OutPoint} record objects.
- */
-export const OutPoint = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<OutPoint, ReturnType<typeof defaults>>(defaults);
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<OutPoint>,
-  });
-})();
-
-const FfiConverterTypeOutPoint = (() => {
-  type TypeName = OutPoint;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        txid: FfiConverterString.readFromCursor(c),
-        vout: FfiConverterUInt32.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterString.writeIntoCursor(value.txid, c);
-      FfiConverterUInt32.writeIntoCursor(value.vout, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterString.allocationSize(value.txid) +
-        FfiConverterUInt32.allocationSize(value.vout)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type TxOut = {
-  value: bigint;
-  scriptPubkeyHex: string;
-};
-
-/**
- * Generated factory for {@link TxOut} record objects.
- */
-export const TxOut = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<TxOut, ReturnType<typeof defaults>>(defaults);
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<TxOut>,
-  });
-})();
-
-const FfiConverterTypeTxOut = (() => {
-  type TypeName = TxOut;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        value: FfiConverterUInt64.readFromCursor(c),
-        scriptPubkeyHex: FfiConverterString.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterUInt64.writeIntoCursor(value.value, c);
-      FfiConverterString.writeIntoCursor(value.scriptPubkeyHex, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterUInt64.allocationSize(value.value) +
-        FfiConverterString.allocationSize(value.scriptPubkeyHex)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type LocalOutput = {
-  outpoint: OutPoint;
-  txout: TxOut;
-  keychain: KeychainKind;
-  isSpent: boolean;
-  derivationIndex: number;
-  confirmationBlockTime?: ConfirmationBlockTime;
-};
-
-/**
- * Generated factory for {@link LocalOutput} record objects.
- */
-export const LocalOutput = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<LocalOutput, ReturnType<typeof defaults>>(
-      defaults
-    );
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<LocalOutput>,
-  });
-})();
-
-const FfiConverterTypeLocalOutput = (() => {
-  type TypeName = LocalOutput;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        outpoint: FfiConverterTypeOutPoint.readFromCursor(c),
-        txout: FfiConverterTypeTxOut.readFromCursor(c),
-        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
-        isSpent: FfiConverterBool.readFromCursor(c),
-        derivationIndex: FfiConverterUInt32.readFromCursor(c),
-        confirmationBlockTime:
-          FfiConverterOptionalTypeConfirmationBlockTime.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterTypeOutPoint.writeIntoCursor(value.outpoint, c);
-      FfiConverterTypeTxOut.writeIntoCursor(value.txout, c);
-      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
-      FfiConverterBool.writeIntoCursor(value.isSpent, c);
-      FfiConverterUInt32.writeIntoCursor(value.derivationIndex, c);
-      FfiConverterOptionalTypeConfirmationBlockTime.writeIntoCursor(
-        value.confirmationBlockTime,
-        c
-      );
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterTypeOutPoint.allocationSize(value.outpoint) +
-        FfiConverterTypeTxOut.allocationSize(value.txout) +
-        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
-        FfiConverterBool.allocationSize(value.isSpent) +
-        FfiConverterUInt32.allocationSize(value.derivationIndex) +
-        FfiConverterOptionalTypeConfirmationBlockTime.allocationSize(
-          value.confirmationBlockTime
-        )
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type Recipient = {
-  address: string;
-  amountSats: bigint;
-};
-
-/**
- * Generated factory for {@link Recipient} record objects.
- */
-export const Recipient = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<Recipient, ReturnType<typeof defaults>>(defaults);
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<Recipient>,
-  });
-})();
-
-const FfiConverterTypeRecipient = (() => {
-  type TypeName = Recipient;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        address: FfiConverterString.readFromCursor(c),
-        amountSats: FfiConverterUInt64.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterString.writeIntoCursor(value.address, c);
-      FfiConverterUInt64.writeIntoCursor(value.amountSats, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterString.allocationSize(value.address) +
-        FfiConverterUInt64.allocationSize(value.amountSats)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type SentAndReceived = {
-  sent: bigint;
-  received: bigint;
-};
-
-/**
- * Generated factory for {@link SentAndReceived} record objects.
- */
-export const SentAndReceived = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<SentAndReceived, ReturnType<typeof defaults>>(
-      defaults
-    );
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<SentAndReceived>,
-  });
-})();
-
-const FfiConverterTypeSentAndReceived = (() => {
-  type TypeName = SentAndReceived;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        sent: FfiConverterUInt64.readFromCursor(c),
-        received: FfiConverterUInt64.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterUInt64.writeIntoCursor(value.sent, c);
-      FfiConverterUInt64.writeIntoCursor(value.received, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterUInt64.allocationSize(value.sent) +
-        FfiConverterUInt64.allocationSize(value.received)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type TxInput = {
-  previousTxid: string;
-  previousVout: number;
-  sequence: number;
-  scriptSigHex: string;
-  witness: Array<string>;
-};
-
-/**
- * Generated factory for {@link TxInput} record objects.
- */
-export const TxInput = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<TxInput, ReturnType<typeof defaults>>(defaults);
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<TxInput>,
-  });
-})();
-
-const FfiConverterTypeTxInput = (() => {
-  type TypeName = TxInput;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        previousTxid: FfiConverterString.readFromCursor(c),
-        previousVout: FfiConverterUInt32.readFromCursor(c),
-        sequence: FfiConverterUInt32.readFromCursor(c),
-        scriptSigHex: FfiConverterString.readFromCursor(c),
-        witness: FfiConverterSequenceString.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterString.writeIntoCursor(value.previousTxid, c);
-      FfiConverterUInt32.writeIntoCursor(value.previousVout, c);
-      FfiConverterUInt32.writeIntoCursor(value.sequence, c);
-      FfiConverterString.writeIntoCursor(value.scriptSigHex, c);
-      FfiConverterSequenceString.writeIntoCursor(value.witness, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterString.allocationSize(value.previousTxid) +
-        FfiConverterUInt32.allocationSize(value.previousVout) +
-        FfiConverterUInt32.allocationSize(value.sequence) +
-        FfiConverterString.allocationSize(value.scriptSigHex) +
-        FfiConverterSequenceString.allocationSize(value.witness)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type TxOutput = {
-  value: bigint;
-  scriptPubkeyHex: string;
-  address?: string;
-};
-
-/**
- * Generated factory for {@link TxOutput} record objects.
- */
-export const TxOutput = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<TxOutput, ReturnType<typeof defaults>>(defaults);
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<TxOutput>,
-  });
-})();
-
-const FfiConverterTypeTxOutput = (() => {
-  type TypeName = TxOutput;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        value: FfiConverterUInt64.readFromCursor(c),
-        scriptPubkeyHex: FfiConverterString.readFromCursor(c),
-        address: FfiConverterOptionalString.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterUInt64.writeIntoCursor(value.value, c);
-      FfiConverterString.writeIntoCursor(value.scriptPubkeyHex, c);
-      FfiConverterOptionalString.writeIntoCursor(value.address, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterUInt64.allocationSize(value.value) +
-        FfiConverterString.allocationSize(value.scriptPubkeyHex) +
-        FfiConverterOptionalString.allocationSize(value.address)
-      );
-    }
-  }
-  return new FFIConverter();
-})();
-
-export type TxDetails = {
-  txid: string;
-  sent: bigint;
-  received: bigint;
-  fee?: bigint;
-  feeRate?: number;
-  balanceDelta: bigint;
-  confirmationBlockTime?: ConfirmationBlockTime;
-  version: number;
-  locktime: number;
-  inputs: Array<TxInput>;
-  outputs: Array<TxOutput>;
-};
-
-/**
- * Generated factory for {@link TxDetails} record objects.
- */
-export const TxDetails = (() => {
-  const defaults = () => ({});
-  const create = (() => {
-    return uniffiCreateRecord<TxDetails, ReturnType<typeof defaults>>(defaults);
-  })();
-  return Object.freeze({
-    create,
-    new: create,
-    defaults: () => Object.freeze(defaults()) as Partial<TxDetails>,
-  });
-})();
-
-const FfiConverterTypeTxDetails = (() => {
-  type TypeName = TxDetails;
-  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
-    readFromCursor(c: Cursor): TypeName {
-      return {
-        txid: FfiConverterString.readFromCursor(c),
-        sent: FfiConverterUInt64.readFromCursor(c),
-        received: FfiConverterUInt64.readFromCursor(c),
-        fee: FfiConverterOptionalUInt64.readFromCursor(c),
-        feeRate: FfiConverterOptionalFloat64.readFromCursor(c),
-        balanceDelta: FfiConverterInt64.readFromCursor(c),
-        confirmationBlockTime:
-          FfiConverterOptionalTypeConfirmationBlockTime.readFromCursor(c),
-        version: FfiConverterInt32.readFromCursor(c),
-        locktime: FfiConverterUInt32.readFromCursor(c),
-        inputs: FfiConverterSequenceTypeTxInput.readFromCursor(c),
-        outputs: FfiConverterSequenceTypeTxOutput.readFromCursor(c),
-      };
-    }
-    writeIntoCursor(value: TypeName, c: Cursor): void {
-      FfiConverterString.writeIntoCursor(value.txid, c);
-      FfiConverterUInt64.writeIntoCursor(value.sent, c);
-      FfiConverterUInt64.writeIntoCursor(value.received, c);
-      FfiConverterOptionalUInt64.writeIntoCursor(value.fee, c);
-      FfiConverterOptionalFloat64.writeIntoCursor(value.feeRate, c);
-      FfiConverterInt64.writeIntoCursor(value.balanceDelta, c);
-      FfiConverterOptionalTypeConfirmationBlockTime.writeIntoCursor(
-        value.confirmationBlockTime,
-        c
-      );
-      FfiConverterInt32.writeIntoCursor(value.version, c);
-      FfiConverterUInt32.writeIntoCursor(value.locktime, c);
-      FfiConverterSequenceTypeTxInput.writeIntoCursor(value.inputs, c);
-      FfiConverterSequenceTypeTxOutput.writeIntoCursor(value.outputs, c);
-    }
-    allocationSize(value: TypeName): number {
-      return (
-        FfiConverterString.allocationSize(value.txid) +
-        FfiConverterUInt64.allocationSize(value.sent) +
-        FfiConverterUInt64.allocationSize(value.received) +
-        FfiConverterOptionalUInt64.allocationSize(value.fee) +
-        FfiConverterOptionalFloat64.allocationSize(value.feeRate) +
-        FfiConverterInt64.allocationSize(value.balanceDelta) +
-        FfiConverterOptionalTypeConfirmationBlockTime.allocationSize(
-          value.confirmationBlockTime
-        ) +
-        FfiConverterInt32.allocationSize(value.version) +
-        FfiConverterUInt32.allocationSize(value.locktime) +
-        FfiConverterSequenceTypeTxInput.allocationSize(value.inputs) +
-        FfiConverterSequenceTypeTxOutput.allocationSize(value.outputs)
       );
     }
   }
@@ -3929,6 +3494,1358 @@ const FfiConverterTypeBdkError = (() => {
   return new FFIConverter();
 })();
 
+export type TxOut = {
+  value: bigint;
+  scriptPubkeyHex: string;
+};
+
+/**
+ * Generated factory for {@link TxOut} record objects.
+ */
+export const TxOut = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<TxOut, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<TxOut>,
+  });
+})();
+
+const FfiConverterTypeTxOut = (() => {
+  type TypeName = TxOut;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        value: FfiConverterUInt64.readFromCursor(c),
+        scriptPubkeyHex: FfiConverterString.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt64.writeIntoCursor(value.value, c);
+      FfiConverterString.writeIntoCursor(value.scriptPubkeyHex, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterUInt64.allocationSize(value.value) +
+        FfiConverterString.allocationSize(value.scriptPubkeyHex)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export interface PsbtLike {
+  /**
+   * Extract the fully-signed transaction as raw hex.
+   */
+  extractTxHex() /*throws*/ : string;
+  /**
+   * Total fee in satoshis. None if any input UTXO value is unknown.
+   */
+  feeAmount(): bigint | undefined;
+  /**
+   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+   */
+  feeRate(): number | undefined;
+  /**
+   * Retrieve the UTXO for a given input index. Returns None if unavailable.
+   */
+  getUtxoFor(inputIndex: bigint): TxOut | undefined;
+  /**
+   * Serialize to a base64-encoded string.
+   */
+  toBase64(): string;
+  /**
+   * The unsigned txid.
+   */
+  txid() /*throws*/ : string;
+}
+/**
+ * @deprecated Use `PsbtLike` instead.
+ */
+export type PsbtInterface = PsbtLike;
+
+export class Psbt extends UniffiAbstractObject implements PsbtLike {
+  readonly [uniffiTypeNameSymbol] = "Psbt";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  /**
+   * Deserialize from a base64-encoded string.
+   */
+  constructor(psbtBase64: string) /*throws*/ {
+    super();
+    const pointer = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_psbt_new(
+          FfiConverterString.lower(psbtBase64, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] = uniffiTypePsbtObjectFactory.bless(pointer);
+  }
+
+  /**
+   * Extract the fully-signed transaction as raw hex.
+   */
+  extractTxHex(): string /*throws*/ {
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_extract_tx_hex(
+          uniffiTypePsbtObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterString.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * Total fee in satoshis. None if any input UTXO value is unknown.
+   */
+  feeAmount(): bigint | undefined {
+    const __rb: Uint8Array = uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_amount(
+          uniffiTypePsbtObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterOptionalUInt64.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+   */
+  feeRate(): number | undefined {
+    const __rb: Uint8Array = uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_rate(
+          uniffiTypePsbtObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterOptionalFloat64.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * Retrieve the UTXO for a given input index. Returns None if unavailable.
+   */
+  getUtxoFor(inputIndex: bigint): TxOut | undefined {
+    const __rb: Uint8Array = uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_get_utxo_for(
+          uniffiTypePsbtObjectFactory.clonePointer(this),
+          FfiConverterUInt64.lower(inputIndex, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterOptionalTypeTxOut.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * Serialize to a base64-encoded string.
+   */
+  toBase64(): string {
+    const __rb: Uint8Array = uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_to_base64(
+          uniffiTypePsbtObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterString.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * The unsigned txid.
+   */
+  txid(): string /*throws*/ {
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_txid(
+          uniffiTypePsbtObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterString.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer = uniffiTypePsbtObjectFactory.pointer(this);
+      uniffiTypePsbtObjectFactory.freePointer(pointer);
+      uniffiTypePsbtObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj_: any): obj_ is Psbt {
+    return uniffiTypePsbtObjectFactory.isConcreteType(obj_);
+  }
+}
+
+const uniffiTypePsbtObjectFactory: UniffiObjectFactory<PsbtLike> = (() => {
+  return {
+    create(pointer: UniffiHandle): PsbtLike {
+      const instance = Object.create(Psbt.prototype);
+      instance[pointerLiteralSymbol] = pointer;
+      instance[destructorGuardSymbol] = this.bless(pointer);
+      instance[uniffiTypeNameSymbol] = "Psbt";
+      return instance;
+    },
+
+    bless(p: UniffiHandle): UniffiGcObject {
+      return uniffiCaller.rustCall(
+        /*caller:*/ (status) =>
+          nativeModule().ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(
+            p,
+            status
+          ),
+        /*liftString:*/ FfiConverterString.lift
+      );
+    },
+
+    unbless(ptr_: UniffiGcObject) {
+      ptr_.markDestroyed();
+    },
+
+    pointer(obj_: PsbtLike): UniffiHandle {
+      if ((obj_ as any)[destructorGuardSymbol] === undefined) {
+        throw new UniffiInternalError.UnexpectedNullPointer();
+      }
+      return (obj_ as any)[pointerLiteralSymbol];
+    },
+
+    clonePointer(obj_: PsbtLike): UniffiHandle {
+      const pointer = this.pointer(obj_);
+      return uniffiCaller.rustCall(
+        /*caller:*/ (callStatus) =>
+          nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_psbt(pointer, callStatus),
+        /*liftString:*/ FfiConverterString.lift
+      );
+    },
+
+    freePointer(pointer: UniffiHandle): void {
+      uniffiCaller.rustCall(
+        /*caller:*/ (callStatus) =>
+          nativeModule().ubrn_uniffi_bdk_ffi_fn_free_psbt(pointer, callStatus),
+        /*liftString:*/ FfiConverterString.lift
+      );
+    },
+
+    isConcreteType(obj_: any): obj_ is PsbtLike {
+      return (
+        obj_[destructorGuardSymbol] && obj_[uniffiTypeNameSymbol] === "Psbt"
+      );
+    },
+  };
+})();
+const FfiConverterTypePsbt = new FfiConverterObject(
+  uniffiTypePsbtObjectFactory
+);
+
+// Enum: FinalizeInputOutcome
+export enum FinalizeInputOutcome_Tags {
+  AlreadyFinalized = "AlreadyFinalized",
+  Finalized = "Finalized",
+  MissingDescriptor = "MissingDescriptor",
+  CouldNotSatisfy = "CouldNotSatisfy",
+}
+/**
+ * Finalization status of a single PSBT input.
+ */
+export const FinalizeInputOutcome = (() => {
+  type AlreadyFinalized__interface = {
+    tag: FinalizeInputOutcome_Tags.AlreadyFinalized;
+  };
+  /**
+   * The input was already finalized before this call.
+   */
+  class AlreadyFinalized_
+    extends UniffiEnum
+    implements AlreadyFinalized__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "FinalizeInputOutcome";
+    readonly tag = FinalizeInputOutcome_Tags.AlreadyFinalized;
+    constructor() {
+      super("FinalizeInputOutcome", "AlreadyFinalized");
+    }
+
+    static new(): AlreadyFinalized_ {
+      return new AlreadyFinalized_();
+    }
+
+    static instanceOf(obj: any): obj is AlreadyFinalized_ {
+      return obj.tag === FinalizeInputOutcome_Tags.AlreadyFinalized;
+    }
+  }
+
+  type Finalized__interface = {
+    tag: FinalizeInputOutcome_Tags.Finalized;
+  };
+  /**
+   * The input was finalized during this call.
+   */
+  class Finalized_ extends UniffiEnum implements Finalized__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "FinalizeInputOutcome";
+    readonly tag = FinalizeInputOutcome_Tags.Finalized;
+    constructor() {
+      super("FinalizeInputOutcome", "Finalized");
+    }
+
+    static new(): Finalized_ {
+      return new Finalized_();
+    }
+
+    static instanceOf(obj: any): obj is Finalized_ {
+      return obj.tag === FinalizeInputOutcome_Tags.Finalized;
+    }
+  }
+
+  type MissingDescriptor__interface = {
+    tag: FinalizeInputOutcome_Tags.MissingDescriptor;
+  };
+  /**
+   * No descriptor (or spending plan) is known for the input, e.g. a foreign input.
+   */
+  class MissingDescriptor_
+    extends UniffiEnum
+    implements MissingDescriptor__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "FinalizeInputOutcome";
+    readonly tag = FinalizeInputOutcome_Tags.MissingDescriptor;
+    constructor() {
+      super("FinalizeInputOutcome", "MissingDescriptor");
+    }
+
+    static new(): MissingDescriptor_ {
+      return new MissingDescriptor_();
+    }
+
+    static instanceOf(obj: any): obj is MissingDescriptor_ {
+      return obj.tag === FinalizeInputOutcome_Tags.MissingDescriptor;
+    }
+  }
+
+  type CouldNotSatisfy__interface = {
+    tag: FinalizeInputOutcome_Tags.CouldNotSatisfy;
+    inner: Readonly<{ message: string }>;
+  };
+  /**
+   * The descriptor is known but the input could not be satisfied (missing
+   * signatures, unmet timelocks, …).
+   */
+  class CouldNotSatisfy_
+    extends UniffiEnum
+    implements CouldNotSatisfy__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "FinalizeInputOutcome";
+    readonly tag = FinalizeInputOutcome_Tags.CouldNotSatisfy;
+    readonly inner: Readonly<{ message: string }>;
+    constructor(inner: { message: string }) {
+      super("FinalizeInputOutcome", "CouldNotSatisfy");
+
+      this.inner = Object.freeze(inner);
+    }
+    static new(inner: { message: string }): CouldNotSatisfy_ {
+      return new CouldNotSatisfy_(inner);
+    }
+
+    static instanceOf(obj: any): obj is CouldNotSatisfy_ {
+      return obj.tag === FinalizeInputOutcome_Tags.CouldNotSatisfy;
+    }
+  }
+
+  function instanceOf(obj: any): obj is FinalizeInputOutcome {
+    return obj[uniffiTypeNameSymbol] === "FinalizeInputOutcome";
+  }
+
+  return Object.freeze({
+    instanceOf,
+    AlreadyFinalized: AlreadyFinalized_,
+    Finalized: Finalized_,
+    MissingDescriptor: MissingDescriptor_,
+    CouldNotSatisfy: CouldNotSatisfy_,
+  });
+})();
+/**
+ * Finalization status of a single PSBT input.
+ */
+export type FinalizeInputOutcome = InstanceType<
+  (typeof FinalizeInputOutcome)[
+    | "AlreadyFinalized"
+    | "Finalized"
+    | "MissingDescriptor"
+    | "CouldNotSatisfy"]
+>;
+
+// FfiConverter for enum FinalizeInputOutcome
+const FfiConverterTypeFinalizeInputOutcome = (() => {
+  type TypeName = FinalizeInputOutcome;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      switch (c.readI32()) {
+        case 1:
+          return new FinalizeInputOutcome.AlreadyFinalized();
+        case 2:
+          return new FinalizeInputOutcome.Finalized();
+        case 3:
+          return new FinalizeInputOutcome.MissingDescriptor();
+        case 4:
+          return new FinalizeInputOutcome.CouldNotSatisfy({
+            message: FfiConverterString.readFromCursor(c),
+          });
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      switch (value.tag) {
+        case FinalizeInputOutcome_Tags.AlreadyFinalized: {
+          c.writeI32(1);
+          return;
+        }
+        case FinalizeInputOutcome_Tags.Finalized: {
+          c.writeI32(2);
+          return;
+        }
+        case FinalizeInputOutcome_Tags.MissingDescriptor: {
+          c.writeI32(3);
+          return;
+        }
+        case FinalizeInputOutcome_Tags.CouldNotSatisfy: {
+          c.writeI32(4);
+          const inner = value.inner;
+          FfiConverterString.writeIntoCursor(inner.message, c);
+          return;
+        }
+        default:
+          // Throwing from here means that FinalizeInputOutcome_Tags hasn't matched an ordinal.
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    allocationSize(value: TypeName): number {
+      switch (value.tag) {
+        case FinalizeInputOutcome_Tags.AlreadyFinalized: {
+          return 4;
+        }
+        case FinalizeInputOutcome_Tags.Finalized: {
+          return 4;
+        }
+        case FinalizeInputOutcome_Tags.MissingDescriptor: {
+          return 4;
+        }
+        case FinalizeInputOutcome_Tags.CouldNotSatisfy: {
+          const inner = value.inner;
+          let size = 4;
+          size += FfiConverterString.allocationSize(inner.message);
+          return size;
+        }
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type FinalizeInputResult = {
+  inputIndex: number;
+  outcome: FinalizeInputOutcome;
+};
+
+/**
+ * Generated factory for {@link FinalizeInputResult} record objects.
+ */
+export const FinalizeInputResult = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<FinalizeInputResult, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<FinalizeInputResult>,
+  });
+})();
+
+const FfiConverterTypeFinalizeInputResult = (() => {
+  type TypeName = FinalizeInputResult;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        inputIndex: FfiConverterUInt32.readFromCursor(c),
+        outcome: FfiConverterTypeFinalizeInputOutcome.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt32.writeIntoCursor(value.inputIndex, c);
+      FfiConverterTypeFinalizeInputOutcome.writeIntoCursor(value.outcome, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterUInt32.allocationSize(value.inputIndex) +
+        FfiConverterTypeFinalizeInputOutcome.allocationSize(value.outcome)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+/**
+ * Per-input result of a PSBT finalization attempt.
+ */
+export type FinalizePsbtOutcome = {
+  /**
+   * Whether every input is finalized after the call.
+   */
+  isFinalized: boolean;
+  /**
+   * One entry per PSBT input, ordered by input index.
+   */
+  inputs: Array<FinalizeInputResult>;
+};
+
+/**
+ * Generated factory for {@link FinalizePsbtOutcome} record objects.
+ */
+export const FinalizePsbtOutcome = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<FinalizePsbtOutcome, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<FinalizePsbtOutcome>,
+  });
+})();
+
+const FfiConverterTypeFinalizePsbtOutcome = (() => {
+  type TypeName = FinalizePsbtOutcome;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        isFinalized: FfiConverterBool.readFromCursor(c),
+        inputs: FfiConverterSequenceTypeFinalizeInputResult.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterBool.writeIntoCursor(value.isFinalized, c);
+      FfiConverterSequenceTypeFinalizeInputResult.writeIntoCursor(
+        value.inputs,
+        c
+      );
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterBool.allocationSize(value.isFinalized) +
+        FfiConverterSequenceTypeFinalizeInputResult.allocationSize(value.inputs)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+/**
+ * **Experimental.** Finalizes a PSBT returned by
+ * [`crate::Wallet::create_psbt`] / [`crate::Wallet::replace_by_fee`] using
+ * the spending plans computed while building it. Call after signing.
+ */
+export interface FinalizerLike {
+  /**
+   * Finalize every signed input. Inputs that are already final are left
+   * untouched; inputs without a plan (foreign inputs) are reported as
+   * `MissingDescriptor`.
+   */
+  finalize(psbt: PsbtLike): FinalizePsbtOutcome;
+}
+/**
+ * @deprecated Use `FinalizerLike` instead.
+ */
+export type FinalizerInterface = FinalizerLike;
+
+/**
+ * **Experimental.** Finalizes a PSBT returned by
+ * [`crate::Wallet::create_psbt`] / [`crate::Wallet::replace_by_fee`] using
+ * the spending plans computed while building it. Call after signing.
+ */
+export class Finalizer extends UniffiAbstractObject implements FinalizerLike {
+  readonly [uniffiTypeNameSymbol] = "Finalizer";
+  readonly [destructorGuardSymbol]: UniffiGcObject;
+  readonly [pointerLiteralSymbol]: UniffiHandle;
+  // No primary constructor declared for this class.
+  private constructor(pointer: UniffiHandle) {
+    super();
+    this[pointerLiteralSymbol] = pointer;
+    this[destructorGuardSymbol] =
+      uniffiTypeFinalizerObjectFactory.bless(pointer);
+  }
+
+  /**
+   * Finalize every signed input. Inputs that are already final are left
+   * untouched; inputs without a plan (foreign inputs) are reported as
+   * `MissingDescriptor`.
+   */
+  finalize(psbt: PsbtLike): FinalizePsbtOutcome {
+    const __rb: Uint8Array = uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_finalizer_finalize(
+          uniffiTypeFinalizerObjectFactory.clonePointer(this),
+          FfiConverterTypePsbt.lower(psbt, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterTypeFinalizePsbtOutcome.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  uniffiDestroy(): void {
+    const ptr = (this as any)[destructorGuardSymbol];
+    if (ptr !== undefined) {
+      const pointer = uniffiTypeFinalizerObjectFactory.pointer(this);
+      uniffiTypeFinalizerObjectFactory.freePointer(pointer);
+      uniffiTypeFinalizerObjectFactory.unbless(ptr);
+      delete (this as any)[destructorGuardSymbol];
+    }
+  }
+
+  static instanceOf(obj_: any): obj_ is Finalizer {
+    return uniffiTypeFinalizerObjectFactory.isConcreteType(obj_);
+  }
+}
+
+const uniffiTypeFinalizerObjectFactory: UniffiObjectFactory<FinalizerLike> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): FinalizerLike {
+        const instance = Object.create(Finalizer.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "Finalizer";
+        return instance;
+      },
+
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_finalizer_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      unbless(ptr_: UniffiGcObject) {
+        ptr_.markDestroyed();
+      },
+
+      pointer(obj_: FinalizerLike): UniffiHandle {
+        if ((obj_ as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj_ as any)[pointerLiteralSymbol];
+      },
+
+      clonePointer(obj_: FinalizerLike): UniffiHandle {
+        const pointer = this.pointer(obj_);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_finalizer(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_finalizer(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
+
+      isConcreteType(obj_: any): obj_ is FinalizerLike {
+        return (
+          obj_[destructorGuardSymbol] &&
+          obj_[uniffiTypeNameSymbol] === "Finalizer"
+        );
+      },
+    };
+  })();
+const FfiConverterTypeFinalizer = new FfiConverterObject(
+  uniffiTypeFinalizerObjectFactory
+);
+
+/**
+ * Result of [`crate::Wallet::create_psbt`] / [`crate::Wallet::replace_by_fee`].
+ */
+export type CreatePsbtResult = {
+  psbt: PsbtLike;
+  finalizer: FinalizerLike;
+};
+
+/**
+ * Generated factory for {@link CreatePsbtResult} record objects.
+ */
+export const CreatePsbtResult = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<CreatePsbtResult, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<CreatePsbtResult>,
+  });
+})();
+
+const FfiConverterTypeCreatePsbtResult = (() => {
+  type TypeName = CreatePsbtResult;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        psbt: FfiConverterTypePsbt.readFromCursor(c),
+        finalizer: FfiConverterTypeFinalizer.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterTypePsbt.writeIntoCursor(value.psbt, c);
+      FfiConverterTypeFinalizer.writeIntoCursor(value.finalizer, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterTypePsbt.allocationSize(value.psbt) +
+        FfiConverterTypeFinalizer.allocationSize(value.finalizer)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type DerivationInfo = {
+  keychain: KeychainKind;
+  index: number;
+};
+
+/**
+ * Generated factory for {@link DerivationInfo} record objects.
+ */
+export const DerivationInfo = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<DerivationInfo, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<DerivationInfo>,
+  });
+})();
+
+const FfiConverterTypeDerivationInfo = (() => {
+  type TypeName = DerivationInfo;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
+        index: FfiConverterUInt32.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
+      FfiConverterUInt32.writeIntoCursor(value.index, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
+        FfiConverterUInt32.allocationSize(value.index)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type KeychainInfo = {
+  keychain: KeychainKind;
+  descriptor: string;
+};
+
+/**
+ * Generated factory for {@link KeychainInfo} record objects.
+ */
+export const KeychainInfo = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<KeychainInfo, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<KeychainInfo>,
+  });
+})();
+
+const FfiConverterTypeKeychainInfo = (() => {
+  type TypeName = KeychainInfo;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
+        descriptor: FfiConverterString.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
+      FfiConverterString.writeIntoCursor(value.descriptor, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
+        FfiConverterString.allocationSize(value.descriptor)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type OutPoint = {
+  txid: string;
+  vout: number;
+};
+
+/**
+ * Generated factory for {@link OutPoint} record objects.
+ */
+export const OutPoint = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<OutPoint, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<OutPoint>,
+  });
+})();
+
+const FfiConverterTypeOutPoint = (() => {
+  type TypeName = OutPoint;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        txid: FfiConverterString.readFromCursor(c),
+        vout: FfiConverterUInt32.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterString.writeIntoCursor(value.txid, c);
+      FfiConverterUInt32.writeIntoCursor(value.vout, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterString.allocationSize(value.txid) +
+        FfiConverterUInt32.allocationSize(value.vout)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type LocalOutput = {
+  outpoint: OutPoint;
+  txout: TxOut;
+  keychain: KeychainKind;
+  isSpent: boolean;
+  derivationIndex: number;
+  confirmationBlockTime?: ConfirmationBlockTime;
+};
+
+/**
+ * Generated factory for {@link LocalOutput} record objects.
+ */
+export const LocalOutput = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<LocalOutput, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<LocalOutput>,
+  });
+})();
+
+const FfiConverterTypeLocalOutput = (() => {
+  type TypeName = LocalOutput;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        outpoint: FfiConverterTypeOutPoint.readFromCursor(c),
+        txout: FfiConverterTypeTxOut.readFromCursor(c),
+        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
+        isSpent: FfiConverterBool.readFromCursor(c),
+        derivationIndex: FfiConverterUInt32.readFromCursor(c),
+        confirmationBlockTime:
+          FfiConverterOptionalTypeConfirmationBlockTime.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterTypeOutPoint.writeIntoCursor(value.outpoint, c);
+      FfiConverterTypeTxOut.writeIntoCursor(value.txout, c);
+      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
+      FfiConverterBool.writeIntoCursor(value.isSpent, c);
+      FfiConverterUInt32.writeIntoCursor(value.derivationIndex, c);
+      FfiConverterOptionalTypeConfirmationBlockTime.writeIntoCursor(
+        value.confirmationBlockTime,
+        c
+      );
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterTypeOutPoint.allocationSize(value.outpoint) +
+        FfiConverterTypeTxOut.allocationSize(value.txout) +
+        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
+        FfiConverterBool.allocationSize(value.isSpent) +
+        FfiConverterUInt32.allocationSize(value.derivationIndex) +
+        FfiConverterOptionalTypeConfirmationBlockTime.allocationSize(
+          value.confirmationBlockTime
+        )
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type Recipient = {
+  address: string;
+  amountSats: bigint;
+};
+
+/**
+ * Generated factory for {@link Recipient} record objects.
+ */
+export const Recipient = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<Recipient, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<Recipient>,
+  });
+})();
+
+const FfiConverterTypeRecipient = (() => {
+  type TypeName = Recipient;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        address: FfiConverterString.readFromCursor(c),
+        amountSats: FfiConverterUInt64.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterString.writeIntoCursor(value.address, c);
+      FfiConverterUInt64.writeIntoCursor(value.amountSats, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterString.allocationSize(value.address) +
+        FfiConverterUInt64.allocationSize(value.amountSats)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type SentAndReceived = {
+  sent: bigint;
+  received: bigint;
+};
+
+/**
+ * Generated factory for {@link SentAndReceived} record objects.
+ */
+export const SentAndReceived = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<SentAndReceived, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<SentAndReceived>,
+  });
+})();
+
+const FfiConverterTypeSentAndReceived = (() => {
+  type TypeName = SentAndReceived;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        sent: FfiConverterUInt64.readFromCursor(c),
+        received: FfiConverterUInt64.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt64.writeIntoCursor(value.sent, c);
+      FfiConverterUInt64.writeIntoCursor(value.received, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterUInt64.allocationSize(value.sent) +
+        FfiConverterUInt64.allocationSize(value.received)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+/**
+ * Spending assets used to plan inputs: which keys will sign and which
+ * timelocks the spend may rely on. Selects the spending path for complex
+ * descriptors (the bdk-tx equivalent of a policy path).
+ */
+export type SpendAssets = {
+  /**
+   * Descriptor public keys that will sign, e.g. `[fingerprint/path]xpub…/0/*`
+   * or a hex public key. Empty means every key in the wallet's descriptors.
+   */
+  keys: Array<string>;
+  /**
+   * Absolute timelock (`after(n)`, consensus nLockTime) the spend may use.
+   */
+  after?: number;
+  /**
+   * Relative timelock (`older(n)`, consensus nSequence) the spend may use.
+   */
+  older?: number;
+};
+
+/**
+ * Generated factory for {@link SpendAssets} record objects.
+ */
+export const SpendAssets = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<SpendAssets, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<SpendAssets>,
+  });
+})();
+
+const FfiConverterTypeSpendAssets = (() => {
+  type TypeName = SpendAssets;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        keys: FfiConverterSequenceString.readFromCursor(c),
+        after: FfiConverterOptionalUInt32.readFromCursor(c),
+        older: FfiConverterOptionalUInt32.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterSequenceString.writeIntoCursor(value.keys, c);
+      FfiConverterOptionalUInt32.writeIntoCursor(value.after, c);
+      FfiConverterOptionalUInt32.writeIntoCursor(value.older, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterSequenceString.allocationSize(value.keys) +
+        FfiConverterOptionalUInt32.allocationSize(value.after) +
+        FfiConverterOptionalUInt32.allocationSize(value.older)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type TxInput = {
+  previousTxid: string;
+  previousVout: number;
+  sequence: number;
+  scriptSigHex: string;
+  witness: Array<string>;
+};
+
+/**
+ * Generated factory for {@link TxInput} record objects.
+ */
+export const TxInput = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<TxInput, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<TxInput>,
+  });
+})();
+
+const FfiConverterTypeTxInput = (() => {
+  type TypeName = TxInput;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        previousTxid: FfiConverterString.readFromCursor(c),
+        previousVout: FfiConverterUInt32.readFromCursor(c),
+        sequence: FfiConverterUInt32.readFromCursor(c),
+        scriptSigHex: FfiConverterString.readFromCursor(c),
+        witness: FfiConverterSequenceString.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterString.writeIntoCursor(value.previousTxid, c);
+      FfiConverterUInt32.writeIntoCursor(value.previousVout, c);
+      FfiConverterUInt32.writeIntoCursor(value.sequence, c);
+      FfiConverterString.writeIntoCursor(value.scriptSigHex, c);
+      FfiConverterSequenceString.writeIntoCursor(value.witness, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterString.allocationSize(value.previousTxid) +
+        FfiConverterUInt32.allocationSize(value.previousVout) +
+        FfiConverterUInt32.allocationSize(value.sequence) +
+        FfiConverterString.allocationSize(value.scriptSigHex) +
+        FfiConverterSequenceString.allocationSize(value.witness)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type TxOutput = {
+  value: bigint;
+  scriptPubkeyHex: string;
+  address?: string;
+};
+
+/**
+ * Generated factory for {@link TxOutput} record objects.
+ */
+export const TxOutput = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<TxOutput, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<TxOutput>,
+  });
+})();
+
+const FfiConverterTypeTxOutput = (() => {
+  type TypeName = TxOutput;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        value: FfiConverterUInt64.readFromCursor(c),
+        scriptPubkeyHex: FfiConverterString.readFromCursor(c),
+        address: FfiConverterOptionalString.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt64.writeIntoCursor(value.value, c);
+      FfiConverterString.writeIntoCursor(value.scriptPubkeyHex, c);
+      FfiConverterOptionalString.writeIntoCursor(value.address, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterUInt64.allocationSize(value.value) +
+        FfiConverterString.allocationSize(value.scriptPubkeyHex) +
+        FfiConverterOptionalString.allocationSize(value.address)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+export type TxDetails = {
+  txid: string;
+  sent: bigint;
+  received: bigint;
+  fee?: bigint;
+  feeRate?: number;
+  balanceDelta: bigint;
+  confirmationBlockTime?: ConfirmationBlockTime;
+  version: number;
+  locktime: number;
+  inputs: Array<TxInput>;
+  outputs: Array<TxOutput>;
+};
+
+/**
+ * Generated factory for {@link TxDetails} record objects.
+ */
+export const TxDetails = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<TxDetails, ReturnType<typeof defaults>>(defaults);
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<TxDetails>,
+  });
+})();
+
+const FfiConverterTypeTxDetails = (() => {
+  type TypeName = TxDetails;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        txid: FfiConverterString.readFromCursor(c),
+        sent: FfiConverterUInt64.readFromCursor(c),
+        received: FfiConverterUInt64.readFromCursor(c),
+        fee: FfiConverterOptionalUInt64.readFromCursor(c),
+        feeRate: FfiConverterOptionalFloat64.readFromCursor(c),
+        balanceDelta: FfiConverterInt64.readFromCursor(c),
+        confirmationBlockTime:
+          FfiConverterOptionalTypeConfirmationBlockTime.readFromCursor(c),
+        version: FfiConverterInt32.readFromCursor(c),
+        locktime: FfiConverterUInt32.readFromCursor(c),
+        inputs: FfiConverterSequenceTypeTxInput.readFromCursor(c),
+        outputs: FfiConverterSequenceTypeTxOutput.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterString.writeIntoCursor(value.txid, c);
+      FfiConverterUInt64.writeIntoCursor(value.sent, c);
+      FfiConverterUInt64.writeIntoCursor(value.received, c);
+      FfiConverterOptionalUInt64.writeIntoCursor(value.fee, c);
+      FfiConverterOptionalFloat64.writeIntoCursor(value.feeRate, c);
+      FfiConverterInt64.writeIntoCursor(value.balanceDelta, c);
+      FfiConverterOptionalTypeConfirmationBlockTime.writeIntoCursor(
+        value.confirmationBlockTime,
+        c
+      );
+      FfiConverterInt32.writeIntoCursor(value.version, c);
+      FfiConverterUInt32.writeIntoCursor(value.locktime, c);
+      FfiConverterSequenceTypeTxInput.writeIntoCursor(value.inputs, c);
+      FfiConverterSequenceTypeTxOutput.writeIntoCursor(value.outputs, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterString.allocationSize(value.txid) +
+        FfiConverterUInt64.allocationSize(value.sent) +
+        FfiConverterUInt64.allocationSize(value.received) +
+        FfiConverterOptionalUInt64.allocationSize(value.fee) +
+        FfiConverterOptionalFloat64.allocationSize(value.feeRate) +
+        FfiConverterInt64.allocationSize(value.balanceDelta) +
+        FfiConverterOptionalTypeConfirmationBlockTime.allocationSize(
+          value.confirmationBlockTime
+        ) +
+        FfiConverterInt32.allocationSize(value.version) +
+        FfiConverterUInt32.allocationSize(value.locktime) +
+        FfiConverterSequenceTypeTxInput.allocationSize(value.inputs) +
+        FfiConverterSequenceTypeTxOutput.allocationSize(value.outputs)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
 export enum ChangeSpendPolicy {
   ChangeAllowed,
   OnlyChange,
@@ -4234,6 +5151,7 @@ const FfiConverterTypeKyotoRecoveryStart = (() => {
 export enum KyotoScanType_Tags {
   Sync = "Sync",
   Recovery = "Recovery",
+  NewWallet = "NewWallet",
 }
 /**
  * How the Kyoto (BIP157/158) light client should scan filters on start-up.
@@ -4300,6 +5218,34 @@ export const KyotoScanType = (() => {
     }
   }
 
+  type NewWallet__interface = {
+    tag: KyotoScanType_Tags.NewWallet;
+  };
+  /**
+   * A brand-new wallet with no revealed scripts. Syncs block headers only
+   * (no filter downloads) from taproot activation on mainnet, or genesis on
+   * other networks. Later syncs on new blocks check filters as usual.
+   */
+  class NewWallet_ extends UniffiEnum implements NewWallet__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "KyotoScanType";
+    readonly tag = KyotoScanType_Tags.NewWallet;
+    constructor() {
+      super("KyotoScanType", "NewWallet");
+    }
+
+    static new(): NewWallet_ {
+      return new NewWallet_();
+    }
+
+    static instanceOf(obj: any): obj is NewWallet_ {
+      return obj.tag === KyotoScanType_Tags.NewWallet;
+    }
+  }
+
   function instanceOf(obj: any): obj is KyotoScanType {
     return obj[uniffiTypeNameSymbol] === "KyotoScanType";
   }
@@ -4308,13 +5254,14 @@ export const KyotoScanType = (() => {
     instanceOf,
     Sync: Sync_,
     Recovery: Recovery_,
+    NewWallet: NewWallet_,
   });
 })();
 /**
  * How the Kyoto (BIP157/158) light client should scan filters on start-up.
  */
 export type KyotoScanType = InstanceType<
-  (typeof KyotoScanType)["Sync" | "Recovery"]
+  (typeof KyotoScanType)["Sync" | "Recovery" | "NewWallet"]
 >;
 
 // FfiConverter for enum KyotoScanType
@@ -4330,6 +5277,8 @@ const FfiConverterTypeKyotoScanType = (() => {
             usedScriptIndex: FfiConverterUInt32.readFromCursor(c),
             start: FfiConverterTypeKyotoRecoveryStart.readFromCursor(c),
           });
+        case 3:
+          return new KyotoScanType.NewWallet();
         default:
           throw new UniffiInternalError.UnexpectedEnumCase();
       }
@@ -4345,6 +5294,10 @@ const FfiConverterTypeKyotoScanType = (() => {
           const inner = value.inner;
           FfiConverterUInt32.writeIntoCursor(inner.usedScriptIndex, c);
           FfiConverterTypeKyotoRecoveryStart.writeIntoCursor(inner.start, c);
+          return;
+        }
+        case KyotoScanType_Tags.NewWallet: {
+          c.writeI32(3);
           return;
         }
         default:
@@ -4365,6 +5318,9 @@ const FfiConverterTypeKyotoScanType = (() => {
             inner.start
           );
           return size;
+        }
+        case KyotoScanType_Tags.NewWallet: {
+          return 4;
         }
         default:
           throw new UniffiInternalError.UnexpectedEnumCase();
@@ -4485,6 +5441,186 @@ const FfiConverterTypeNetwork = (() => {
     }
     allocationSize(value: TypeName): number {
       return 4;
+    }
+  }
+  return new FFIConverter();
+})();
+
+// Enum: SelectionStrategy
+export enum SelectionStrategy_Tags {
+  SingleRandomDraw = "SingleRandomDraw",
+  LowestFee = "LowestFee",
+  All = "All",
+}
+/**
+ * Coin selection strategy for [`crate::PsbtParams`].
+ */
+export const SelectionStrategy = (() => {
+  type SingleRandomDraw__interface = {
+    tag: SelectionStrategy_Tags.SingleRandomDraw;
+  };
+  /**
+   * Single random draw (default).
+   */
+  class SingleRandomDraw_
+    extends UniffiEnum
+    implements SingleRandomDraw__interface
+  {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "SelectionStrategy";
+    readonly tag = SelectionStrategy_Tags.SingleRandomDraw;
+    constructor() {
+      super("SelectionStrategy", "SingleRandomDraw");
+    }
+
+    static new(): SingleRandomDraw_ {
+      return new SingleRandomDraw_();
+    }
+
+    static instanceOf(obj: any): obj is SingleRandomDraw_ {
+      return obj.tag === SelectionStrategy_Tags.SingleRandomDraw;
+    }
+  }
+
+  type LowestFee__interface = {
+    tag: SelectionStrategy_Tags.LowestFee;
+    inner: Readonly<{ longtermFeeRate: number; maxRounds: number }>;
+  };
+  /**
+   * Branch-and-bound variant that minimizes fees while allowing change.
+   */
+  class LowestFee_ extends UniffiEnum implements LowestFee__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "SelectionStrategy";
+    readonly tag = SelectionStrategy_Tags.LowestFee;
+    readonly inner: Readonly<{ longtermFeeRate: number; maxRounds: number }>;
+    constructor(inner: { longtermFeeRate: number; maxRounds: number }) {
+      super("SelectionStrategy", "LowestFee");
+
+      this.inner = Object.freeze(inner);
+    }
+    static new(inner: {
+      longtermFeeRate: number;
+      maxRounds: number;
+    }): LowestFee_ {
+      return new LowestFee_(inner);
+    }
+
+    static instanceOf(obj: any): obj is LowestFee_ {
+      return obj.tag === SelectionStrategy_Tags.LowestFee;
+    }
+  }
+
+  type All__interface = {
+    tag: SelectionStrategy_Tags.All;
+  };
+  /**
+   * Spend every eligible coin (drain). With no recipients, requires a
+   * change address to sweep to.
+   */
+  class All_ extends UniffiEnum implements All__interface {
+    /**
+     * @private
+     * This field is private and should not be used, use `tag` instead.
+     */
+    readonly [uniffiTypeNameSymbol] = "SelectionStrategy";
+    readonly tag = SelectionStrategy_Tags.All;
+    constructor() {
+      super("SelectionStrategy", "All");
+    }
+
+    static new(): All_ {
+      return new All_();
+    }
+
+    static instanceOf(obj: any): obj is All_ {
+      return obj.tag === SelectionStrategy_Tags.All;
+    }
+  }
+
+  function instanceOf(obj: any): obj is SelectionStrategy {
+    return obj[uniffiTypeNameSymbol] === "SelectionStrategy";
+  }
+
+  return Object.freeze({
+    instanceOf,
+    SingleRandomDraw: SingleRandomDraw_,
+    LowestFee: LowestFee_,
+    All: All_,
+  });
+})();
+/**
+ * Coin selection strategy for [`crate::PsbtParams`].
+ */
+export type SelectionStrategy = InstanceType<
+  (typeof SelectionStrategy)["SingleRandomDraw" | "LowestFee" | "All"]
+>;
+
+// FfiConverter for enum SelectionStrategy
+const FfiConverterTypeSelectionStrategy = (() => {
+  type TypeName = SelectionStrategy;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      switch (c.readI32()) {
+        case 1:
+          return new SelectionStrategy.SingleRandomDraw();
+        case 2:
+          return new SelectionStrategy.LowestFee({
+            longtermFeeRate: FfiConverterFloat64.readFromCursor(c),
+            maxRounds: FfiConverterUInt32.readFromCursor(c),
+          });
+        case 3:
+          return new SelectionStrategy.All();
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      switch (value.tag) {
+        case SelectionStrategy_Tags.SingleRandomDraw: {
+          c.writeI32(1);
+          return;
+        }
+        case SelectionStrategy_Tags.LowestFee: {
+          c.writeI32(2);
+          const inner = value.inner;
+          FfiConverterFloat64.writeIntoCursor(inner.longtermFeeRate, c);
+          FfiConverterUInt32.writeIntoCursor(inner.maxRounds, c);
+          return;
+        }
+        case SelectionStrategy_Tags.All: {
+          c.writeI32(3);
+          return;
+        }
+        default:
+          // Throwing from here means that SelectionStrategy_Tags hasn't matched an ordinal.
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
+    }
+    allocationSize(value: TypeName): number {
+      switch (value.tag) {
+        case SelectionStrategy_Tags.SingleRandomDraw: {
+          return 4;
+        }
+        case SelectionStrategy_Tags.LowestFee: {
+          const inner = value.inner;
+          let size = 4;
+          size += FfiConverterFloat64.allocationSize(inner.longtermFeeRate);
+          size += FfiConverterUInt32.allocationSize(inner.maxRounds);
+          return size;
+        }
+        case SelectionStrategy_Tags.All: {
+          return 4;
+        }
+        default:
+          throw new UniffiInternalError.UnexpectedEnumCase();
+      }
     }
   }
   return new FFIConverter();
@@ -5093,7 +6229,7 @@ export interface KyotoClientLike {
    * Stop the node and release peer connections. Idempotent-ish: returns an
    * error if the node has already stopped.
    */
-  shutdown(): /*throws*/ void;
+  shutdown() /*throws*/ : void;
 }
 /**
  * @deprecated Use `KyotoClientLike` instead.
@@ -5119,10 +6255,12 @@ export class KyotoClient
    * Build a light client for `wallet` and start its background node.
    *
    * - `scan_type`: [`KyotoScanType::Sync`] to continue from the wallet's
-   * checkpoint, or [`KyotoScanType::Recovery`] to rescan for restoration.
+   * checkpoint, [`KyotoScanType::NewWallet`] for a fresh wallet (headers
+   * only), or [`KyotoScanType::Recovery`] to rescan for restoration.
    * - `required_peers`: how many peers to maintain (clamped to >= 1).
    * - `peers`: optional explicit peer IPs; empty falls back to DNS discovery.
-   * - `data_dir`: writable directory for header/peer persistence.
+   * - `data_dir`: **deprecated and ignored**. Kyoto no longer persists
+   * headers/peers to disk; kept only for API compatibility.
    * - `handler`: receives info/warning events from the node.
    */
   constructor(
@@ -5844,262 +6982,685 @@ const FfiConverterTypeMnemonic = new FfiConverterObject(
   uniffiTypeMnemonicObjectFactory
 );
 
-export interface PsbtLike {
+/**
+ * **Experimental.** Parameters for [`crate::Wallet::create_psbt`] and
+ * [`crate::Wallet::replace_by_fee`], backed by bdk_wallet's unstable
+ * `bdk-tx` API. Unlike [`crate::TxBuilder`], spending paths are chosen with
+ * [`PsbtParams::add_assets`] and the result comes with a [`Finalizer`].
+ */
+export interface PsbtParamsLike {
   /**
-   * Extract the fully-signed transaction as raw hex.
+   * Add spending assets (signing keys and usable timelocks). Without
+   * assets every wallet key is assumed able to sign. If only timelocks are
+   * given, the wallet's keys are used. Only the last `after`/`older` set
+   * across calls is kept.
    */
-  extractTxHex(): /*throws*/ string;
+  addAssets(assets: SpendAssets) /*throws*/ : void;
   /**
-   * Total fee in satoshis. None if any input UTXO value is unknown.
+   * Add an OP_RETURN output carrying `data`.
    */
-  feeAmount(): bigint | undefined;
+  addData(data: ArrayBuffer): void;
+  addGlobalXpubs(): void;
+  addRecipient(address: string, amountSats: bigint): void;
+  addRecipients(recipients: Array<Recipient>): void;
+  addUnspendable(outpoint: OutPoint) /*throws*/ : void;
   /**
-   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+   * Must-spend a wallet UTXO. Ignored by `replace_by_fee`, which spends the
+   * inputs of the replaced transactions instead.
    */
-  feeRate(): number | undefined;
+  addUtxo(outpoint: OutPoint) /*throws*/ : void;
+  addUtxos(outpoints: Array<OutPoint>) /*throws*/ : void;
   /**
-   * Retrieve the UTXO for a given input index. Returns None if unavailable.
+   * Enable BIP-326 anti-fee-sniping using `tip_height` as the current height.
    */
-  getUtxoFor(inputIndex: bigint): TxOut | undefined;
+  antiFeeSnipingHeight(tipHeight: number) /*throws*/ : void;
   /**
-   * Serialize to a base64-encoded string.
+   * Treat these transactions as canonical (winning any conflicts) while
+   * building this PSBT.
    */
-  toBase64(): string;
+  assumeCanonical(txids: Array<string>) /*throws*/ : void;
   /**
-   * The unsigned txid.
+   * Send change to this address instead of the wallet's next unused change
+   * address. Required for a sweep (`SelectionStrategy::All` with no recipients).
    */
-  txid(): /*throws*/ string;
+  changeAddress(address: string): void;
+  /**
+   * Restrict coin selection by keychain (change vs. external outputs).
+   */
+  changePolicy(policy: ChangeSpendPolicy): void;
+  coinSelection(strategy: SelectionStrategy): void;
+  /**
+   * Exclude UTXOs with fewer than `min_confirms` confirmations from coin selection.
+   */
+  excludeBelowConfirmations(minConfirms: number): void;
+  /**
+   * Exclude unconfirmed UTXOs from coin selection.
+   */
+  excludeUnconfirmed(): void;
+  /**
+   * nSequence for wallet inputs with no override and no CSV requirement.
+   */
+  fallbackSequence(nsequence: number): void;
+  /**
+   * Target fee rate in sat/vB. Defaults to 1 sat/vB.
+   */
+  feeRate(satPerVbyte: number): void;
+  /**
+   * Minimum transaction nLockTime (consensus value: a height below
+   * 500,000,000, otherwise a UNIX timestamp). Raised by any `after()` the
+   * chosen spending path requires.
+   */
+  locktime(locktime: number): void;
+  /**
+   * Only spend the UTXOs added with `add_utxo(s)`.
+   */
+  manuallySelectedOnly(): void;
+  /**
+   * Height used to evaluate coinbase maturity during coin selection.
+   * Defaults to the wallet tip.
+   */
+  maturityHeight(height: number) /*throws*/ : void;
+  onlyWitnessUtxo(): void;
+  ordering(ordering: TxOrdering): void;
+  removeUtxo(outpoint: OutPoint) /*throws*/ : void;
+  /**
+   * nSequence for a UTXO added with `add_utxo(s)`. Takes precedence over
+   * `fallback_sequence`.
+   */
+  sequenceOverride(outpoint: OutPoint, nsequence: number) /*throws*/ : void;
+  /**
+   * Exclude UTXOs from coin selection.
+   */
+  unspendable(outpoints: Array<OutPoint>) /*throws*/ : void;
+  /**
+   * Transaction version. With version 3 (TRUC), coin selection only spends
+   * unconfirmed UTXOs from v3 parents, and vice versa (BIP-431 rule 2).
+   * Manually added UTXOs bypass this check.
+   */
+  version(version: number): void;
 }
 /**
- * @deprecated Use `PsbtLike` instead.
+ * @deprecated Use `PsbtParamsLike` instead.
  */
-export type PsbtInterface = PsbtLike;
+export type PsbtParamsInterface = PsbtParamsLike;
 
-export class Psbt extends UniffiAbstractObject implements PsbtLike {
-  readonly [uniffiTypeNameSymbol] = "Psbt";
+/**
+ * **Experimental.** Parameters for [`crate::Wallet::create_psbt`] and
+ * [`crate::Wallet::replace_by_fee`], backed by bdk_wallet's unstable
+ * `bdk-tx` API. Unlike [`crate::TxBuilder`], spending paths are chosen with
+ * [`PsbtParams::add_assets`] and the result comes with a [`Finalizer`].
+ */
+export class PsbtParams extends UniffiAbstractObject implements PsbtParamsLike {
+  readonly [uniffiTypeNameSymbol] = "PsbtParams";
   readonly [destructorGuardSymbol]: UniffiGcObject;
   readonly [pointerLiteralSymbol]: UniffiHandle;
-  /**
-   * Deserialize from a base64-encoded string.
-   */
-  constructor(psbtBase64: string) /*throws*/ {
+  constructor() {
     super();
-    const pointer = uniffiCaller.rustCallWithError(
-      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
-        FfiConverterTypeBdkError
-      ),
+    const pointer = uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_psbt_new(
-          FfiConverterString.lower(psbtBase64, nativeModule().rustbuffer_alloc),
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_psbtparams_new(
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
     this[pointerLiteralSymbol] = pointer;
-    this[destructorGuardSymbol] = uniffiTypePsbtObjectFactory.bless(pointer);
+    this[destructorGuardSymbol] =
+      uniffiTypePsbtParamsObjectFactory.bless(pointer);
   }
 
   /**
-   * Extract the fully-signed transaction as raw hex.
+   * Add spending assets (signing keys and usable timelocks). Without
+   * assets every wallet key is assumed able to sign. If only timelocks are
+   * given, the wallet's keys are used. Only the last `after`/`older` set
+   * across calls is kept.
    */
-  extractTxHex(): string /*throws*/ {
-    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+  addAssets(assets: SpendAssets): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
         FfiConverterTypeBdkError
       ),
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_extract_tx_hex(
-          uniffiTypePsbtObjectFactory.clonePointer(this),
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_assets(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeSpendAssets.lower(
+            assets,
+            nativeModule().rustbuffer_alloc
+          ),
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
-    try {
-      return FfiConverterString.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
   }
 
   /**
-   * Total fee in satoshis. None if any input UTXO value is unknown.
+   * Add an OP_RETURN output carrying `data`.
    */
-  feeAmount(): bigint | undefined {
-    const __rb: Uint8Array = uniffiCaller.rustCall(
+  addData(data: ArrayBuffer): void {
+    uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_amount(
-          uniffiTypePsbtObjectFactory.clonePointer(this),
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_data(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterArrayBuffer.lower(data, nativeModule().rustbuffer_alloc),
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
-    try {
-      return FfiConverterOptionalUInt64.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
   }
 
-  /**
-   * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
-   */
-  feeRate(): number | undefined {
-    const __rb: Uint8Array = uniffiCaller.rustCall(
+  addGlobalXpubs(): void {
+    uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_fee_rate(
-          uniffiTypePsbtObjectFactory.clonePointer(this),
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
-    try {
-      return FfiConverterOptionalFloat64.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
   }
 
-  /**
-   * Retrieve the UTXO for a given input index. Returns None if unavailable.
-   */
-  getUtxoFor(inputIndex: bigint): TxOut | undefined {
-    const __rb: Uint8Array = uniffiCaller.rustCall(
+  addRecipient(address: string, amountSats: bigint): void {
+    uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_get_utxo_for(
-          uniffiTypePsbtObjectFactory.clonePointer(this),
-          FfiConverterUInt64.lower(inputIndex, nativeModule().rustbuffer_alloc),
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipient(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterString.lower(address, nativeModule().rustbuffer_alloc),
+          FfiConverterUInt64.lower(amountSats, nativeModule().rustbuffer_alloc),
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
-    try {
-      return FfiConverterOptionalTypeTxOut.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
   }
 
-  /**
-   * Serialize to a base64-encoded string.
-   */
-  toBase64(): string {
-    const __rb: Uint8Array = uniffiCaller.rustCall(
+  addRecipients(recipients: Array<Recipient>): void {
+    uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_to_base64(
-          uniffiTypePsbtObjectFactory.clonePointer(this),
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipients(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterSequenceTypeRecipient.lower(
+            recipients,
+            nativeModule().rustbuffer_alloc
+          ),
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
-    try {
-      return FfiConverterString.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
   }
 
-  /**
-   * The unsigned txid.
-   */
-  txid(): string /*throws*/ {
-    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+  addUnspendable(outpoint: OutPoint): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
         FfiConverterTypeBdkError
       ),
       /*caller:*/ (callStatus) => {
-        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbt_txid(
-          uniffiTypePsbtObjectFactory.clonePointer(this),
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeOutPoint.lower(
+            outpoint,
+            nativeModule().rustbuffer_alloc
+          ),
           callStatus
         );
       },
       /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
     );
-    try {
-      return FfiConverterString.lift(__rb);
-    } finally {
-      nativeModule().rustbuffer_free(__rb);
-    }
+  }
+
+  /**
+   * Must-spend a wallet UTXO. Ignored by `replace_by_fee`, which spends the
+   * inputs of the replaced transactions instead.
+   */
+  addUtxo(outpoint: OutPoint): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxo(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeOutPoint.lower(
+            outpoint,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  addUtxos(outpoints: Array<OutPoint>): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxos(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterSequenceTypeOutPoint.lower(
+            outpoints,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Enable BIP-326 anti-fee-sniping using `tip_height` as the current height.
+   */
+  antiFeeSnipingHeight(tipHeight: number): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterUInt32.lower(tipHeight, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Treat these transactions as canonical (winning any conflicts) while
+   * building this PSBT.
+   */
+  assumeCanonical(txids: Array<string>): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterSequenceString.lower(
+            txids,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Send change to this address instead of the wallet's next unused change
+   * address. Required for a sweep (`SelectionStrategy::All` with no recipients).
+   */
+  changeAddress(address: string): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_address(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterString.lower(address, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Restrict coin selection by keychain (change vs. external outputs).
+   */
+  changePolicy(policy: ChangeSpendPolicy): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_policy(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeChangeSpendPolicy.lower(
+            policy,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  coinSelection(strategy: SelectionStrategy): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_coin_selection(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeSelectionStrategy.lower(
+            strategy,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Exclude UTXOs with fewer than `min_confirms` confirmations from coin selection.
+   */
+  excludeBelowConfirmations(minConfirms: number): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterUInt32.lower(
+            minConfirms,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Exclude unconfirmed UTXOs from coin selection.
+   */
+  excludeUnconfirmed(): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * nSequence for wallet inputs with no override and no CSV requirement.
+   */
+  fallbackSequence(nsequence: number): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterUInt32.lower(nsequence, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Target fee rate in sat/vB. Defaults to 1 sat/vB.
+   */
+  feeRate(satPerVbyte: number): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fee_rate(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterFloat64.lower(
+            satPerVbyte,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Minimum transaction nLockTime (consensus value: a height below
+   * 500,000,000, otherwise a UNIX timestamp). Raised by any `after()` the
+   * chosen spending path requires.
+   */
+  locktime(locktime: number): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_locktime(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterUInt32.lower(locktime, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Only spend the UTXOs added with `add_utxo(s)`.
+   */
+  manuallySelectedOnly(): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Height used to evaluate coinbase maturity during coin selection.
+   * Defaults to the wallet tip.
+   */
+  maturityHeight(height: number): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_maturity_height(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterUInt32.lower(height, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  onlyWitnessUtxo(): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  ordering(ordering: TxOrdering): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_ordering(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeTxOrdering.lower(
+            ordering,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  removeUtxo(outpoint: OutPoint): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeOutPoint.lower(
+            outpoint,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * nSequence for a UTXO added with `add_utxo(s)`. Takes precedence over
+   * `fallback_sequence`.
+   */
+  sequenceOverride(outpoint: OutPoint, nsequence: number): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_sequence_override(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterTypeOutPoint.lower(
+            outpoint,
+            nativeModule().rustbuffer_alloc
+          ),
+          FfiConverterUInt32.lower(nsequence, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Exclude UTXOs from coin selection.
+   */
+  unspendable(outpoints: Array<OutPoint>): void /*throws*/ {
+    uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_unspendable(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterSequenceTypeOutPoint.lower(
+            outpoints,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
+  /**
+   * Transaction version. With version 3 (TRUC), coin selection only spends
+   * unconfirmed UTXOs from v3 parents, and vice versa (BIP-431 rule 2).
+   * Manually added UTXOs bypass this check.
+   */
+  version(version: number): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_psbtparams_version(
+          uniffiTypePsbtParamsObjectFactory.clonePointer(this),
+          FfiConverterInt32.lower(version, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
   }
 
   uniffiDestroy(): void {
     const ptr = (this as any)[destructorGuardSymbol];
     if (ptr !== undefined) {
-      const pointer = uniffiTypePsbtObjectFactory.pointer(this);
-      uniffiTypePsbtObjectFactory.freePointer(pointer);
-      uniffiTypePsbtObjectFactory.unbless(ptr);
+      const pointer = uniffiTypePsbtParamsObjectFactory.pointer(this);
+      uniffiTypePsbtParamsObjectFactory.freePointer(pointer);
+      uniffiTypePsbtParamsObjectFactory.unbless(ptr);
       delete (this as any)[destructorGuardSymbol];
     }
   }
 
-  static instanceOf(obj_: any): obj_ is Psbt {
-    return uniffiTypePsbtObjectFactory.isConcreteType(obj_);
+  static instanceOf(obj_: any): obj_ is PsbtParams {
+    return uniffiTypePsbtParamsObjectFactory.isConcreteType(obj_);
   }
 }
 
-const uniffiTypePsbtObjectFactory: UniffiObjectFactory<PsbtLike> = (() => {
-  return {
-    create(pointer: UniffiHandle): PsbtLike {
-      const instance = Object.create(Psbt.prototype);
-      instance[pointerLiteralSymbol] = pointer;
-      instance[destructorGuardSymbol] = this.bless(pointer);
-      instance[uniffiTypeNameSymbol] = "Psbt";
-      return instance;
-    },
+const uniffiTypePsbtParamsObjectFactory: UniffiObjectFactory<PsbtParamsLike> =
+  (() => {
+    return {
+      create(pointer: UniffiHandle): PsbtParamsLike {
+        const instance = Object.create(PsbtParams.prototype);
+        instance[pointerLiteralSymbol] = pointer;
+        instance[destructorGuardSymbol] = this.bless(pointer);
+        instance[uniffiTypeNameSymbol] = "PsbtParams";
+        return instance;
+      },
 
-    bless(p: UniffiHandle): UniffiGcObject {
-      return uniffiCaller.rustCall(
-        /*caller:*/ (status) =>
-          nativeModule().ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(
-            p,
-            status
-          ),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
+      bless(p: UniffiHandle): UniffiGcObject {
+        return uniffiCaller.rustCall(
+          /*caller:*/ (status) =>
+            nativeModule().ubrn_uniffi_internal_fn_method_psbtparams_ffi__bless_pointer(
+              p,
+              status
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
 
-    unbless(ptr_: UniffiGcObject) {
-      ptr_.markDestroyed();
-    },
+      unbless(ptr_: UniffiGcObject) {
+        ptr_.markDestroyed();
+      },
 
-    pointer(obj_: PsbtLike): UniffiHandle {
-      if ((obj_ as any)[destructorGuardSymbol] === undefined) {
-        throw new UniffiInternalError.UnexpectedNullPointer();
-      }
-      return (obj_ as any)[pointerLiteralSymbol];
-    },
+      pointer(obj_: PsbtParamsLike): UniffiHandle {
+        if ((obj_ as any)[destructorGuardSymbol] === undefined) {
+          throw new UniffiInternalError.UnexpectedNullPointer();
+        }
+        return (obj_ as any)[pointerLiteralSymbol];
+      },
 
-    clonePointer(obj_: PsbtLike): UniffiHandle {
-      const pointer = this.pointer(obj_);
-      return uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) =>
-          nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_psbt(pointer, callStatus),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
+      clonePointer(obj_: PsbtParamsLike): UniffiHandle {
+        const pointer = this.pointer(obj_);
+        return uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_clone_psbtparams(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
 
-    freePointer(pointer: UniffiHandle): void {
-      uniffiCaller.rustCall(
-        /*caller:*/ (callStatus) =>
-          nativeModule().ubrn_uniffi_bdk_ffi_fn_free_psbt(pointer, callStatus),
-        /*liftString:*/ FfiConverterString.lift
-      );
-    },
+      freePointer(pointer: UniffiHandle): void {
+        uniffiCaller.rustCall(
+          /*caller:*/ (callStatus) =>
+            nativeModule().ubrn_uniffi_bdk_ffi_fn_free_psbtparams(
+              pointer,
+              callStatus
+            ),
+          /*liftString:*/ FfiConverterString.lift
+        );
+      },
 
-    isConcreteType(obj_: any): obj_ is PsbtLike {
-      return (
-        obj_[destructorGuardSymbol] && obj_[uniffiTypeNameSymbol] === "Psbt"
-      );
-    },
-  };
-})();
-const FfiConverterTypePsbt = new FfiConverterObject(
-  uniffiTypePsbtObjectFactory
+      isConcreteType(obj_: any): obj_ is PsbtParamsLike {
+        return (
+          obj_[destructorGuardSymbol] &&
+          obj_[uniffiTypeNameSymbol] === "PsbtParams"
+        );
+      },
+    };
+  })();
+const FfiConverterTypePsbtParams = new FfiConverterObject(
+  uniffiTypePsbtParamsObjectFactory
 );
 
 /**
@@ -6117,7 +7678,7 @@ export interface RpcClientLike {
    * The node's current chain-tip height. Blocks the calling thread on a
    * single RPC round-trip (fast against a local node).
    */
-  getBlockHeight(): /*throws*/ number;
+  getBlockHeight() /*throws*/ : number;
 }
 /**
  * @deprecated Use `RpcClientLike` instead.
@@ -6697,105 +8258,156 @@ export interface WalletLike {
     client: ElectrumClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
+  ) /*throws*/ : Promise<string>;
   broadcastWithEsplora(
     client: EsploraClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
+  ) /*throws*/ : Promise<string>;
   broadcastWithKyoto(
     client: KyotoClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
+  ) /*throws*/ : Promise<string>;
   broadcastWithRpc(
     client: RpcClientLike,
     psbt: PsbtLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
-  buildFeeBump(txid: string, newFeeRate: number): /*throws*/ PsbtLike;
-  calculateFee(txHex: string): /*throws*/ bigint;
-  calculateFeeRate(txHex: string): /*throws*/ number;
+  ) /*throws*/ : Promise<string>;
+  buildFeeBump(txid: string, newFeeRate: number) /*throws*/ : PsbtLike;
+  calculateFee(txHex: string) /*throws*/ : bigint;
+  calculateFeeRate(txHex: string) /*throws*/ : number;
   checkpoints(): Array<BlockId>;
+  /**
+   * **Experimental.** Create a PSBT with bdk_wallet's unstable bdk-tx API.
+   * Sign the PSBT, then finalize it with the returned `finalizer`.
+   * Persists the wallet afterwards (a change address may be revealed).
+   */
+  createPsbt(
+    params: PsbtParamsLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<CreatePsbtResult>;
   derivationIndex(keychain: KeychainKind): number | undefined;
-  derivationOfSpk(scriptHex: string): /*throws*/ DerivationInfo | undefined;
-  descriptorChecksum(keychain: KeychainKind): /*throws*/ string;
+  derivationOfSpk(scriptHex: string) /*throws*/ : DerivationInfo | undefined;
+  descriptorChecksum(keychain: KeychainKind) /*throws*/ : string;
   drain(
     address: string,
     feeRate: number,
     client: EsploraClientLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
+  ) /*throws*/ : Promise<string>;
   drainWithElectrum(
     address: string,
     feeRate: number,
     client: ElectrumClientLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
-  finalizePsbt(psbt: PsbtLike): /*throws*/ boolean;
+  ) /*throws*/ : Promise<string>;
+  finalizePsbt(psbt: PsbtLike) /*throws*/ : boolean;
   fullScanWithElectrum(
     client: ElectrumClientLike,
     stopGap: bigint,
     inspector: FullScanProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<void>;
+  ) /*throws*/ : Promise<void>;
   fullScanWithEsplora(
     client: EsploraClientLike,
     stopGap: bigint,
     inspector: FullScanProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<void>;
-  getBalance(): /*throws*/ Balance;
-  getTx(txid: string): /*throws*/ string | undefined;
-  getUtxo(outpoint: OutPoint): /*throws*/ LocalOutput | undefined;
+  ) /*throws*/ : Promise<void>;
+  getBalance() /*throws*/ : Balance;
+  getTx(txid: string) /*throws*/ : string | undefined;
+  getUtxo(outpoint: OutPoint) /*throws*/ : LocalOutput | undefined;
   insertTxout(outpoint: OutPoint, txout: TxOut): void;
-  isMine(scriptHex: string): /*throws*/ boolean;
+  isMine(scriptHex: string) /*throws*/ : boolean;
   keychains(): Array<KeychainInfo>;
   latestCheckpoint(): BlockId | undefined;
-  listOutput(): /*throws*/ Array<LocalOutput>;
-  listUnspent(): /*throws*/ Array<LocalOutput>;
-  listUnusedAddresses(keychain: KeychainKind): /*throws*/ Array<AddressInfo>;
+  listOutput() /*throws*/ : Array<LocalOutput>;
+  listUnspent() /*throws*/ : Array<LocalOutput>;
+  listUnusedAddresses(keychain: KeychainKind) /*throws*/ : Array<AddressInfo>;
   markUsed(keychain: KeychainKind, index: number): boolean;
   network(): Network;
   nextDerivationIndex(keychain: KeychainKind): number;
-  nextUnusedAddress(keychain: KeychainKind): /*throws*/ AddressInfo;
-  peekAddress(keychain: KeychainKind, index: number): /*throws*/ AddressInfo;
-  persist(): /*throws*/ boolean;
-  policies(keychain: KeychainKind): /*throws*/ string | undefined;
-  publicDescriptor(keychain: KeychainKind): /*throws*/ string;
+  nextUnusedAddress(keychain: KeychainKind) /*throws*/ : AddressInfo;
+  peekAddress(keychain: KeychainKind, index: number) /*throws*/ : AddressInfo;
+  persist() /*throws*/ : boolean;
+  policies(keychain: KeychainKind) /*throws*/ : string | undefined;
+  /**
+   * Timelock requirements of a spending path, for `TxBuilder.set_condition`.
+   * `path_map_json` maps policy item ids to the chosen child indexes, e.g.
+   * `{"abcd1234": [1]}`. Returns an empty condition for descriptors without
+   * a policy.
+   */
+  policyCondition(
+    pathMapJson: string,
+    keychain: KeychainKind
+  ) /*throws*/ : Condition;
+  publicDescriptor(keychain: KeychainKind) /*throws*/ : string;
+  /**
+   * **Experimental.** Replace one or more unconfirmed wallet transactions
+   * (RBF) with bdk_wallet's unstable bdk-tx API. The replacement spends the
+   * inputs of the originals, so `PsbtParams.add_utxo(s)` is ignored; add
+   * recipients again (they are not copied from the originals).
+   * Persists the wallet afterwards.
+   */
+  replaceByFee(
+    params: PsbtParamsLike,
+    txids: Array<string>,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<CreatePsbtResult>;
   revealAddressesTo(
     keychain: KeychainKind,
     index: number
-  ): /*throws*/ Array<AddressInfo>;
-  revealNextAddress(keychain: KeychainKind): /*throws*/ AddressInfo;
+  ) /*throws*/ : Array<AddressInfo>;
+  revealNextAddress(keychain: KeychainKind) /*throws*/ : AddressInfo;
   send(
     address: string,
     amountSats: bigint,
     feeRate: number,
     client: EsploraClientLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
+  ) /*throws*/ : Promise<string>;
   sendWithElectrum(
     address: string,
     amountSats: bigint,
     feeRate: number,
     client: ElectrumClientLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<string>;
-  sentAndReceived(txHex: string): /*throws*/ SentAndReceived;
-  sign(psbt: PsbtLike): /*throws*/ boolean;
+  ) /*throws*/ : Promise<string>;
+  sentAndReceived(txHex: string) /*throws*/ : SentAndReceived;
+  sign(psbt: PsbtLike) /*throws*/ : boolean;
+  /**
+   * Sign with private keys from the given descriptors instead of keys held
+   * by the wallet (the non-deprecated signing path in bdk_wallet 3.2).
+   * Pass the wallet's private descriptor(s), or any descriptor containing
+   * keys that should sign. Multipath (`<0;1>`) private descriptors are not
+   * supported by miniscript; pass one descriptor per path instead.
+   * Returns whether the PSBT was finalized.
+   */
+  signWithDescriptors(
+    psbt: PsbtLike,
+    descriptors: Array<string>
+  ) /*throws*/ : boolean;
+  /**
+   * Spending policy of the keychain's descriptor as JSON (`null` for a
+   * plain single-key descriptor). Use the policy item `id`s to build a
+   * path map for `policy_condition`. Ids may differ from the deprecated
+   * `policies()` output when the wallet holds private keys, so don't mix
+   * them with `TxBuilder.policy_path`.
+   */
+  spendingPolicy(keychain: KeychainKind) /*throws*/ : string | undefined;
   syncWithElectrum(
     client: ElectrumClientLike,
     stopGap: bigint,
     inspector: SyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<void>;
+  ) /*throws*/ : Promise<void>;
   syncWithEsplora(
     client: EsploraClientLike,
     stopGap: bigint,
     inspector: SyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<void>;
+  ) /*throws*/ : Promise<void>;
   /**
    * Drive a single sync against the Kyoto light client. Awaits until the node
    * reports it has caught up to the chain tip, applies the resulting update,
@@ -6805,7 +8417,7 @@ export interface WalletLike {
   syncWithKyoto(
     client: KyotoClientLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<void>;
+  ) /*throws*/ : Promise<void>;
   /**
    * Sync by downloading full blocks from a Bitcoin Core node.
    *
@@ -6828,9 +8440,14 @@ export interface WalletLike {
     fetchMempool: boolean,
     inspector: RpcSyncProgressInspector | undefined,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<void>;
-  transactions(): /*throws*/ Array<TxDetails>;
-  txDetails(txid: string): /*throws*/ TxDetails | undefined;
+  ) /*throws*/ : Promise<void>;
+  transactions() /*throws*/ : Array<TxDetails>;
+  /**
+   * Finalize the PSBT and report the outcome of every input (finalized,
+   * already final, foreign input, or unsatisfied with the reason).
+   */
+  tryFinalizePsbt(psbt: PsbtLike) /*throws*/ : FinalizePsbtOutcome;
+  txDetails(txid: string) /*throws*/ : TxDetails | undefined;
   unmarkUsed(keychain: KeychainKind, index: number): boolean;
 }
 /**
@@ -7202,6 +8819,65 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
       return FfiConverterSequenceTypeBlockId.lift(__rb);
     } finally {
       nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * **Experimental.** Create a PSBT with bdk_wallet's unstable bdk-tx API.
+   * Sign the PSBT, then finalize it with the returned `finalizer`.
+   * Persists the wallet afterwards (a change address may be revealed).
+   */
+  async createPsbt(
+    params: PsbtParamsLike,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<CreatePsbtResult> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_create_psbt(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypePsbtParams.lower(
+              params,
+              nativeModule().rustbuffer_alloc
+            )
+          );
+        },
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        // Async returns always go through the JS-side converter: the
+        // FFI symbol returns the future handle (u64), and the user-level
+        // RustBuffer comes back via the shared `rust_future_complete_*`
+        // export. The bytes the runtime hands back must be deserialized
+        // here using the per-callable return-type converter.
+        // Borrowed view over foreign memory: the call site owns the free,
+        // as on the sync paths. Unconditional — a no-op where buffers are
+        // already JS-owned.
+        /*liftFunc:*/ (__rb) => {
+          try {
+            return FfiConverterTypeCreatePsbtResult.lift(__rb);
+          } finally {
+            nativeModule().rustbuffer_free(__rb);
+          }
+        },
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
     }
   }
 
@@ -7838,6 +9514,43 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
+  /**
+   * Timelock requirements of a spending path, for `TxBuilder.set_condition`.
+   * `path_map_json` maps policy item ids to the chosen child indexes, e.g.
+   * `{"abcd1234": [1]}`. Returns an empty condition for descriptors without
+   * a policy.
+   */
+  policyCondition(
+    pathMapJson: string,
+    keychain: KeychainKind
+  ): Condition /*throws*/ {
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_policy_condition(
+          uniffiTypeWalletObjectFactory.clonePointer(this),
+          FfiConverterString.lower(
+            pathMapJson,
+            nativeModule().rustbuffer_alloc
+          ),
+          FfiConverterTypeKeychainKind.lower(
+            keychain,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterTypeCondition.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
   publicDescriptor(keychain: KeychainKind): string /*throws*/ {
     const __rb: Uint8Array = uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -7859,6 +9572,72 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
       return FfiConverterString.lift(__rb);
     } finally {
       nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * **Experimental.** Replace one or more unconfirmed wallet transactions
+   * (RBF) with bdk_wallet's unstable bdk-tx API. The replacement spends the
+   * inputs of the originals, so `PsbtParams.add_utxo(s)` is ignored; add
+   * recipients again (they are not copied from the originals).
+   * Persists the wallet afterwards.
+   */
+  async replaceByFee(
+    params: PsbtParamsLike,
+    txids: Array<string>,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<CreatePsbtResult> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_replace_by_fee(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypePsbtParams.lower(
+              params,
+              nativeModule().rustbuffer_alloc
+            ),
+            FfiConverterSequenceString.lower(
+              txids,
+              nativeModule().rustbuffer_alloc
+            )
+          );
+        },
+        /*pollFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_poll_rust_buffer,
+        /*cancelFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_cancel_rust_buffer,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_rust_buffer,
+        /*freeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_free_rust_buffer,
+        // Async returns always go through the JS-side converter: the
+        // FFI symbol returns the future handle (u64), and the user-level
+        // RustBuffer comes back via the shared `rust_future_complete_*`
+        // export. The bytes the runtime hands back must be deserialized
+        // here using the per-callable return-type converter.
+        // Borrowed view over foreign memory: the call site owns the free,
+        // as on the sync paths. Unconditional — a no-op where buffers are
+        // already JS-owned.
+        /*liftFunc:*/ (__rb) => {
+          try {
+            return FfiConverterTypeCreatePsbtResult.lift(__rb);
+          } finally {
+            nativeModule().rustbuffer_free(__rb);
+          }
+        },
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
     }
   }
 
@@ -8077,6 +9856,70 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
         /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
       )
     );
+  }
+
+  /**
+   * Sign with private keys from the given descriptors instead of keys held
+   * by the wallet (the non-deprecated signing path in bdk_wallet 3.2).
+   * Pass the wallet's private descriptor(s), or any descriptor containing
+   * keys that should sign. Multipath (`<0;1>`) private descriptors are not
+   * supported by miniscript; pass one descriptor per path instead.
+   * Returns whether the PSBT was finalized.
+   */
+  signWithDescriptors(
+    psbt: PsbtLike,
+    descriptors: Array<string>
+  ): boolean /*throws*/ {
+    return FfiConverterBool.lift(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
+        /*caller:*/ (callStatus) => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypePsbt.lower(psbt, nativeModule().rustbuffer_alloc),
+            FfiConverterSequenceString.lower(
+              descriptors,
+              nativeModule().rustbuffer_alloc
+            ),
+            callStatus
+          );
+        },
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+      )
+    );
+  }
+
+  /**
+   * Spending policy of the keychain's descriptor as JSON (`null` for a
+   * plain single-key descriptor). Use the policy item `id`s to build a
+   * path map for `policy_condition`. Ids may differ from the deprecated
+   * `policies()` output when the wallet holds private keys, so don't mix
+   * them with `TxBuilder.policy_path`.
+   */
+  spendingPolicy(keychain: KeychainKind): string | undefined /*throws*/ {
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_spending_policy(
+          uniffiTypeWalletObjectFactory.clonePointer(this),
+          FfiConverterTypeKeychainKind.lower(
+            keychain,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterOptionalString.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
   }
 
   async syncWithElectrum(
@@ -8298,6 +10141,31 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
+  /**
+   * Finalize the PSBT and report the outcome of every input (finalized,
+   * already final, foreign input, or unsatisfied with the reason).
+   */
+  tryFinalizePsbt(psbt: PsbtLike): FinalizePsbtOutcome /*throws*/ {
+    const __rb: Uint8Array = uniffiCaller.rustCallWithError(
+      /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+        FfiConverterTypeBdkError
+      ),
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt(
+          uniffiTypeWalletObjectFactory.clonePointer(this),
+          FfiConverterTypePsbt.lower(psbt, nativeModule().rustbuffer_alloc),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterTypeFinalizePsbtOutcome.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
   txDetails(txid: string): TxDetails | undefined /*throws*/ {
     const __rb: Uint8Array = uniffiCaller.rustCallWithError(
       /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
@@ -8424,13 +10292,13 @@ export interface TxBuilderLike {
   addGlobalXpubs(): void;
   addRecipient(address: string, amountSats: bigint): void;
   addUnspendable(outpoint: OutPoint): void;
-  addUtxo(outpoint: OutPoint): /*throws*/ void;
-  addUtxos(outpoints: Array<OutPoint>): /*throws*/ void;
+  addUtxo(outpoint: OutPoint) /*throws*/ : void;
+  addUtxos(outpoints: Array<OutPoint>) /*throws*/ : void;
   allowDust(allow: boolean): void;
   changePolicy(policy: ChangeSpendPolicy): void;
   currentHeight(height: number): void;
   doNotSpendChange(): void;
-  drainTo(address: string): /*throws*/ void;
+  drainTo(address: string) /*throws*/ : void;
   drainWallet(): void;
   enableRbf(): void;
   enableRbfWithSequence(nsequence: number): void;
@@ -8445,13 +10313,19 @@ export interface TxBuilderLike {
   finish(
     wallet: WalletLike,
     asyncOpts_?: { signal: AbortSignal }
-  ): /*throws*/ Promise<PsbtLike>;
+  ) /*throws*/ : Promise<PsbtLike>;
   manuallySelectedOnly(): void;
   nlocktime(lockHeight: number): void;
   onlySpendChange(): void;
   onlyWitnessUtxo(): void;
   ordering(ordering: TxOrdering): void;
   policyPath(pathMapJson: string, keychain: KeychainKind): void;
+  /**
+   * Apply the timelocks of a spending path (nLockTime / nSequence) without a
+   * policy path. Get one from `Wallet::policy_condition`, or build it
+   * directly. Takes precedence over `policy_path` when both are set.
+   */
+  setCondition(condition: Condition): void;
   setExactSequence(nsequence: number): void;
   setRecipients(recipients: Array<Recipient>): void;
   sighash(sighashType: number): void;
@@ -8870,6 +10744,27 @@ export class TxBuilder extends UniffiAbstractObject implements TxBuilderLike {
     );
   }
 
+  /**
+   * Apply the timelocks of a spending path (nLockTime / nSequence) without a
+   * policy path. Get one from `Wallet::policy_condition`, or build it
+   * directly. Takes precedence over `policy_path` when both are set.
+   */
+  setCondition(condition: Condition): void {
+    uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        nativeModule().ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_condition(
+          uniffiTypeTxBuilderObjectFactory.clonePointer(this),
+          FfiConverterTypeCondition.lower(
+            condition,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+  }
+
   setExactSequence(nsequence: number): void {
     uniffiCaller.rustCall(
       /*caller:*/ (callStatus) => {
@@ -9027,10 +10922,8 @@ const FfiConverterTypeTxBuilder = new FfiConverterObject(
   uniffiTypeTxBuilderObjectFactory
 );
 
-// FfiConverter for ConfirmationBlockTime | undefined
-const FfiConverterOptionalTypeConfirmationBlockTime = new FfiConverterOptional(
-  FfiConverterTypeConfirmationBlockTime
-);
+// FfiConverter for number | undefined
+const FfiConverterOptionalUInt32 = new FfiConverterOptional(FfiConverterUInt32);
 
 // FfiConverter for bigint | undefined
 const FfiConverterOptionalUInt64 = new FfiConverterOptional(FfiConverterUInt64);
@@ -9038,6 +10931,21 @@ const FfiConverterOptionalUInt64 = new FfiConverterOptional(FfiConverterUInt64);
 // FfiConverter for number | undefined
 const FfiConverterOptionalFloat64 = new FfiConverterOptional(
   FfiConverterFloat64
+);
+
+// FfiConverter for TxOut | undefined
+const FfiConverterOptionalTypeTxOut = new FfiConverterOptional(
+  FfiConverterTypeTxOut
+);
+
+// FfiConverter for Array<FinalizeInputResult>
+const FfiConverterSequenceTypeFinalizeInputResult = new FfiConverterArray(
+  FfiConverterTypeFinalizeInputResult
+);
+
+// FfiConverter for ConfirmationBlockTime | undefined
+const FfiConverterOptionalTypeConfirmationBlockTime = new FfiConverterOptional(
+  FfiConverterTypeConfirmationBlockTime
 );
 
 // FfiConverter for Array<string>
@@ -9056,9 +10964,9 @@ const FfiConverterSequenceTypeTxOutput = new FfiConverterArray(
   FfiConverterTypeTxOutput
 );
 
-// FfiConverter for TxOut | undefined
-const FfiConverterOptionalTypeTxOut = new FfiConverterOptional(
-  FfiConverterTypeTxOut
+// FfiConverter for Array<Recipient>
+const FfiConverterSequenceTypeRecipient = new FfiConverterArray(
+  FfiConverterTypeRecipient
 );
 
 // FfiConverter for Array<OutPoint>
@@ -9070,9 +10978,6 @@ const FfiConverterSequenceTypeOutPoint = new FfiConverterArray(
 const FfiConverterSequenceTypeBlockId = new FfiConverterArray(
   FfiConverterTypeBlockId
 );
-
-// FfiConverter for number | undefined
-const FfiConverterOptionalUInt32 = new FfiConverterOptional(FfiConverterUInt32);
 
 // FfiConverter for DerivationInfo | undefined
 const FfiConverterOptionalTypeDerivationInfo = new FfiConverterOptional(
@@ -9125,11 +11030,6 @@ const FfiConverterSequenceTypeTxDetails = new FfiConverterArray(
 // FfiConverter for TxDetails | undefined
 const FfiConverterOptionalTypeTxDetails = new FfiConverterOptional(
   FfiConverterTypeTxDetails
-);
-
-// FfiConverter for Array<Recipient>
-const FfiConverterSequenceTypeRecipient = new FfiConverterArray(
-  FfiConverterTypeRecipient
 );
 
 /**
@@ -9225,6 +11125,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_merge_conditions() !==
+    62470
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_func_merge_conditions"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor() !==
     36838
   ) {
@@ -9262,6 +11170,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_finalizer_finalize() !==
+    29350
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_finalizer_finalize"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect() !==
     49334
   ) {
@@ -9271,7 +11187,7 @@ function uniffiEnsureInitialized() {
   }
   if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new() !==
-    35516
+    29312
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_kyotoclient_new"
@@ -9440,6 +11356,222 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_psbt_txid"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_psbtparams_new() !==
+    27385
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_psbtparams_new"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_assets() !==
+    15815
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_assets"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_data() !==
+    45097
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_data"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs() !==
+    54830
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient() !==
+    31446
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients() !==
+    52282
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable() !==
+    12895
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo() !==
+    27838
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos() !==
+    24203
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height() !==
+    52855
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical() !==
+    57013
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_address() !==
+    15677
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_change_address"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_policy() !==
+    25247
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_change_policy"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection() !==
+    7165
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations() !==
+    6790
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed() !==
+    6614
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence() !==
+    29952
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate() !==
+    8503
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_locktime() !==
+    16256
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_locktime"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only() !==
+    23045
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height() !==
+    11898
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo() !==
+    43778
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_ordering() !==
+    51369
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_ordering"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo() !==
+    55652
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override() !==
+    58857
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_unspendable() !==
+    53893
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_unspendable"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_version() !==
+    31431
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_psbtparams_version"
     );
   }
   if (
@@ -9683,6 +11815,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_condition() !==
+    60786
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_txbuilder_set_condition"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence() !==
     41481
   ) {
@@ -9800,6 +11940,14 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_checkpoints"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_create_psbt() !==
+    2361
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_create_psbt"
     );
   }
   if (
@@ -10001,11 +12149,27 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_policy_condition() !==
+    32516
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_policy_condition"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor() !==
     57701
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_public_descriptor"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee() !==
+    58249
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee"
     );
   }
   if (
@@ -10055,6 +12219,22 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors() !==
+    34121
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_spending_policy() !==
+    55920
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_spending_policy"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum() !==
     47051
   ) {
@@ -10095,6 +12275,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt() !==
+    39879
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details() !==
     39307
   ) {
@@ -10125,11 +12313,17 @@ export default Object.freeze({
     FfiConverterTypeBdkError,
     FfiConverterTypeBlockId,
     FfiConverterTypeChangeSpendPolicy,
+    FfiConverterTypeCondition,
     FfiConverterTypeConfirmationBlockTime,
+    FfiConverterTypeCreatePsbtResult,
     FfiConverterTypeDerivationInfo,
     FfiConverterTypeDescriptorTemplate,
     FfiConverterTypeElectrumClient,
     FfiConverterTypeEsploraClient,
+    FfiConverterTypeFinalizeInputOutcome,
+    FfiConverterTypeFinalizeInputResult,
+    FfiConverterTypeFinalizePsbtOutcome,
+    FfiConverterTypeFinalizer,
     FfiConverterTypeFullScanProgressInspector,
     FfiConverterTypeKeychainInfo,
     FfiConverterTypeKeychainKind,
@@ -10143,11 +12337,14 @@ export default Object.freeze({
     FfiConverterTypeNetwork,
     FfiConverterTypeOutPoint,
     FfiConverterTypePsbt,
+    FfiConverterTypePsbtParams,
     FfiConverterTypeRecipient,
     FfiConverterTypeRpcClient,
     FfiConverterTypeRpcSyncProgressInspector,
+    FfiConverterTypeSelectionStrategy,
     FfiConverterTypeSentAndReceived,
     FfiConverterTypeSingleKeyDescriptorTemplate,
+    FfiConverterTypeSpendAssets,
     FfiConverterTypeSyncProgressInspector,
     FfiConverterTypeTxBuilder,
     FfiConverterTypeTxDetails,

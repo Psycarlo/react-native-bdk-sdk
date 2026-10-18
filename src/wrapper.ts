@@ -13,9 +13,12 @@ import type {
   AddressInfo,
   BlockId,
   ChangeSpendPolicy,
+  Condition,
+  CreatePsbtResult,
   DerivationInfo,
   ElectrumClientLike,
   EsploraClientLike,
+  FinalizePsbtOutcome,
   FullScanProgressInspector,
   KeychainInfo,
   KeychainKind,
@@ -27,6 +30,8 @@ import type {
   PsbtLike,
   RpcClientLike,
   RpcSyncProgressInspector,
+  SelectionStrategy,
+  SpendAssets,
   SyncProgressInspector,
   TxOrdering,
 } from './generated/bdk_ffi';
@@ -35,6 +40,7 @@ import {
   ElectrumClient,
   EsploraClient,
   KyotoClient,
+  PsbtParams,
   RpcClient,
   TxBuilder,
   Wallet,
@@ -312,14 +318,17 @@ function adaptFullScanInspector(
 // ═══════════════════════════════════════════════════════════════════════════════
 
 export type KyotoOptions = {
-  /** Incremental `Sync` or full `Recovery` — see `KyotoScanType`. */
+  /** Incremental `Sync`, `NewWallet` or full `Recovery` — see `KyotoScanType`. */
   scanType: KyotoScanType;
   /** Number of peers to maintain. Clamped to >= 1. Defaults to 2. */
   requiredPeers?: number;
   /** Explicit peer IPs. Empty (default) falls back to DNS discovery. */
   peers?: string[];
-  /** Writable directory for header/peer persistence. */
-  dataDir: string;
+  /**
+   * @deprecated Ignored since bdk_kyoto 0.18, which no longer persists
+   * headers or peers to disk. Will be removed in a future release.
+   */
+  dataDir?: string;
   /** Receives info/warning events emitted by the node while it runs. */
   handler: KyotoNodeEventHandler;
 };
@@ -338,7 +347,7 @@ export class BdkKyotoClient {
       opts.scanType,
       opts.requiredPeers ?? 2,
       opts.peers ?? [],
-      opts.dataDir,
+      opts.dataDir ?? '',
       opts.handler
     );
   }
@@ -588,6 +597,45 @@ export class BdkWallet {
     return this.inner.finalizePsbt(psbt);
   }
 
+  /**
+   * Like {@link finalizePsbt}, but also reports the outcome of every input
+   * (finalized, already final, foreign input, or unsatisfied with the reason).
+   */
+  tryFinalizePsbt(psbt: PsbtLike): FinalizePsbtOutcome {
+    return this.inner.tryFinalizePsbt(psbt);
+  }
+
+  /**
+   * Sign with private keys from the given descriptors instead of keys held by
+   * the wallet, so the wallet itself can stay watch-only. Multipath (`<0;1>`)
+   * private descriptors are not supported; pass one descriptor per path.
+   * Returns whether the PSBT was finalized.
+   */
+  signWithDescriptors(psbt: PsbtLike, descriptors: string[]): boolean {
+    return this.inner.signWithDescriptors(psbt, descriptors);
+  }
+
+  // ── Experimental PSBT API (bdk-tx) ──────────────────────────────────────
+
+  /**
+   * **Experimental.** Create a PSBT with bdk_wallet's bdk-tx API. Sign the
+   * PSBT, then finalize it with the returned `finalizer`. Persists the wallet
+   * afterwards (a change address may be revealed). May change in future releases.
+   */
+  createPsbt(params: BdkPsbtParams): Promise<CreatePsbtResult> {
+    return this.inner.createPsbt(params.raw);
+  }
+
+  /**
+   * **Experimental.** Replace one or more unconfirmed wallet transactions
+   * (RBF). The replacement spends the inputs of the originals, so
+   * `params.addUtxo(s)` is ignored; add recipients again (they are not copied
+   * from the originals). Persists the wallet afterwards.
+   */
+  replaceByFee(params: BdkPsbtParams, txids: string[]): Promise<CreatePsbtResult> {
+    return this.inner.replaceByFee(params.raw, txids);
+  }
+
   // ── Sync (Esplora) ─────────────────────────────────────────────────────
 
   fullScanWithEsplora(
@@ -713,6 +761,7 @@ export class BdkWallet {
 
   // ── Fee bumping ─────────────────────────────────────────────────────────
 
+  /** Persists the wallet afterwards (a change address may be revealed). */
   buildFeeBump(txid: string, newFeeRate: number): PsbtLike {
     return this.inner.buildFeeBump(txid, newFeeRate);
   }
@@ -745,6 +794,26 @@ export class BdkWallet {
 
   policies(keychain: KeychainKind): string | undefined {
     return this.inner.policies(keychain);
+  }
+
+  /**
+   * Spending policy of the keychain's descriptor as JSON (`undefined` for a
+   * plain single-key descriptor). Use the policy item `id`s to build a path
+   * map for {@link policyCondition}. Ids may differ from {@link policies}
+   * when the wallet holds private keys, so don't mix them with
+   * `BdkTxBuilder.policyPath`.
+   */
+  spendingPolicy(keychain: KeychainKind): string | undefined {
+    return this.inner.spendingPolicy(keychain);
+  }
+
+  /**
+   * Timelock requirements of a spending path, for `BdkTxBuilder.setCondition`.
+   * `pathMapJson` maps policy item ids to the chosen child indexes, e.g.
+   * `{"abcd1234": [1]}`. Returns an empty condition for descriptors without a policy.
+   */
+  policyCondition(pathMapJson: string, keychain: KeychainKind): Condition {
+    return this.inner.policyCondition(pathMapJson, keychain);
   }
 
   derivationIndex(keychain: KeychainKind): number | undefined {
@@ -903,6 +972,11 @@ export class BdkTxBuilder {
     this.inner.addGlobalXpubs();
   }
 
+  /**
+   * Sighash type for every input, e.g. `0x81` (ALL|ANYONECANPAY).
+   * `BdkWallet.sign` and `signWithDescriptors` only sign `SIGHASH_ALL` /
+   * `SIGHASH_DEFAULT` inputs, so other types must be signed externally.
+   */
   sighash(sighashType: number): void {
     this.inner.sighash(sighashType);
   }
@@ -911,7 +985,182 @@ export class BdkTxBuilder {
     this.inner.policyPath(pathMapJson, keychain);
   }
 
+  /**
+   * Apply the timelocks of a spending path (nLockTime / nSequence) without a
+   * policy path. Get one from `BdkWallet.policyCondition`, or build it
+   * directly. Takes precedence over {@link policyPath} when both are set.
+   */
+  setCondition(condition: Condition): void {
+    this.inner.setCondition(condition);
+  }
+
+  /** Persists the wallet afterwards (a change address may be revealed). */
   async finish(wallet: BdkWallet): Promise<PsbtLike> {
     return this.inner.finish(wallet.raw);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PsbtParams wrapper (experimental bdk-tx API)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * **Experimental.** Parameters for {@link BdkWallet.createPsbt} and
+ * {@link BdkWallet.replaceByFee}. Unlike {@link BdkTxBuilder}, spending paths
+ * are chosen with {@link addAssets} and the result comes with a `Finalizer`.
+ * May change in future releases.
+ */
+export class BdkPsbtParams {
+  private readonly inner: PsbtParams;
+
+  constructor() {
+    this.inner = new PsbtParams();
+  }
+
+  get raw(): PsbtParams {
+    return this.inner;
+  }
+
+  // ── Inputs ──────────────────────────────────────────────────────────────
+
+  /** Must-spend a wallet UTXO. Ignored by `replaceByFee`. */
+  addUtxo(outpoint: OutPoint): void {
+    this.inner.addUtxo(outpoint);
+  }
+
+  addUtxos(outpoints: Array<OutPoint>): void {
+    this.inner.addUtxos(outpoints);
+  }
+
+  removeUtxo(outpoint: OutPoint): void {
+    this.inner.removeUtxo(outpoint);
+  }
+
+  /** Only spend the UTXOs added with `addUtxo(s)`. */
+  manuallySelectedOnly(): void {
+    this.inner.manuallySelectedOnly();
+  }
+
+  /** Exclude UTXOs from coin selection. */
+  unspendable(outpoints: Array<OutPoint>): void {
+    this.inner.unspendable(outpoints);
+  }
+
+  addUnspendable(outpoint: OutPoint): void {
+    this.inner.addUnspendable(outpoint);
+  }
+
+  excludeBelowConfirmations(minConfirms: number): void {
+    this.inner.excludeBelowConfirmations(minConfirms);
+  }
+
+  excludeUnconfirmed(): void {
+    this.inner.excludeUnconfirmed();
+  }
+
+  changePolicy(policy: ChangeSpendPolicy): void {
+    this.inner.changePolicy(policy);
+  }
+
+  // ── Outputs ─────────────────────────────────────────────────────────────
+
+  addRecipient(address: string, amountSats: number): void {
+    this.inner.addRecipient(address, BigInt(amountSats));
+  }
+
+  addRecipients(recipients: Array<{ address: string; amountSats: number }>): void {
+    this.inner.addRecipients(
+      recipients.map((r) => ({ address: r.address, amountSats: BigInt(r.amountSats) }))
+    );
+  }
+
+  /** Add an OP_RETURN output carrying `data`. */
+  addData(data: Array<number>): void {
+    this.inner.addData(new Uint8Array(data).buffer);
+  }
+
+  /**
+   * Send change to this address instead of the wallet's next unused change
+   * address. Required for a sweep (`SelectionStrategy.All` with no recipients).
+   */
+  changeAddress(address: string): void {
+    this.inner.changeAddress(address);
+  }
+
+  // ── Spending path / timelocks ───────────────────────────────────────────
+
+  /**
+   * Add spending assets (signing keys and usable timelocks). Without assets
+   * every wallet key is assumed able to sign. Only the last `after`/`older`
+   * set across calls is kept.
+   */
+  addAssets(assets: SpendAssets): void {
+    this.inner.addAssets(assets);
+  }
+
+  /** Minimum nLockTime (height below 500,000,000, otherwise a UNIX timestamp). */
+  locktime(locktime: number): void {
+    this.inner.locktime(locktime);
+  }
+
+  /** Height used to evaluate coinbase maturity. Defaults to the wallet tip. */
+  maturityHeight(height: number): void {
+    this.inner.maturityHeight(height);
+  }
+
+  /** Enable BIP-326 anti-fee-sniping using `tipHeight` as the current height. */
+  antiFeeSnipingHeight(tipHeight: number): void {
+    this.inner.antiFeeSnipingHeight(tipHeight);
+  }
+
+  // ── Fees / coin selection ───────────────────────────────────────────────
+
+  /** Target fee rate in sat/vB. Defaults to 1 sat/vB. */
+  feeRate(satPerVbyte: number): void {
+    this.inner.feeRate(satPerVbyte);
+  }
+
+  coinSelection(strategy: SelectionStrategy): void {
+    this.inner.coinSelection(strategy);
+  }
+
+  /** Treat these transactions as canonical (winning any conflicts). */
+  assumeCanonical(txids: string[]): void {
+    this.inner.assumeCanonical(txids);
+  }
+
+  // ── Layout ──────────────────────────────────────────────────────────────
+
+  ordering(ordering: TxOrdering): void {
+    this.inner.ordering(ordering);
+  }
+
+  onlyWitnessUtxo(): void {
+    this.inner.onlyWitnessUtxo();
+  }
+
+  /**
+   * Transaction version. With version 3 (TRUC), coin selection only spends
+   * unconfirmed UTXOs from v3 parents, and vice versa (BIP-431 rule 2).
+   * Manually added UTXOs bypass this check.
+   */
+  version(version: number): void {
+    this.inner.version(version);
+  }
+
+  addGlobalXpubs(): void {
+    this.inner.addGlobalXpubs();
+  }
+
+  // ── Sequences ───────────────────────────────────────────────────────────
+
+  /** nSequence for a UTXO added with `addUtxo(s)`. Takes precedence over {@link fallbackSequence}. */
+  sequenceOverride(outpoint: OutPoint, nsequence: number): void {
+    this.inner.sequenceOverride(outpoint, nsequence);
+  }
+
+  /** nSequence for wallet inputs with no override and no CSV requirement. */
+  fallbackSequence(nsequence: number): void {
+    this.inner.fallbackSequence(nsequence);
   }
 }

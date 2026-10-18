@@ -180,6 +180,14 @@ interface NativeModuleInterface {
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
+  ubrn_uniffi_bdk_ffi_fn_clone_finalizer(
+    ptr: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_free_finalizer(
+    ptr: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
   ubrn_uniffi_bdk_ffi_fn_clone_fullscanprogressinspector(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -217,6 +225,14 @@ interface NativeModuleInterface {
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_free_psbt(
+    ptr: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_clone_psbtparams(
+    ptr: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_free_psbtparams(
     ptr: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
@@ -326,6 +342,11 @@ interface NativeModuleInterface {
     network: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): number;
+  ubrn_uniffi_bdk_ffi_fn_func_merge_conditions(
+    a: Uint8Array,
+    b: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_func_validate_descriptor(
     descriptor: Uint8Array,
     network: Uint8Array,
@@ -348,6 +369,11 @@ interface NativeModuleInterface {
     url: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_finalizer_finalize(
+    uniffiSelf: bigint,
+    psbt: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_method_fullscanprogressinspector_inspect(
     uniffiSelf: bigint,
     keychain: Uint8Array,
@@ -454,6 +480,137 @@ interface NativeModuleInterface {
     uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_constructor_psbtparams_new(
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_assets(
+    uniffiSelf: bigint,
+    assets: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_data(
+    uniffiSelf: bigint,
+    data: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_global_xpubs(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipient(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    amountSats: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_recipients(
+    uniffiSelf: bigint,
+    recipients: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_unspendable(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxo(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_add_utxos(
+    uniffiSelf: bigint,
+    outpoints: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_anti_fee_sniping_height(
+    uniffiSelf: bigint,
+    tipHeight: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_assume_canonical(
+    uniffiSelf: bigint,
+    txids: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_address(
+    uniffiSelf: bigint,
+    address: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_change_policy(
+    uniffiSelf: bigint,
+    policy: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_coin_selection(
+    uniffiSelf: bigint,
+    strategy: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_below_confirmations(
+    uniffiSelf: bigint,
+    minConfirms: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_exclude_unconfirmed(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fallback_sequence(
+    uniffiSelf: bigint,
+    nsequence: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_fee_rate(
+    uniffiSelf: bigint,
+    satPerVbyte: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_locktime(
+    uniffiSelf: bigint,
+    locktime: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_manually_selected_only(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_maturity_height(
+    uniffiSelf: bigint,
+    height: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_only_witness_utxo(
+    uniffiSelf: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_ordering(
+    uniffiSelf: bigint,
+    ordering: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_remove_utxo(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_sequence_override(
+    uniffiSelf: bigint,
+    outpoint: Uint8Array,
+    nsequence: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_unspendable(
+    uniffiSelf: bigint,
+    outpoints: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_psbtparams_version(
+    uniffiSelf: bigint,
+    version: number,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
   ubrn_uniffi_bdk_ffi_fn_constructor_rpcclient_new(
     url: Uint8Array,
     username: Uint8Array,
@@ -598,6 +755,11 @@ interface NativeModuleInterface {
     keychain: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): void;
+  ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_condition(
+    uniffiSelf: bigint,
+    condition: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): void;
   ubrn_uniffi_bdk_ffi_fn_method_txbuilder_set_exact_sequence(
     uniffiSelf: bigint,
     nsequence: number,
@@ -676,6 +838,10 @@ interface NativeModuleInterface {
     uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_create_psbt(
+    uniffiSelf: bigint,
+    params: bigint
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_derivation_index(
     uniffiSelf: bigint,
     keychain: Uint8Array,
@@ -801,11 +967,22 @@ interface NativeModuleInterface {
     keychain: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_policy_condition(
+    uniffiSelf: bigint,
+    pathMapJson: Uint8Array,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_public_descriptor(
     uniffiSelf: bigint,
     keychain: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_replace_by_fee(
+    uniffiSelf: bigint,
+    params: bigint,
+    txids: Uint8Array
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_reveal_addresses_to(
     uniffiSelf: bigint,
     keychain: Uint8Array,
@@ -841,6 +1018,17 @@ interface NativeModuleInterface {
     psbt: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sign_with_descriptors(
+    uniffiSelf: bigint,
+    psbt: bigint,
+    descriptors: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): number;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_spending_policy(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
     uniffiSelf: bigint,
     client: bigint,
@@ -868,6 +1056,11 @@ interface NativeModuleInterface {
     uniffiSelf: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_try_finalize_psbt(
+    uniffiSelf: bigint,
+    psbt: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_tx_details(
     uniffiSelf: bigint,
     txid: Uint8Array,
@@ -889,11 +1082,13 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_func_create_wallet_from_multipath(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_export_wallet(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_is_valid_address(): number;
+  ubrn_uniffi_bdk_ffi_checksum_func_merge_conditions(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_validate_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_finalizer_finalize(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_kyotoclient_is_running(): number;
@@ -917,6 +1112,33 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_get_utxo_for(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_to_base64(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_psbt_txid(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_psbtparams_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_assets(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_data(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_global_xpubs(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipient(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_recipients(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_unspendable(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxo(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_add_utxos(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_anti_fee_sniping_height(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_assume_canonical(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_address(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_change_policy(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_coin_selection(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_below_confirmations(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_exclude_unconfirmed(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fallback_sequence(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_fee_rate(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_locktime(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_manually_selected_only(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_maturity_height(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_only_witness_utxo(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_ordering(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_remove_utxo(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_sequence_override(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_unspendable(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_psbtparams_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_rpcclient_new(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_rpcclient_get_block_height(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_rpcsyncprogressinspector_inspect(): number;
@@ -947,6 +1169,7 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_only_witness_utxo(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_ordering(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_policy_path(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_condition(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_exact_sequence(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_set_recipients(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_txbuilder_sighash(): number;
@@ -962,6 +1185,7 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_calculate_fee_rate(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_checkpoints(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_create_psbt(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_index(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_derivation_of_spk(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_descriptor_checksum(): number;
@@ -987,20 +1211,33 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_peek_address(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_persist(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_policies(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_policy_condition(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_public_descriptor(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_send(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sent_and_received(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_spending_policy(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_rpc(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_transactions(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_try_finalize_psbt(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_tx_details(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_unmark_used(): number;
+  ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(
+    pointer: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): UniffiGcObject;
+  ubrn_uniffi_internal_fn_method_finalizer_ffi__bless_pointer(
+    pointer: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): UniffiGcObject;
   ubrn_uniffi_internal_fn_method_electrumclient_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
@@ -1025,7 +1262,7 @@ interface NativeModuleInterface {
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;
-  ubrn_uniffi_internal_fn_method_psbt_ffi__bless_pointer(
+  ubrn_uniffi_internal_fn_method_psbtparams_ffi__bless_pointer(
     pointer: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): UniffiGcObject;

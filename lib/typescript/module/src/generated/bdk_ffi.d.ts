@@ -39,6 +39,11 @@ export declare function exportWallet(wallet: WalletLike, label: string, includeB
  */
 export declare function isValidAddress(address: string, network: Network): boolean;
 /**
+ * Combine two spending conditions (e.g. from different keychains or
+ * policies). Fails if their timelocks use different units (height vs time).
+ */
+export declare function mergeConditions(a: Condition, b: Condition): Condition;
+/**
  * Validate a descriptor string for the given network without creating a wallet.
  */
 export declare function validateDescriptor(descriptor: string, network: Network): boolean;
@@ -95,6 +100,32 @@ export declare const BlockId: Readonly<{
     new: (partial: Partial<BlockId> & Required<Omit<BlockId, never>>) => BlockId;
     defaults: () => Partial<BlockId>;
 }>;
+/**
+ * Extra timelock requirements of a chosen spending path, applied to the
+ * transaction by [`crate::TxBuilder::set_condition`].
+ *
+ * Derive one from a policy path with [`crate::Wallet::policy_condition`], or
+ * build it directly when the values are known (e.g. a fixed `older(144)`).
+ */
+export type Condition = {
+    /**
+     * Relative timelock (`older(n)`) as a consensus nSequence value.
+     */
+    csv?: number;
+    /**
+     * Absolute timelock (`after(n)`) as a consensus nLockTime value: a block
+     * height below 500,000,000, otherwise a UNIX timestamp.
+     */
+    timelock?: number;
+};
+/**
+ * Generated factory for {@link Condition} record objects.
+ */
+export declare const Condition: Readonly<{
+    create: (partial: Partial<Condition> & Required<Omit<Condition, "csv" | "timelock">>) => Condition;
+    new: (partial: Partial<Condition> & Required<Omit<Condition, "csv" | "timelock">>) => Condition;
+    defaults: () => Partial<Condition>;
+}>;
 export type ConfirmationBlockTime = {
     height: number;
     blockHash: string;
@@ -107,143 +138,6 @@ export declare const ConfirmationBlockTime: Readonly<{
     create: (partial: Partial<ConfirmationBlockTime> & Required<Omit<ConfirmationBlockTime, never>>) => ConfirmationBlockTime;
     new: (partial: Partial<ConfirmationBlockTime> & Required<Omit<ConfirmationBlockTime, never>>) => ConfirmationBlockTime;
     defaults: () => Partial<ConfirmationBlockTime>;
-}>;
-export type DerivationInfo = {
-    keychain: KeychainKind;
-    index: number;
-};
-/**
- * Generated factory for {@link DerivationInfo} record objects.
- */
-export declare const DerivationInfo: Readonly<{
-    create: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
-    new: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
-    defaults: () => Partial<DerivationInfo>;
-}>;
-export type KeychainInfo = {
-    keychain: KeychainKind;
-    descriptor: string;
-};
-/**
- * Generated factory for {@link KeychainInfo} record objects.
- */
-export declare const KeychainInfo: Readonly<{
-    create: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
-    new: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
-    defaults: () => Partial<KeychainInfo>;
-}>;
-export type OutPoint = {
-    txid: string;
-    vout: number;
-};
-/**
- * Generated factory for {@link OutPoint} record objects.
- */
-export declare const OutPoint: Readonly<{
-    create: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
-    new: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
-    defaults: () => Partial<OutPoint>;
-}>;
-export type TxOut = {
-    value: bigint;
-    scriptPubkeyHex: string;
-};
-/**
- * Generated factory for {@link TxOut} record objects.
- */
-export declare const TxOut: Readonly<{
-    create: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
-    new: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
-    defaults: () => Partial<TxOut>;
-}>;
-export type LocalOutput = {
-    outpoint: OutPoint;
-    txout: TxOut;
-    keychain: KeychainKind;
-    isSpent: boolean;
-    derivationIndex: number;
-    confirmationBlockTime?: ConfirmationBlockTime;
-};
-/**
- * Generated factory for {@link LocalOutput} record objects.
- */
-export declare const LocalOutput: Readonly<{
-    create: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
-    new: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
-    defaults: () => Partial<LocalOutput>;
-}>;
-export type Recipient = {
-    address: string;
-    amountSats: bigint;
-};
-/**
- * Generated factory for {@link Recipient} record objects.
- */
-export declare const Recipient: Readonly<{
-    create: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
-    new: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
-    defaults: () => Partial<Recipient>;
-}>;
-export type SentAndReceived = {
-    sent: bigint;
-    received: bigint;
-};
-/**
- * Generated factory for {@link SentAndReceived} record objects.
- */
-export declare const SentAndReceived: Readonly<{
-    create: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
-    new: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
-    defaults: () => Partial<SentAndReceived>;
-}>;
-export type TxInput = {
-    previousTxid: string;
-    previousVout: number;
-    sequence: number;
-    scriptSigHex: string;
-    witness: Array<string>;
-};
-/**
- * Generated factory for {@link TxInput} record objects.
- */
-export declare const TxInput: Readonly<{
-    create: (partial: Partial<TxInput> & Required<Omit<TxInput, never>>) => TxInput;
-    new: (partial: Partial<TxInput> & Required<Omit<TxInput, never>>) => TxInput;
-    defaults: () => Partial<TxInput>;
-}>;
-export type TxOutput = {
-    value: bigint;
-    scriptPubkeyHex: string;
-    address?: string;
-};
-/**
- * Generated factory for {@link TxOutput} record objects.
- */
-export declare const TxOutput: Readonly<{
-    create: (partial: Partial<TxOutput> & Required<Omit<TxOutput, "address">>) => TxOutput;
-    new: (partial: Partial<TxOutput> & Required<Omit<TxOutput, "address">>) => TxOutput;
-    defaults: () => Partial<TxOutput>;
-}>;
-export type TxDetails = {
-    txid: string;
-    sent: bigint;
-    received: bigint;
-    fee?: bigint;
-    feeRate?: number;
-    balanceDelta: bigint;
-    confirmationBlockTime?: ConfirmationBlockTime;
-    version: number;
-    locktime: number;
-    inputs: Array<TxInput>;
-    outputs: Array<TxOutput>;
-};
-/**
- * Generated factory for {@link TxDetails} record objects.
- */
-export declare const TxDetails: Readonly<{
-    create: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
-    new: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
-    defaults: () => Partial<TxDetails>;
 }>;
 export declare enum BdkError_Tags {
     InvalidDescriptor = "InvalidDescriptor",
@@ -385,9 +279,6 @@ export declare const BdkError: Readonly<{
         new (inner: {
             message: string;
         }): {
-            name: string;
-            message: string;
-            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -397,14 +288,14 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
+            name: string;
+            message: string;
+            stack?: string;
             cause?: unknown;
         };
         "new"(inner: {
             message: string;
         }): {
-            name: string;
-            message: string;
-            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -414,12 +305,12 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
+            name: string;
+            message: string;
+            stack?: string;
             cause?: unknown;
         };
         instanceOf(obj: any): obj is {
-            name: string;
-            message: string;
-            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -429,12 +320,12 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
+            name: string;
+            message: string;
+            stack?: string;
             cause?: unknown;
         };
         hasInner(obj: any): obj is {
-            name: string;
-            message: string;
-            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -444,12 +335,12 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
+            name: string;
+            message: string;
+            stack?: string;
             cause?: unknown;
         };
         getInner(obj: {
-            name: string;
-            message: string;
-            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -459,6 +350,9 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
+            name: string;
+            message: string;
+            stack?: string;
             cause?: unknown;
         }): Readonly<{
             message: string;
@@ -1393,6 +1287,9 @@ export declare const BdkError: Readonly<{
         new (inner: {
             message: string;
         }): {
+            name: string;
+            message: string;
+            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -1402,14 +1299,14 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
-            name: string;
-            message: string;
-            stack?: string;
             cause?: unknown;
         };
         "new"(inner: {
             message: string;
         }): {
+            name: string;
+            message: string;
+            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -1419,12 +1316,12 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
-            name: string;
-            message: string;
-            stack?: string;
             cause?: unknown;
         };
         instanceOf(obj: any): obj is {
+            name: string;
+            message: string;
+            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -1434,12 +1331,12 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
-            name: string;
-            message: string;
-            stack?: string;
             cause?: unknown;
         };
         hasInner(obj: any): obj is {
+            name: string;
+            message: string;
+            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -1449,12 +1346,12 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
-            name: string;
-            message: string;
-            stack?: string;
             cause?: unknown;
         };
         getInner(obj: {
+            name: string;
+            message: string;
+            stack?: string;
             /**
              * @private
              * This field is private and should not be used, use `tag` instead.
@@ -1464,9 +1361,6 @@ export declare const BdkError: Readonly<{
             readonly inner: Readonly<{
                 message: string;
             }>;
-            name: string;
-            message: string;
-            stack?: string;
             cause?: unknown;
         }): Readonly<{
             message: string;
@@ -4331,6 +4225,453 @@ export declare const BdkError: Readonly<{
     };
 }>;
 export type BdkError = InstanceType<(typeof BdkError)["InvalidDescriptor" | "WalletCreationFailed" | "WalletLoadFailed" | "WalletLoadMismatch" | "PersistError" | "InvalidAddress" | "InvalidScript" | "TransactionBuildFailed" | "NoRecipients" | "NoUtxosSelected" | "OutputBelowDustLimit" | "InsufficientFunds" | "FeeRateTooLow" | "FeeTooLow" | "LockTimeConflict" | "RbfSequenceConflict" | "VersionZero" | "VersionOneCsv" | "SpendingPolicyRequired" | "MissingKeyOrigin" | "MissingNonWitnessUtxo" | "OutpointNotFound" | "FeeBumpTargetNotFound" | "FeeBumpAlreadyConfirmed" | "FeeBumpIrreplaceable" | "FeeBumpFeeRateUnavailable" | "FeeBumpInvalidOutputIndex" | "InvalidPsbt" | "SignFailed" | "SignerMissingKey" | "SignerInvalidKey" | "SignerUserCanceled" | "SignerInputIndexOutOfRange" | "SignerMissingNonWitnessUtxo" | "SignerMissingWitnessUtxo" | "SignerMissingWitnessScript" | "SignerNonStandardSighash" | "SignerInvalidSighash" | "SyncFailed" | "BroadcastFailed" | "InvalidTransaction" | "TransactionNotFound" | "CannotConnect" | "CalculateFeeError" | "InvalidMnemonic" | "InvalidEntropy" | "KeyError" | "Generic"]>;
+export type TxOut = {
+    value: bigint;
+    scriptPubkeyHex: string;
+};
+/**
+ * Generated factory for {@link TxOut} record objects.
+ */
+export declare const TxOut: Readonly<{
+    create: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
+    new: (partial: Partial<TxOut> & Required<Omit<TxOut, never>>) => TxOut;
+    defaults: () => Partial<TxOut>;
+}>;
+export interface PsbtLike {
+    /**
+     * Extract the fully-signed transaction as raw hex.
+     */
+    extractTxHex(): string;
+    /**
+     * Total fee in satoshis. None if any input UTXO value is unknown.
+     */
+    feeAmount(): bigint | undefined;
+    /**
+     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+     */
+    feeRate(): number | undefined;
+    /**
+     * Retrieve the UTXO for a given input index. Returns None if unavailable.
+     */
+    getUtxoFor(inputIndex: bigint): TxOut | undefined;
+    /**
+     * Serialize to a base64-encoded string.
+     */
+    toBase64(): string;
+    /**
+     * The unsigned txid.
+     */
+    txid(): string;
+}
+/**
+ * @deprecated Use `PsbtLike` instead.
+ */
+export type PsbtInterface = PsbtLike;
+export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
+    readonly [uniffiTypeNameSymbol] = "Psbt";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Deserialize from a base64-encoded string.
+     */
+    constructor(psbtBase64: string);
+    /**
+     * Extract the fully-signed transaction as raw hex.
+     */
+    extractTxHex(): string;
+    /**
+     * Total fee in satoshis. None if any input UTXO value is unknown.
+     */
+    feeAmount(): bigint | undefined;
+    /**
+     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+     */
+    feeRate(): number | undefined;
+    /**
+     * Retrieve the UTXO for a given input index. Returns None if unavailable.
+     */
+    getUtxoFor(inputIndex: bigint): TxOut | undefined;
+    /**
+     * Serialize to a base64-encoded string.
+     */
+    toBase64(): string;
+    /**
+     * The unsigned txid.
+     */
+    txid(): string;
+    uniffiDestroy(): void;
+    static instanceOf(obj_: any): obj_ is Psbt;
+}
+export declare enum FinalizeInputOutcome_Tags {
+    AlreadyFinalized = "AlreadyFinalized",
+    Finalized = "Finalized",
+    MissingDescriptor = "MissingDescriptor",
+    CouldNotSatisfy = "CouldNotSatisfy"
+}
+/**
+ * Finalization status of a single PSBT input.
+ */
+export declare const FinalizeInputOutcome: Readonly<{
+    instanceOf: (obj: any) => obj is FinalizeInputOutcome;
+    AlreadyFinalized: {
+        new (): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.AlreadyFinalized;
+        };
+        "new"(): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.AlreadyFinalized;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.AlreadyFinalized;
+        };
+    };
+    Finalized: {
+        new (): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.Finalized;
+        };
+        "new"(): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.Finalized;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.Finalized;
+        };
+    };
+    MissingDescriptor: {
+        new (): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.MissingDescriptor;
+        };
+        "new"(): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.MissingDescriptor;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.MissingDescriptor;
+        };
+    };
+    CouldNotSatisfy: {
+        new (inner: {
+            message: string;
+        }): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.CouldNotSatisfy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+        };
+        "new"(inner: {
+            message: string;
+        }): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.CouldNotSatisfy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "FinalizeInputOutcome";
+            readonly tag: FinalizeInputOutcome_Tags.CouldNotSatisfy;
+            readonly inner: Readonly<{
+                message: string;
+            }>;
+        };
+    };
+}>;
+/**
+ * Finalization status of a single PSBT input.
+ */
+export type FinalizeInputOutcome = InstanceType<(typeof FinalizeInputOutcome)["AlreadyFinalized" | "Finalized" | "MissingDescriptor" | "CouldNotSatisfy"]>;
+export type FinalizeInputResult = {
+    inputIndex: number;
+    outcome: FinalizeInputOutcome;
+};
+/**
+ * Generated factory for {@link FinalizeInputResult} record objects.
+ */
+export declare const FinalizeInputResult: Readonly<{
+    create: (partial: Partial<FinalizeInputResult> & Required<Omit<FinalizeInputResult, never>>) => FinalizeInputResult;
+    new: (partial: Partial<FinalizeInputResult> & Required<Omit<FinalizeInputResult, never>>) => FinalizeInputResult;
+    defaults: () => Partial<FinalizeInputResult>;
+}>;
+/**
+ * Per-input result of a PSBT finalization attempt.
+ */
+export type FinalizePsbtOutcome = {
+    /**
+     * Whether every input is finalized after the call.
+     */
+    isFinalized: boolean;
+    /**
+     * One entry per PSBT input, ordered by input index.
+     */
+    inputs: Array<FinalizeInputResult>;
+};
+/**
+ * Generated factory for {@link FinalizePsbtOutcome} record objects.
+ */
+export declare const FinalizePsbtOutcome: Readonly<{
+    create: (partial: Partial<FinalizePsbtOutcome> & Required<Omit<FinalizePsbtOutcome, never>>) => FinalizePsbtOutcome;
+    new: (partial: Partial<FinalizePsbtOutcome> & Required<Omit<FinalizePsbtOutcome, never>>) => FinalizePsbtOutcome;
+    defaults: () => Partial<FinalizePsbtOutcome>;
+}>;
+/**
+ * **Experimental.** Finalizes a PSBT returned by
+ * [`crate::Wallet::create_psbt`] / [`crate::Wallet::replace_by_fee`] using
+ * the spending plans computed while building it. Call after signing.
+ */
+export interface FinalizerLike {
+    /**
+     * Finalize every signed input. Inputs that are already final are left
+     * untouched; inputs without a plan (foreign inputs) are reported as
+     * `MissingDescriptor`.
+     */
+    finalize(psbt: PsbtLike): FinalizePsbtOutcome;
+}
+/**
+ * @deprecated Use `FinalizerLike` instead.
+ */
+export type FinalizerInterface = FinalizerLike;
+/**
+ * **Experimental.** Finalizes a PSBT returned by
+ * [`crate::Wallet::create_psbt`] / [`crate::Wallet::replace_by_fee`] using
+ * the spending plans computed while building it. Call after signing.
+ */
+export declare class Finalizer extends UniffiAbstractObject implements FinalizerLike {
+    readonly [uniffiTypeNameSymbol] = "Finalizer";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    private constructor();
+    /**
+     * Finalize every signed input. Inputs that are already final are left
+     * untouched; inputs without a plan (foreign inputs) are reported as
+     * `MissingDescriptor`.
+     */
+    finalize(psbt: PsbtLike): FinalizePsbtOutcome;
+    uniffiDestroy(): void;
+    static instanceOf(obj_: any): obj_ is Finalizer;
+}
+/**
+ * Result of [`crate::Wallet::create_psbt`] / [`crate::Wallet::replace_by_fee`].
+ */
+export type CreatePsbtResult = {
+    psbt: PsbtLike;
+    finalizer: FinalizerLike;
+};
+/**
+ * Generated factory for {@link CreatePsbtResult} record objects.
+ */
+export declare const CreatePsbtResult: Readonly<{
+    create: (partial: Partial<CreatePsbtResult> & Required<Omit<CreatePsbtResult, never>>) => CreatePsbtResult;
+    new: (partial: Partial<CreatePsbtResult> & Required<Omit<CreatePsbtResult, never>>) => CreatePsbtResult;
+    defaults: () => Partial<CreatePsbtResult>;
+}>;
+export type DerivationInfo = {
+    keychain: KeychainKind;
+    index: number;
+};
+/**
+ * Generated factory for {@link DerivationInfo} record objects.
+ */
+export declare const DerivationInfo: Readonly<{
+    create: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
+    new: (partial: Partial<DerivationInfo> & Required<Omit<DerivationInfo, never>>) => DerivationInfo;
+    defaults: () => Partial<DerivationInfo>;
+}>;
+export type KeychainInfo = {
+    keychain: KeychainKind;
+    descriptor: string;
+};
+/**
+ * Generated factory for {@link KeychainInfo} record objects.
+ */
+export declare const KeychainInfo: Readonly<{
+    create: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
+    new: (partial: Partial<KeychainInfo> & Required<Omit<KeychainInfo, never>>) => KeychainInfo;
+    defaults: () => Partial<KeychainInfo>;
+}>;
+export type OutPoint = {
+    txid: string;
+    vout: number;
+};
+/**
+ * Generated factory for {@link OutPoint} record objects.
+ */
+export declare const OutPoint: Readonly<{
+    create: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
+    new: (partial: Partial<OutPoint> & Required<Omit<OutPoint, never>>) => OutPoint;
+    defaults: () => Partial<OutPoint>;
+}>;
+export type LocalOutput = {
+    outpoint: OutPoint;
+    txout: TxOut;
+    keychain: KeychainKind;
+    isSpent: boolean;
+    derivationIndex: number;
+    confirmationBlockTime?: ConfirmationBlockTime;
+};
+/**
+ * Generated factory for {@link LocalOutput} record objects.
+ */
+export declare const LocalOutput: Readonly<{
+    create: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
+    new: (partial: Partial<LocalOutput> & Required<Omit<LocalOutput, "confirmationBlockTime">>) => LocalOutput;
+    defaults: () => Partial<LocalOutput>;
+}>;
+export type Recipient = {
+    address: string;
+    amountSats: bigint;
+};
+/**
+ * Generated factory for {@link Recipient} record objects.
+ */
+export declare const Recipient: Readonly<{
+    create: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
+    new: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
+    defaults: () => Partial<Recipient>;
+}>;
+export type SentAndReceived = {
+    sent: bigint;
+    received: bigint;
+};
+/**
+ * Generated factory for {@link SentAndReceived} record objects.
+ */
+export declare const SentAndReceived: Readonly<{
+    create: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
+    new: (partial: Partial<SentAndReceived> & Required<Omit<SentAndReceived, never>>) => SentAndReceived;
+    defaults: () => Partial<SentAndReceived>;
+}>;
+/**
+ * Spending assets used to plan inputs: which keys will sign and which
+ * timelocks the spend may rely on. Selects the spending path for complex
+ * descriptors (the bdk-tx equivalent of a policy path).
+ */
+export type SpendAssets = {
+    /**
+     * Descriptor public keys that will sign, e.g. `[fingerprint/path]xpub…/0/*`
+     * or a hex public key. Empty means every key in the wallet's descriptors.
+     */
+    keys: Array<string>;
+    /**
+     * Absolute timelock (`after(n)`, consensus nLockTime) the spend may use.
+     */
+    after?: number;
+    /**
+     * Relative timelock (`older(n)`, consensus nSequence) the spend may use.
+     */
+    older?: number;
+};
+/**
+ * Generated factory for {@link SpendAssets} record objects.
+ */
+export declare const SpendAssets: Readonly<{
+    create: (partial: Partial<SpendAssets> & Required<Omit<SpendAssets, "after" | "older">>) => SpendAssets;
+    new: (partial: Partial<SpendAssets> & Required<Omit<SpendAssets, "after" | "older">>) => SpendAssets;
+    defaults: () => Partial<SpendAssets>;
+}>;
+export type TxInput = {
+    previousTxid: string;
+    previousVout: number;
+    sequence: number;
+    scriptSigHex: string;
+    witness: Array<string>;
+};
+/**
+ * Generated factory for {@link TxInput} record objects.
+ */
+export declare const TxInput: Readonly<{
+    create: (partial: Partial<TxInput> & Required<Omit<TxInput, never>>) => TxInput;
+    new: (partial: Partial<TxInput> & Required<Omit<TxInput, never>>) => TxInput;
+    defaults: () => Partial<TxInput>;
+}>;
+export type TxOutput = {
+    value: bigint;
+    scriptPubkeyHex: string;
+    address?: string;
+};
+/**
+ * Generated factory for {@link TxOutput} record objects.
+ */
+export declare const TxOutput: Readonly<{
+    create: (partial: Partial<TxOutput> & Required<Omit<TxOutput, "address">>) => TxOutput;
+    new: (partial: Partial<TxOutput> & Required<Omit<TxOutput, "address">>) => TxOutput;
+    defaults: () => Partial<TxOutput>;
+}>;
+export type TxDetails = {
+    txid: string;
+    sent: bigint;
+    received: bigint;
+    fee?: bigint;
+    feeRate?: number;
+    balanceDelta: bigint;
+    confirmationBlockTime?: ConfirmationBlockTime;
+    version: number;
+    locktime: number;
+    inputs: Array<TxInput>;
+    outputs: Array<TxOutput>;
+};
+/**
+ * Generated factory for {@link TxDetails} record objects.
+ */
+export declare const TxDetails: Readonly<{
+    create: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
+    new: (partial: Partial<TxDetails> & Required<Omit<TxDetails, "confirmationBlockTime" | "fee" | "feeRate">>) => TxDetails;
+    defaults: () => Partial<TxDetails>;
+}>;
 export declare enum ChangeSpendPolicy {
     ChangeAllowed = 0,
     OnlyChange = 1,
@@ -4482,7 +4823,8 @@ export declare const KyotoRecoveryStart: Readonly<{
 export type KyotoRecoveryStart = InstanceType<(typeof KyotoRecoveryStart)["Genesis" | "SegwitActivation" | "TaprootActivation" | "FromBlock"]>;
 export declare enum KyotoScanType_Tags {
     Sync = "Sync",
-    Recovery = "Recovery"
+    Recovery = "Recovery",
+    NewWallet = "NewWallet"
 }
 /**
  * How the Kyoto (BIP157/158) light client should scan filters on start-up.
@@ -4559,11 +4901,37 @@ export declare const KyotoScanType: Readonly<{
             }>;
         };
     };
+    NewWallet: {
+        new (): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+            readonly tag: KyotoScanType_Tags.NewWallet;
+        };
+        "new"(): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+            readonly tag: KyotoScanType_Tags.NewWallet;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "KyotoScanType";
+            readonly tag: KyotoScanType_Tags.NewWallet;
+        };
+    };
 }>;
 /**
  * How the Kyoto (BIP157/158) light client should scan filters on start-up.
  */
-export type KyotoScanType = InstanceType<(typeof KyotoScanType)["Sync" | "Recovery"]>;
+export type KyotoScanType = InstanceType<(typeof KyotoScanType)["Sync" | "Recovery" | "NewWallet"]>;
 export declare enum Language {
     English = 0,
     SimplifiedChinese = 1,
@@ -4582,6 +4950,117 @@ export declare enum Network {
     Signet = 2,
     Regtest = 3
 }
+export declare enum SelectionStrategy_Tags {
+    SingleRandomDraw = "SingleRandomDraw",
+    LowestFee = "LowestFee",
+    All = "All"
+}
+/**
+ * Coin selection strategy for [`crate::PsbtParams`].
+ */
+export declare const SelectionStrategy: Readonly<{
+    instanceOf: (obj: any) => obj is SelectionStrategy;
+    SingleRandomDraw: {
+        new (): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.SingleRandomDraw;
+        };
+        "new"(): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.SingleRandomDraw;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.SingleRandomDraw;
+        };
+    };
+    LowestFee: {
+        new (inner: {
+            longtermFeeRate: number;
+            maxRounds: number;
+        }): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.LowestFee;
+            readonly inner: Readonly<{
+                longtermFeeRate: number;
+                maxRounds: number;
+            }>;
+        };
+        "new"(inner: {
+            longtermFeeRate: number;
+            maxRounds: number;
+        }): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.LowestFee;
+            readonly inner: Readonly<{
+                longtermFeeRate: number;
+                maxRounds: number;
+            }>;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.LowestFee;
+            readonly inner: Readonly<{
+                longtermFeeRate: number;
+                maxRounds: number;
+            }>;
+        };
+    };
+    All: {
+        new (): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.All;
+        };
+        "new"(): {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.All;
+        };
+        instanceOf(obj: any): obj is {
+            /**
+             * @private
+             * This field is private and should not be used, use `tag` instead.
+             */
+            readonly [uniffiTypeNameSymbol]: "SelectionStrategy";
+            readonly tag: SelectionStrategy_Tags.All;
+        };
+    };
+}>;
+/**
+ * Coin selection strategy for [`crate::PsbtParams`].
+ */
+export type SelectionStrategy = InstanceType<(typeof SelectionStrategy)["SingleRandomDraw" | "LowestFee" | "All"]>;
 export declare enum SingleKeyDescriptorTemplate {
     P2Pkh = 0,
     P2Wpkh = 1,
@@ -4730,10 +5209,12 @@ export declare class KyotoClient extends UniffiAbstractObject implements KyotoCl
      * Build a light client for `wallet` and start its background node.
      *
      * - `scan_type`: [`KyotoScanType::Sync`] to continue from the wallet's
-     * checkpoint, or [`KyotoScanType::Recovery`] to rescan for restoration.
+     * checkpoint, [`KyotoScanType::NewWallet`] for a fresh wallet (headers
+     * only), or [`KyotoScanType::Recovery`] to rescan for restoration.
      * - `required_peers`: how many peers to maintain (clamped to >= 1).
      * - `peers`: optional explicit peer IPs; empty falls back to DNS discovery.
-     * - `data_dir`: writable directory for header/peer persistence.
+     * - `data_dir`: **deprecated and ignored**. Kyoto no longer persists
+     * headers/peers to disk; kept only for API compatibility.
      * - `handler`: receives info/warning events from the node.
      */
     constructor(wallet: WalletLike, scanType: KyotoScanType, requiredPeers: number, peers: Array<string>, dataDir: string, handler: KyotoNodeEventHandler);
@@ -4858,70 +5339,209 @@ export declare class Mnemonic extends UniffiAbstractObject implements MnemonicLi
     uniffiDestroy(): void;
     static instanceOf(obj_: any): obj_ is Mnemonic;
 }
-export interface PsbtLike {
+/**
+ * **Experimental.** Parameters for [`crate::Wallet::create_psbt`] and
+ * [`crate::Wallet::replace_by_fee`], backed by bdk_wallet's unstable
+ * `bdk-tx` API. Unlike [`crate::TxBuilder`], spending paths are chosen with
+ * [`PsbtParams::add_assets`] and the result comes with a [`Finalizer`].
+ */
+export interface PsbtParamsLike {
     /**
-     * Extract the fully-signed transaction as raw hex.
+     * Add spending assets (signing keys and usable timelocks). Without
+     * assets every wallet key is assumed able to sign. If only timelocks are
+     * given, the wallet's keys are used. Only the last `after`/`older` set
+     * across calls is kept.
      */
-    extractTxHex(): string;
+    addAssets(assets: SpendAssets): void;
     /**
-     * Total fee in satoshis. None if any input UTXO value is unknown.
+     * Add an OP_RETURN output carrying `data`.
      */
-    feeAmount(): bigint | undefined;
+    addData(data: ArrayBuffer): void;
+    addGlobalXpubs(): void;
+    addRecipient(address: string, amountSats: bigint): void;
+    addRecipients(recipients: Array<Recipient>): void;
+    addUnspendable(outpoint: OutPoint): void;
     /**
-     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+     * Must-spend a wallet UTXO. Ignored by `replace_by_fee`, which spends the
+     * inputs of the replaced transactions instead.
      */
-    feeRate(): number | undefined;
+    addUtxo(outpoint: OutPoint): void;
+    addUtxos(outpoints: Array<OutPoint>): void;
     /**
-     * Retrieve the UTXO for a given input index. Returns None if unavailable.
+     * Enable BIP-326 anti-fee-sniping using `tip_height` as the current height.
      */
-    getUtxoFor(inputIndex: bigint): TxOut | undefined;
+    antiFeeSnipingHeight(tipHeight: number): void;
     /**
-     * Serialize to a base64-encoded string.
+     * Treat these transactions as canonical (winning any conflicts) while
+     * building this PSBT.
      */
-    toBase64(): string;
+    assumeCanonical(txids: Array<string>): void;
     /**
-     * The unsigned txid.
+     * Send change to this address instead of the wallet's next unused change
+     * address. Required for a sweep (`SelectionStrategy::All` with no recipients).
      */
-    txid(): string;
+    changeAddress(address: string): void;
+    /**
+     * Restrict coin selection by keychain (change vs. external outputs).
+     */
+    changePolicy(policy: ChangeSpendPolicy): void;
+    coinSelection(strategy: SelectionStrategy): void;
+    /**
+     * Exclude UTXOs with fewer than `min_confirms` confirmations from coin selection.
+     */
+    excludeBelowConfirmations(minConfirms: number): void;
+    /**
+     * Exclude unconfirmed UTXOs from coin selection.
+     */
+    excludeUnconfirmed(): void;
+    /**
+     * nSequence for wallet inputs with no override and no CSV requirement.
+     */
+    fallbackSequence(nsequence: number): void;
+    /**
+     * Target fee rate in sat/vB. Defaults to 1 sat/vB.
+     */
+    feeRate(satPerVbyte: number): void;
+    /**
+     * Minimum transaction nLockTime (consensus value: a height below
+     * 500,000,000, otherwise a UNIX timestamp). Raised by any `after()` the
+     * chosen spending path requires.
+     */
+    locktime(locktime: number): void;
+    /**
+     * Only spend the UTXOs added with `add_utxo(s)`.
+     */
+    manuallySelectedOnly(): void;
+    /**
+     * Height used to evaluate coinbase maturity during coin selection.
+     * Defaults to the wallet tip.
+     */
+    maturityHeight(height: number): void;
+    onlyWitnessUtxo(): void;
+    ordering(ordering: TxOrdering): void;
+    removeUtxo(outpoint: OutPoint): void;
+    /**
+     * nSequence for a UTXO added with `add_utxo(s)`. Takes precedence over
+     * `fallback_sequence`.
+     */
+    sequenceOverride(outpoint: OutPoint, nsequence: number): void;
+    /**
+     * Exclude UTXOs from coin selection.
+     */
+    unspendable(outpoints: Array<OutPoint>): void;
+    /**
+     * Transaction version. With version 3 (TRUC), coin selection only spends
+     * unconfirmed UTXOs from v3 parents, and vice versa (BIP-431 rule 2).
+     * Manually added UTXOs bypass this check.
+     */
+    version(version: number): void;
 }
 /**
- * @deprecated Use `PsbtLike` instead.
+ * @deprecated Use `PsbtParamsLike` instead.
  */
-export type PsbtInterface = PsbtLike;
-export declare class Psbt extends UniffiAbstractObject implements PsbtLike {
-    readonly [uniffiTypeNameSymbol] = "Psbt";
+export type PsbtParamsInterface = PsbtParamsLike;
+/**
+ * **Experimental.** Parameters for [`crate::Wallet::create_psbt`] and
+ * [`crate::Wallet::replace_by_fee`], backed by bdk_wallet's unstable
+ * `bdk-tx` API. Unlike [`crate::TxBuilder`], spending paths are chosen with
+ * [`PsbtParams::add_assets`] and the result comes with a [`Finalizer`].
+ */
+export declare class PsbtParams extends UniffiAbstractObject implements PsbtParamsLike {
+    readonly [uniffiTypeNameSymbol] = "PsbtParams";
     readonly [destructorGuardSymbol]: UniffiGcObject;
     readonly [pointerLiteralSymbol]: UniffiHandle;
+    constructor();
     /**
-     * Deserialize from a base64-encoded string.
+     * Add spending assets (signing keys and usable timelocks). Without
+     * assets every wallet key is assumed able to sign. If only timelocks are
+     * given, the wallet's keys are used. Only the last `after`/`older` set
+     * across calls is kept.
      */
-    constructor(psbtBase64: string);
+    addAssets(assets: SpendAssets): void;
     /**
-     * Extract the fully-signed transaction as raw hex.
+     * Add an OP_RETURN output carrying `data`.
      */
-    extractTxHex(): string;
+    addData(data: ArrayBuffer): void;
+    addGlobalXpubs(): void;
+    addRecipient(address: string, amountSats: bigint): void;
+    addRecipients(recipients: Array<Recipient>): void;
+    addUnspendable(outpoint: OutPoint): void;
     /**
-     * Total fee in satoshis. None if any input UTXO value is unknown.
+     * Must-spend a wallet UTXO. Ignored by `replace_by_fee`, which spends the
+     * inputs of the replaced transactions instead.
      */
-    feeAmount(): bigint | undefined;
+    addUtxo(outpoint: OutPoint): void;
+    addUtxos(outpoints: Array<OutPoint>): void;
     /**
-     * Fee rate in sat/vbyte. None if any input UTXO value is unknown.
+     * Enable BIP-326 anti-fee-sniping using `tip_height` as the current height.
      */
-    feeRate(): number | undefined;
+    antiFeeSnipingHeight(tipHeight: number): void;
     /**
-     * Retrieve the UTXO for a given input index. Returns None if unavailable.
+     * Treat these transactions as canonical (winning any conflicts) while
+     * building this PSBT.
      */
-    getUtxoFor(inputIndex: bigint): TxOut | undefined;
+    assumeCanonical(txids: Array<string>): void;
     /**
-     * Serialize to a base64-encoded string.
+     * Send change to this address instead of the wallet's next unused change
+     * address. Required for a sweep (`SelectionStrategy::All` with no recipients).
      */
-    toBase64(): string;
+    changeAddress(address: string): void;
     /**
-     * The unsigned txid.
+     * Restrict coin selection by keychain (change vs. external outputs).
      */
-    txid(): string;
+    changePolicy(policy: ChangeSpendPolicy): void;
+    coinSelection(strategy: SelectionStrategy): void;
+    /**
+     * Exclude UTXOs with fewer than `min_confirms` confirmations from coin selection.
+     */
+    excludeBelowConfirmations(minConfirms: number): void;
+    /**
+     * Exclude unconfirmed UTXOs from coin selection.
+     */
+    excludeUnconfirmed(): void;
+    /**
+     * nSequence for wallet inputs with no override and no CSV requirement.
+     */
+    fallbackSequence(nsequence: number): void;
+    /**
+     * Target fee rate in sat/vB. Defaults to 1 sat/vB.
+     */
+    feeRate(satPerVbyte: number): void;
+    /**
+     * Minimum transaction nLockTime (consensus value: a height below
+     * 500,000,000, otherwise a UNIX timestamp). Raised by any `after()` the
+     * chosen spending path requires.
+     */
+    locktime(locktime: number): void;
+    /**
+     * Only spend the UTXOs added with `add_utxo(s)`.
+     */
+    manuallySelectedOnly(): void;
+    /**
+     * Height used to evaluate coinbase maturity during coin selection.
+     * Defaults to the wallet tip.
+     */
+    maturityHeight(height: number): void;
+    onlyWitnessUtxo(): void;
+    ordering(ordering: TxOrdering): void;
+    removeUtxo(outpoint: OutPoint): void;
+    /**
+     * nSequence for a UTXO added with `add_utxo(s)`. Takes precedence over
+     * `fallback_sequence`.
+     */
+    sequenceOverride(outpoint: OutPoint, nsequence: number): void;
+    /**
+     * Exclude UTXOs from coin selection.
+     */
+    unspendable(outpoints: Array<OutPoint>): void;
+    /**
+     * Transaction version. With version 3 (TRUC), coin selection only spends
+     * unconfirmed UTXOs from v3 parents, and vice versa (BIP-431 rule 2).
+     * Manually added UTXOs bypass this check.
+     */
+    version(version: number): void;
     uniffiDestroy(): void;
-    static instanceOf(obj_: any): obj_ is Psbt;
+    static instanceOf(obj_: any): obj_ is PsbtParams;
 }
 /**
  * A reusable Bitcoin Core JSON-RPC connection.
@@ -5077,117 +5697,14 @@ export interface WalletLike {
     calculateFee(txHex: string): bigint;
     calculateFeeRate(txHex: string): number;
     checkpoints(): Array<BlockId>;
-    derivationIndex(keychain: KeychainKind): number | undefined;
-    derivationOfSpk(scriptHex: string): /*throws*/ DerivationInfo | undefined;
-    descriptorChecksum(keychain: KeychainKind): string;
-    drain(address: string, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    drainWithElectrum(address: string, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    finalizePsbt(psbt: PsbtLike): boolean;
-    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<void>;
-    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<void>;
-    getBalance(): Balance;
-    getTx(txid: string): /*throws*/ string | undefined;
-    getUtxo(outpoint: OutPoint): /*throws*/ LocalOutput | undefined;
-    insertTxout(outpoint: OutPoint, txout: TxOut): void;
-    isMine(scriptHex: string): boolean;
-    keychains(): Array<KeychainInfo>;
-    latestCheckpoint(): BlockId | undefined;
-    listOutput(): Array<LocalOutput>;
-    listUnspent(): Array<LocalOutput>;
-    listUnusedAddresses(keychain: KeychainKind): Array<AddressInfo>;
-    markUsed(keychain: KeychainKind, index: number): boolean;
-    network(): Network;
-    nextDerivationIndex(keychain: KeychainKind): number;
-    nextUnusedAddress(keychain: KeychainKind): AddressInfo;
-    peekAddress(keychain: KeychainKind, index: number): AddressInfo;
-    persist(): boolean;
-    policies(keychain: KeychainKind): /*throws*/ string | undefined;
-    publicDescriptor(keychain: KeychainKind): string;
-    revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
-    revealNextAddress(keychain: KeychainKind): AddressInfo;
-    send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    sendWithElectrum(address: string, amountSats: bigint, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    sentAndReceived(txHex: string): SentAndReceived;
-    sign(psbt: PsbtLike): boolean;
-    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<void>;
-    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<void>;
     /**
-     * Drive a single sync against the Kyoto light client. Awaits until the node
-     * reports it has caught up to the chain tip, applies the resulting update,
-     * and persists. The scan strategy (incremental vs recovery) is fixed when the
-     * `KyotoClient` is built. Safe to call repeatedly while the node is running.
+     * **Experimental.** Create a PSBT with bdk_wallet's unstable bdk-tx API.
+     * Sign the PSBT, then finalize it with the returned `finalizer`.
+     * Persists the wallet afterwards (a change address may be revealed).
      */
-    syncWithKyoto(client: KyotoClientLike, asyncOpts_?: {
+    createPsbt(params: PsbtParamsLike, asyncOpts_?: {
         signal: AbortSignal;
-    }): Promise<void>;
-    /**
-     * Sync by downloading full blocks from a Bitcoin Core node.
-     *
-     * Walks blocks from `start_height` up to the node's chain tip, applying each
-     * to the wallet. `start_height` only matters on a wallet with no history yet
-     * (use the wallet's birthday height); once the wallet has a checkpoint, the
-     * emitter resumes from there and `start_height` is effectively a floor.
-     *
-     * If `fetch_mempool` is true, unconfirmed mempool transactions are applied
-     * after the chain is caught up, and txs that dropped out of the mempool are
-     * marked evicted.
-     *
-     * Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
-     * blocking task that owns the wallet across many RPC round-trips, rather than
-     * collecting every block into memory first.
-     */
-    syncWithRpc(client: RpcClientLike, startHeight: number, fetchMempool: boolean, inspector: RpcSyncProgressInspector | undefined, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<void>;
-    transactions(): Array<TxDetails>;
-    txDetails(txid: string): /*throws*/ TxDetails | undefined;
-    unmarkUsed(keychain: KeychainKind, index: number): boolean;
-}
-/**
- * @deprecated Use `WalletLike` instead.
- */
-export type WalletInterface = WalletLike;
-export declare class Wallet extends UniffiAbstractObject implements WalletLike {
-    readonly [uniffiTypeNameSymbol] = "Wallet";
-    readonly [destructorGuardSymbol]: UniffiGcObject;
-    readonly [pointerLiteralSymbol]: UniffiHandle;
-    /**
-     * Create or load a persisted wallet (sync — for async use create_wallet()).
-     */
-    constructor(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string);
-    static newFromMultipath(descriptor: string, network: Network, dbPath: string): WalletLike;
-    broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    broadcastWithEsplora(client: EsploraClientLike, psbt: PsbtLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    broadcastWithKyoto(client: KyotoClientLike, psbt: PsbtLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    broadcastWithRpc(client: RpcClientLike, psbt: PsbtLike, asyncOpts_?: {
-        signal: AbortSignal;
-    }): Promise<string>;
-    buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
-    calculateFee(txHex: string): bigint;
-    calculateFeeRate(txHex: string): number;
-    checkpoints(): Array<BlockId>;
+    }): Promise<CreatePsbtResult>;
     derivationIndex(keychain: KeychainKind): number | undefined;
     derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
     descriptorChecksum(keychain: KeychainKind): string;
@@ -5221,7 +5738,24 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     peekAddress(keychain: KeychainKind, index: number): AddressInfo;
     persist(): boolean;
     policies(keychain: KeychainKind): string | undefined;
+    /**
+     * Timelock requirements of a spending path, for `TxBuilder.set_condition`.
+     * `path_map_json` maps policy item ids to the chosen child indexes, e.g.
+     * `{"abcd1234": [1]}`. Returns an empty condition for descriptors without
+     * a policy.
+     */
+    policyCondition(pathMapJson: string, keychain: KeychainKind): Condition;
     publicDescriptor(keychain: KeychainKind): string;
+    /**
+     * **Experimental.** Replace one or more unconfirmed wallet transactions
+     * (RBF) with bdk_wallet's unstable bdk-tx API. The replacement spends the
+     * inputs of the originals, so `PsbtParams.add_utxo(s)` is ignored; add
+     * recipients again (they are not copied from the originals).
+     * Persists the wallet afterwards.
+     */
+    replaceByFee(params: PsbtParamsLike, txids: Array<string>, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<CreatePsbtResult>;
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
     revealNextAddress(keychain: KeychainKind): AddressInfo;
     send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
@@ -5232,6 +5766,23 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     }): Promise<string>;
     sentAndReceived(txHex: string): SentAndReceived;
     sign(psbt: PsbtLike): boolean;
+    /**
+     * Sign with private keys from the given descriptors instead of keys held
+     * by the wallet (the non-deprecated signing path in bdk_wallet 3.2).
+     * Pass the wallet's private descriptor(s), or any descriptor containing
+     * keys that should sign. Multipath (`<0;1>`) private descriptors are not
+     * supported by miniscript; pass one descriptor per path instead.
+     * Returns whether the PSBT was finalized.
+     */
+    signWithDescriptors(psbt: PsbtLike, descriptors: Array<string>): boolean;
+    /**
+     * Spending policy of the keychain's descriptor as JSON (`null` for a
+     * plain single-key descriptor). Use the policy item `id`s to build a
+     * path map for `policy_condition`. Ids may differ from the deprecated
+     * `policies()` output when the wallet holds private keys, so don't mix
+     * them with `TxBuilder.policy_path`.
+     */
+    spendingPolicy(keychain: KeychainKind): string | undefined;
     syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
@@ -5267,6 +5818,169 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
         signal: AbortSignal;
     }): Promise<void>;
     transactions(): Array<TxDetails>;
+    /**
+     * Finalize the PSBT and report the outcome of every input (finalized,
+     * already final, foreign input, or unsatisfied with the reason).
+     */
+    tryFinalizePsbt(psbt: PsbtLike): FinalizePsbtOutcome;
+    txDetails(txid: string): TxDetails | undefined;
+    unmarkUsed(keychain: KeychainKind, index: number): boolean;
+}
+/**
+ * @deprecated Use `WalletLike` instead.
+ */
+export type WalletInterface = WalletLike;
+export declare class Wallet extends UniffiAbstractObject implements WalletLike {
+    readonly [uniffiTypeNameSymbol] = "Wallet";
+    readonly [destructorGuardSymbol]: UniffiGcObject;
+    readonly [pointerLiteralSymbol]: UniffiHandle;
+    /**
+     * Create or load a persisted wallet (sync — for async use create_wallet()).
+     */
+    constructor(descriptor: string, changeDescriptor: string | undefined, network: Network, dbPath: string);
+    static newFromMultipath(descriptor: string, network: Network, dbPath: string): WalletLike;
+    broadcastWithElectrum(client: ElectrumClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    broadcastWithEsplora(client: EsploraClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    broadcastWithKyoto(client: KyotoClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    broadcastWithRpc(client: RpcClientLike, psbt: PsbtLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    buildFeeBump(txid: string, newFeeRate: number): PsbtLike;
+    calculateFee(txHex: string): bigint;
+    calculateFeeRate(txHex: string): number;
+    checkpoints(): Array<BlockId>;
+    /**
+     * **Experimental.** Create a PSBT with bdk_wallet's unstable bdk-tx API.
+     * Sign the PSBT, then finalize it with the returned `finalizer`.
+     * Persists the wallet afterwards (a change address may be revealed).
+     */
+    createPsbt(params: PsbtParamsLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<CreatePsbtResult>;
+    derivationIndex(keychain: KeychainKind): number | undefined;
+    derivationOfSpk(scriptHex: string): DerivationInfo | undefined;
+    descriptorChecksum(keychain: KeychainKind): string;
+    drain(address: string, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    drainWithElectrum(address: string, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    finalizePsbt(psbt: PsbtLike): boolean;
+    fullScanWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    fullScanWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: FullScanProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    getBalance(): Balance;
+    getTx(txid: string): string | undefined;
+    getUtxo(outpoint: OutPoint): LocalOutput | undefined;
+    insertTxout(outpoint: OutPoint, txout: TxOut): void;
+    isMine(scriptHex: string): boolean;
+    keychains(): Array<KeychainInfo>;
+    latestCheckpoint(): BlockId | undefined;
+    listOutput(): Array<LocalOutput>;
+    listUnspent(): Array<LocalOutput>;
+    listUnusedAddresses(keychain: KeychainKind): Array<AddressInfo>;
+    markUsed(keychain: KeychainKind, index: number): boolean;
+    network(): Network;
+    nextDerivationIndex(keychain: KeychainKind): number;
+    nextUnusedAddress(keychain: KeychainKind): AddressInfo;
+    peekAddress(keychain: KeychainKind, index: number): AddressInfo;
+    persist(): boolean;
+    policies(keychain: KeychainKind): string | undefined;
+    /**
+     * Timelock requirements of a spending path, for `TxBuilder.set_condition`.
+     * `path_map_json` maps policy item ids to the chosen child indexes, e.g.
+     * `{"abcd1234": [1]}`. Returns an empty condition for descriptors without
+     * a policy.
+     */
+    policyCondition(pathMapJson: string, keychain: KeychainKind): Condition;
+    publicDescriptor(keychain: KeychainKind): string;
+    /**
+     * **Experimental.** Replace one or more unconfirmed wallet transactions
+     * (RBF) with bdk_wallet's unstable bdk-tx API. The replacement spends the
+     * inputs of the originals, so `PsbtParams.add_utxo(s)` is ignored; add
+     * recipients again (they are not copied from the originals).
+     * Persists the wallet afterwards.
+     */
+    replaceByFee(params: PsbtParamsLike, txids: Array<string>, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<CreatePsbtResult>;
+    revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
+    revealNextAddress(keychain: KeychainKind): AddressInfo;
+    send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    sendWithElectrum(address: string, amountSats: bigint, feeRate: number, client: ElectrumClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<string>;
+    sentAndReceived(txHex: string): SentAndReceived;
+    sign(psbt: PsbtLike): boolean;
+    /**
+     * Sign with private keys from the given descriptors instead of keys held
+     * by the wallet (the non-deprecated signing path in bdk_wallet 3.2).
+     * Pass the wallet's private descriptor(s), or any descriptor containing
+     * keys that should sign. Multipath (`<0;1>`) private descriptors are not
+     * supported by miniscript; pass one descriptor per path instead.
+     * Returns whether the PSBT was finalized.
+     */
+    signWithDescriptors(psbt: PsbtLike, descriptors: Array<string>): boolean;
+    /**
+     * Spending policy of the keychain's descriptor as JSON (`null` for a
+     * plain single-key descriptor). Use the policy item `id`s to build a
+     * path map for `policy_condition`. Ids may differ from the deprecated
+     * `policies()` output when the wallet holds private keys, so don't mix
+     * them with `TxBuilder.policy_path`.
+     */
+    spendingPolicy(keychain: KeychainKind): string | undefined;
+    syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    syncWithEsplora(client: EsploraClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    /**
+     * Drive a single sync against the Kyoto light client. Awaits until the node
+     * reports it has caught up to the chain tip, applies the resulting update,
+     * and persists. The scan strategy (incremental vs recovery) is fixed when the
+     * `KyotoClient` is built. Safe to call repeatedly while the node is running.
+     */
+    syncWithKyoto(client: KyotoClientLike, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    /**
+     * Sync by downloading full blocks from a Bitcoin Core node.
+     *
+     * Walks blocks from `start_height` up to the node's chain tip, applying each
+     * to the wallet. `start_height` only matters on a wallet with no history yet
+     * (use the wallet's birthday height); once the wallet has a checkpoint, the
+     * emitter resumes from there and `start_height` is effectively a floor.
+     *
+     * If `fetch_mempool` is true, unconfirmed mempool transactions are applied
+     * after the chain is caught up, and txs that dropped out of the mempool are
+     * marked evicted.
+     *
+     * Takes `Arc<Self>` (not `&self`) because the block-apply loop runs inside a
+     * blocking task that owns the wallet across many RPC round-trips, rather than
+     * collecting every block into memory first.
+     */
+    syncWithRpc(client: RpcClientLike, startHeight: number, fetchMempool: boolean, inspector: RpcSyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    transactions(): Array<TxDetails>;
+    /**
+     * Finalize the PSBT and report the outcome of every input (finalized,
+     * already final, foreign input, or unsatisfied with the reason).
+     */
+    tryFinalizePsbt(psbt: PsbtLike): FinalizePsbtOutcome;
     txDetails(txid: string): TxDetails | undefined;
     unmarkUsed(keychain: KeychainKind, index: number): boolean;
     uniffiDestroy(): void;
@@ -5304,6 +6018,12 @@ export interface TxBuilderLike {
     onlyWitnessUtxo(): void;
     ordering(ordering: TxOrdering): void;
     policyPath(pathMapJson: string, keychain: KeychainKind): void;
+    /**
+     * Apply the timelocks of a spending path (nLockTime / nSequence) without a
+     * policy path. Get one from `Wallet::policy_condition`, or build it
+     * directly. Takes precedence over `policy_path` when both are set.
+     */
+    setCondition(condition: Condition): void;
     setExactSequence(nsequence: number): void;
     setRecipients(recipients: Array<Recipient>): void;
     sighash(sighashType: number): void;
@@ -5350,6 +6070,12 @@ export declare class TxBuilder extends UniffiAbstractObject implements TxBuilder
     onlyWitnessUtxo(): void;
     ordering(ordering: TxOrdering): void;
     policyPath(pathMapJson: string, keychain: KeychainKind): void;
+    /**
+     * Apply the timelocks of a spending path (nLockTime / nSequence) without a
+     * policy path. Get one from `Wallet::policy_condition`, or build it
+     * directly. Takes precedence over `policy_path` when both are set.
+     */
+    setCondition(condition: Condition): void;
     setExactSequence(nsequence: number): void;
     setRecipients(recipients: Array<Recipient>): void;
     sighash(sighashType: number): void;
@@ -5407,12 +6133,26 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): ChangeSpendPolicy;
             lower(value: ChangeSpendPolicy, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
         };
+        FfiConverterTypeCondition: {
+            readFromCursor(c: Cursor): Condition;
+            writeIntoCursor(value: Condition, c: Cursor): void;
+            allocationSize(value: Condition): number;
+            lift(value: UniffiByteArray): Condition;
+            lower(value: Condition, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
         FfiConverterTypeConfirmationBlockTime: {
             readFromCursor(c: Cursor): ConfirmationBlockTime;
             writeIntoCursor(value: ConfirmationBlockTime, c: Cursor): void;
             allocationSize(value: ConfirmationBlockTime): number;
             lift(value: UniffiByteArray): ConfirmationBlockTime;
             lower(value: ConfirmationBlockTime, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
+        FfiConverterTypeCreatePsbtResult: {
+            readFromCursor(c: Cursor): CreatePsbtResult;
+            writeIntoCursor(value: CreatePsbtResult, c: Cursor): void;
+            allocationSize(value: CreatePsbtResult): number;
+            lift(value: UniffiByteArray): CreatePsbtResult;
+            lower(value: CreatePsbtResult, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
         };
         FfiConverterTypeDerivationInfo: {
             readFromCursor(c: Cursor): DerivationInfo;
@@ -5430,6 +6170,28 @@ declare const _default: Readonly<{
         };
         FfiConverterTypeElectrumClient: FfiConverterObject<ElectrumClientLike>;
         FfiConverterTypeEsploraClient: FfiConverterObject<EsploraClientLike>;
+        FfiConverterTypeFinalizeInputOutcome: {
+            readFromCursor(c: Cursor): FinalizeInputOutcome;
+            writeIntoCursor(value: FinalizeInputOutcome, c: Cursor): void;
+            allocationSize(value: FinalizeInputOutcome): number;
+            lift(value: UniffiByteArray): FinalizeInputOutcome;
+            lower(value: FinalizeInputOutcome, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
+        FfiConverterTypeFinalizeInputResult: {
+            readFromCursor(c: Cursor): FinalizeInputResult;
+            writeIntoCursor(value: FinalizeInputResult, c: Cursor): void;
+            allocationSize(value: FinalizeInputResult): number;
+            lift(value: UniffiByteArray): FinalizeInputResult;
+            lower(value: FinalizeInputResult, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
+        FfiConverterTypeFinalizePsbtOutcome: {
+            readFromCursor(c: Cursor): FinalizePsbtOutcome;
+            writeIntoCursor(value: FinalizePsbtOutcome, c: Cursor): void;
+            allocationSize(value: FinalizePsbtOutcome): number;
+            lift(value: UniffiByteArray): FinalizePsbtOutcome;
+            lower(value: FinalizePsbtOutcome, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
+        FfiConverterTypeFinalizer: FfiConverterObject<FinalizerLike>;
         FfiConverterTypeFullScanProgressInspector: FfiConverterObjectWithCallbacks<FullScanProgressInspector>;
         FfiConverterTypeKeychainInfo: {
             readFromCursor(c: Cursor): KeychainInfo;
@@ -5491,6 +6253,7 @@ declare const _default: Readonly<{
             lower(value: OutPoint, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
         };
         FfiConverterTypePsbt: FfiConverterObject<PsbtLike>;
+        FfiConverterTypePsbtParams: FfiConverterObject<PsbtParamsLike>;
         FfiConverterTypeRecipient: {
             readFromCursor(c: Cursor): Recipient;
             writeIntoCursor(value: Recipient, c: Cursor): void;
@@ -5500,6 +6263,13 @@ declare const _default: Readonly<{
         };
         FfiConverterTypeRpcClient: FfiConverterObject<RpcClientLike>;
         FfiConverterTypeRpcSyncProgressInspector: FfiConverterObjectWithCallbacks<RpcSyncProgressInspector>;
+        FfiConverterTypeSelectionStrategy: {
+            readFromCursor(c: Cursor): SelectionStrategy;
+            writeIntoCursor(value: SelectionStrategy, c: Cursor): void;
+            allocationSize(value: SelectionStrategy): number;
+            lift(value: UniffiByteArray): SelectionStrategy;
+            lower(value: SelectionStrategy, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
         FfiConverterTypeSentAndReceived: {
             readFromCursor(c: Cursor): SentAndReceived;
             writeIntoCursor(value: SentAndReceived, c: Cursor): void;
@@ -5513,6 +6283,13 @@ declare const _default: Readonly<{
             allocationSize(value: SingleKeyDescriptorTemplate): number;
             lift(value: UniffiByteArray): SingleKeyDescriptorTemplate;
             lower(value: SingleKeyDescriptorTemplate, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
+        FfiConverterTypeSpendAssets: {
+            readFromCursor(c: Cursor): SpendAssets;
+            writeIntoCursor(value: SpendAssets, c: Cursor): void;
+            allocationSize(value: SpendAssets): number;
+            lift(value: UniffiByteArray): SpendAssets;
+            lower(value: SpendAssets, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
         };
         FfiConverterTypeSyncProgressInspector: FfiConverterObjectWithCallbacks<SyncProgressInspector>;
         FfiConverterTypeTxBuilder: FfiConverterObject<TxBuilderLike>;
