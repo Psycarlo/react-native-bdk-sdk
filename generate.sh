@@ -24,13 +24,11 @@ fi
 echo "📦 Installing dependencies..."
 pnpm install --ignore-scripts
 
-# Targets are installed from ffi/ so they go to the toolchain pinned in
-# ffi/rust-toolchain.toml, which builds the bindings.
 echo "📦 Ensuring Android Rust targets are installed..."
-(cd ffi && rustup target add aarch64-linux-android)
-(cd ffi && rustup target add armv7-linux-androideabi)
-(cd ffi && rustup target add x86_64-linux-android)
-(cd ffi && rustup target add i686-linux-android)
+rustup target add aarch64-linux-android
+rustup target add armv7-linux-androideabi
+rustup target add x86_64-linux-android
+rustup target add i686-linux-android
 
 echo ""
 echo "🤖 Building for Android..."
@@ -40,9 +38,9 @@ pnpm ubrn:android
 if [ "$OS" = "Darwin" ]; then
     echo ""
     echo "📦 Ensuring iOS Rust targets are installed..."
-    (cd ffi && rustup target add aarch64-apple-ios)
-    (cd ffi && rustup target add x86_64-apple-ios)
-    (cd ffi && rustup target add aarch64-apple-ios-sim)
+    rustup target add aarch64-apple-ios
+    rustup target add x86_64-apple-ios
+    rustup target add aarch64-apple-ios-sim
 
     echo ""
     echo "🍎 Building for iOS..."
