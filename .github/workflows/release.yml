@@ -50,8 +50,9 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          # Use the toolchain pinned in ffi/rust-toolchain.toml.
-          rust-src-dir: ffi
+          # Uses the toolchain pinned in rust-toolchain.toml. It must stay at
+          # the repo root: ubrn runs `cargo run` from here and rustup passes
+          # that toolchain on to the ffi build via RUSTUP_TOOLCHAIN.
           # Leave RUSTFLAGS unset: it would override ffi/.cargo/config.toml
           # (bdk_wallet unstable cfg, Android 16KB page size) and ubrn's
           # flags, so builds match a local `just generate`.
@@ -102,8 +103,9 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          # Use the toolchain pinned in ffi/rust-toolchain.toml.
-          rust-src-dir: ffi
+          # Uses the toolchain pinned in rust-toolchain.toml. It must stay at
+          # the repo root: ubrn runs `cargo run` from here and rustup passes
+          # that toolchain on to the ffi build via RUSTUP_TOOLCHAIN.
           # Leave RUSTFLAGS unset: it would override ffi/.cargo/config.toml
           # (bdk_wallet unstable cfg, Android 16KB page size) and ubrn's
           # flags, so builds match a local `just generate`.

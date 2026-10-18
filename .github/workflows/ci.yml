@@ -13,8 +13,8 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          # Use the toolchain pinned in ffi/rust-toolchain.toml.
-          rust-src-dir: ffi
+          # Uses the toolchain pinned in rust-toolchain.toml.
+          cache-workspaces: ffi
           # Sets RUSTFLAGS, which overrides ffi/.cargo/config.toml, so the
           # bdk_wallet unstable cfg must be repeated here.
           rustflags: "-D warnings --cfg bdk_wallet_unstable"
