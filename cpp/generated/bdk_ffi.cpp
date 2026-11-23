@@ -192,6 +192,11 @@ extern "C" {
         RustBuffer url, 
         RustCallStatus *uniffi_out_err
     );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_electrumclient_with_options(
+        RustBuffer url, 
+        uint64_t batch_size, 
+        RustCallStatus *uniffi_out_err
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_esploraclient(
         /*handle*/ uint64_t handle, 
         RustCallStatus *uniffi_out_err
@@ -202,6 +207,11 @@ extern "C" {
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_esploraclient_new(
         RustBuffer url, 
+        RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_constructor_esploraclient_with_options(
+        RustBuffer url, 
+        uint64_t parallel_requests, 
         RustCallStatus *uniffi_out_err
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_clone_kyotoclient(
@@ -935,6 +945,11 @@ extern "C" {
         RustBuffer keychain, 
         RustCallStatus *uniffi_out_err
     );
+    RustBuffer uniffi_bdk_ffi_fn_method_wallet_revealed_scripts(
+        /*handle*/ uint64_t ptr, 
+        RustBuffer keychain, 
+        RustCallStatus *uniffi_out_err
+    );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_send(
         /*handle*/ uint64_t ptr, 
         RustBuffer address, 
@@ -969,6 +984,18 @@ extern "C" {
         /*handle*/ uint64_t ptr, 
         RustBuffer keychain, 
         RustCallStatus *uniffi_out_err
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t client, 
+        RustBuffer request, 
+        RustBuffer inspector
+    );
+    /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora(
+        /*handle*/ uint64_t ptr, 
+        /*handle*/ uint64_t client, 
+        RustBuffer request, 
+        RustBuffer inspector
     );
     /*handle*/ uint64_t uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
         /*handle*/ uint64_t ptr, 
@@ -1540,6 +1567,8 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address(
     );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts(
+    );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_send(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum(
@@ -1551,6 +1580,10 @@ extern "C" {
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_spending_policy(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora(
     );
     uint16_t uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(
     );
@@ -1570,7 +1603,11 @@ extern "C" {
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_electrumclient_new(
     );
+    uint16_t uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options(
+    );
     uint16_t uniffi_bdk_ffi_checksum_constructor_esploraclient_new(
+    );
+    uint16_t uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options(
     );
     uint16_t uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(
     );
@@ -4906,6 +4943,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_constructor_electrumclient_new(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_with_options"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_with_options"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_constructor_electrumclient_with_options(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_clone_esploraclient"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_clone_esploraclient"),
@@ -4928,6 +4973,14 @@ NativeBdkFfi::NativeBdkFfi(
         1,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_with_options"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_with_options"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_with_options(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_clone_kyotoclient"] = jsi::Function::createFromHostFunction(
@@ -6178,6 +6231,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_reveal_next_address(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_revealed_scripts"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_revealed_scripts"),
+        2,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_revealed_scripts(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_send"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_send"),
@@ -6224,6 +6285,22 @@ NativeBdkFfi::NativeBdkFfi(
         2,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_fn_method_wallet_spending_policy(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum"),
+        4,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora"),
+        4,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum"] = jsi::Function::createFromHostFunction(
@@ -7810,6 +7887,14 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_send"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_send"),
@@ -7856,6 +7941,22 @@ NativeBdkFfi::NativeBdkFfi(
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_spending_policy(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum"] = jsi::Function::createFromHostFunction(
@@ -7930,12 +8031,28 @@ NativeBdkFfi::NativeBdkFfi(
             return this->cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(rt, thisVal, args, count);
         }
     );
+    props["ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options(rt, thisVal, args, count);
+        }
+    );
     props["ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new"] = jsi::Function::createFromHostFunction(
         rt,
         jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new"),
         0,
         [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
             return this->cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(rt, thisVal, args, count);
+        }
+    );
+    props["ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options"] = jsi::Function::createFromHostFunction(
+        rt,
+        jsi::PropNameID::forAscii(rt, "ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options"),
+        0,
+        [this](jsi::Runtime &rt, const jsi::Value &thisVal, const jsi::Value *args, size_t count) -> jsi::Value {
+            return this->cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options(rt, thisVal, args, count);
         }
     );
     props["ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new"] = jsi::Function::createFromHostFunction(
@@ -8475,6 +8592,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_electrumclient_new(js
         
         return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_electrumclient_with_options(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_constructor_electrumclient_with_options(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_clone_esploraclient(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_clone_esploraclient(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), 
@@ -8498,6 +8625,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_free_esploraclient(jsi::Runtime& 
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
         auto value = uniffi_bdk_ffi_fn_constructor_esploraclient_new(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_constructor_esploraclient_with_options(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_constructor_esploraclient_with_options(uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[1]), 
             &status
         );
         uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
@@ -10058,6 +10195,16 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_reveal_next_address
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_revealed_scripts(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        RustCallStatus status = uniffi::bdk_ffi::Bridging<RustCallStatus>::rustSuccess(rt);
+        auto value = uniffi_bdk_ffi_fn_method_wallet_revealed_scripts(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), 
+            &status
+        );
+        uniffi::bdk_ffi::Bridging<RustCallStatus>::copyIntoJs(rt, callInvoker, status, args[count - 1]);
+
+        
+        return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_send(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_send(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2]), uniffi_jsi::Bridging<double>::fromJs(rt, callInvoker, args[3]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[4])
         );
@@ -10111,6 +10258,20 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_spending_policy(jsi
 
         
         return uniffi::bdk_ffi::Bridging<RustBuffer>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3])
+        );
+
+        
+        return uniffi_jsi::Bridging</*handle*/ uint64_t>::toJs(rt, callInvoker, value);
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[0]), uniffi_jsi::Bridging</*handle*/ uint64_t>::fromJs(rt, callInvoker, args[1]), uniffi_jsi::Bridging<uint64_t>::fromJs(rt, callInvoker, args[2]), uniffi::bdk_ffi::Bridging<RustBuffer>::fromJs(rt, callInvoker, args[3])
@@ -11578,6 +11739,13 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_a
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_send(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_send(
         );
@@ -11615,6 +11783,20 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sign_with_des
 }
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_spending_policy(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_method_wallet_spending_policy(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora(
         );
 
         
@@ -11683,8 +11865,22 @@ jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_
         
         return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
 }
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
 jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
         auto value = uniffi_bdk_ffi_checksum_constructor_esploraclient_new(
+        );
+
+        
+        return uniffi_jsi::Bridging<uint16_t>::toJs(rt, callInvoker, value);
+}
+jsi::Value NativeBdkFfi::cpp_uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options(jsi::Runtime& rt, const jsi::Value& thisVal, const jsi::Value* args, size_t count) {
+        auto value = uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options(
         );
 
         

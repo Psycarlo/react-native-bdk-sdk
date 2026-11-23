@@ -4583,6 +4583,38 @@ export declare const Recipient: Readonly<{
     new: (partial: Partial<Recipient> & Required<Omit<Recipient, never>>) => Recipient;
     defaults: () => Partial<Recipient>;
 }>;
+/**
+ * A revealed wallet script and whether a transaction has used it.
+ */
+export type RevealedScript = {
+    index: number;
+    scriptHex: string;
+    isUsed: boolean;
+};
+/**
+ * Generated factory for {@link RevealedScript} record objects.
+ */
+export declare const RevealedScript: Readonly<{
+    create: (partial: Partial<RevealedScript> & Required<Omit<RevealedScript, never>>) => RevealedScript;
+    new: (partial: Partial<RevealedScript> & Required<Omit<RevealedScript, never>>) => RevealedScript;
+    defaults: () => Partial<RevealedScript>;
+}>;
+/**
+ * A wallet script by its position in a keychain. Used instead of raw
+ * scripts so a sync can only ask the server about the wallet's own scripts.
+ */
+export type ScriptPosition = {
+    keychain: KeychainKind;
+    index: number;
+};
+/**
+ * Generated factory for {@link ScriptPosition} record objects.
+ */
+export declare const ScriptPosition: Readonly<{
+    create: (partial: Partial<ScriptPosition> & Required<Omit<ScriptPosition, never>>) => ScriptPosition;
+    new: (partial: Partial<ScriptPosition> & Required<Omit<ScriptPosition, never>>) => ScriptPosition;
+    defaults: () => Partial<ScriptPosition>;
+}>;
 export type SentAndReceived = {
     sent: bigint;
     received: bigint;
@@ -4622,6 +4654,24 @@ export declare const SpendAssets: Readonly<{
     create: (partial: Partial<SpendAssets> & Required<Omit<SpendAssets, "after" | "older">>) => SpendAssets;
     new: (partial: Partial<SpendAssets> & Required<Omit<SpendAssets, "after" | "older">>) => SpendAssets;
     defaults: () => Partial<SpendAssets>;
+}>;
+/**
+ * What a partial sync asks the server about: wallet scripts (by position),
+ * outpoints (to find what spends them) and txids (to find whether they
+ * confirmed or left the mempool).
+ */
+export type SyncScriptsRequest = {
+    scripts: Array<ScriptPosition>;
+    outpoints: Array<OutPoint>;
+    txids: Array<string>;
+};
+/**
+ * Generated factory for {@link SyncScriptsRequest} record objects.
+ */
+export declare const SyncScriptsRequest: Readonly<{
+    create: (partial: Partial<SyncScriptsRequest> & Required<Omit<SyncScriptsRequest, never>>) => SyncScriptsRequest;
+    new: (partial: Partial<SyncScriptsRequest> & Required<Omit<SyncScriptsRequest, never>>) => SyncScriptsRequest;
+    defaults: () => Partial<SyncScriptsRequest>;
 }>;
 export type TxInput = {
     previousTxid: string;
@@ -5101,6 +5151,12 @@ export declare class ElectrumClient extends UniffiAbstractObject implements Elec
      * url: e.g. "ssl://electrum.blockstream.info:60002" or "tcp://localhost:50001"
      */
     constructor(url: string);
+    /**
+     * Connect to an Electrum server, sending up to `batch_size` scripts per
+     * request in syncs and full scans. Larger batches cut round trips, which
+     * matters most on high-latency links such as Tor.
+     */
+    static withOptions(url: string, batchSize: bigint): ElectrumClientLike;
     uniffiDestroy(): void;
     static instanceOf(obj_: any): obj_ is ElectrumClient;
 }
@@ -5127,6 +5183,11 @@ export declare class EsploraClient extends UniffiAbstractObject implements Esplo
      * url: e.g. "https://blockstream.info/api" or "https://mempool.space/api"
      */
     constructor(url: string);
+    /**
+     * Connect to an Esplora server, running up to `parallel_requests` HTTP
+     * requests at once in syncs and full scans.
+     */
+    static withOptions(url: string, parallelRequests: bigint): EsploraClientLike;
     uniffiDestroy(): void;
     static instanceOf(obj_: any): obj_ is EsploraClient;
 }
@@ -5758,6 +5819,12 @@ export interface WalletLike {
     }): Promise<CreatePsbtResult>;
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
     revealNextAddress(keychain: KeychainKind): AddressInfo;
+    /**
+     * The revealed scripts of `keychain`, in index order, with whether a
+     * transaction has used each one. Lets the caller pick which scripts a
+     * partial sync should check.
+     */
+    revealedScripts(keychain: KeychainKind): Array<RevealedScript>;
     send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
@@ -5783,6 +5850,22 @@ export interface WalletLike {
      * them with `TxBuilder.policy_path`.
      */
     spendingPolicy(keychain: KeychainKind): string | undefined;
+    /**
+     * Sync only the given scripts, outpoints and txids against Electrum.
+     * Scripts are named by keychain position and must already be revealed.
+     * Use [`Wallet::sync_with_electrum`] to check every revealed script.
+     */
+    syncScriptsWithElectrum(client: ElectrumClientLike, request: SyncScriptsRequest, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    /**
+     * Sync only the given scripts, outpoints and txids against Esplora.
+     * Scripts are named by keychain position and must already be revealed.
+     * Use [`Wallet::sync_with_esplora`] to check every revealed script.
+     */
+    syncScriptsWithEsplora(client: EsploraClientLike, request: SyncScriptsRequest, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
@@ -5916,6 +5999,12 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
     }): Promise<CreatePsbtResult>;
     revealAddressesTo(keychain: KeychainKind, index: number): Array<AddressInfo>;
     revealNextAddress(keychain: KeychainKind): AddressInfo;
+    /**
+     * The revealed scripts of `keychain`, in index order, with whether a
+     * transaction has used each one. Lets the caller pick which scripts a
+     * partial sync should check.
+     */
+    revealedScripts(keychain: KeychainKind): Array<RevealedScript>;
     send(address: string, amountSats: bigint, feeRate: number, client: EsploraClientLike, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<string>;
@@ -5941,6 +6030,22 @@ export declare class Wallet extends UniffiAbstractObject implements WalletLike {
      * them with `TxBuilder.policy_path`.
      */
     spendingPolicy(keychain: KeychainKind): string | undefined;
+    /**
+     * Sync only the given scripts, outpoints and txids against Electrum.
+     * Scripts are named by keychain position and must already be revealed.
+     * Use [`Wallet::sync_with_electrum`] to check every revealed script.
+     */
+    syncScriptsWithElectrum(client: ElectrumClientLike, request: SyncScriptsRequest, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
+    /**
+     * Sync only the given scripts, outpoints and txids against Esplora.
+     * Scripts are named by keychain position and must already be revealed.
+     * Use [`Wallet::sync_with_esplora`] to check every revealed script.
+     */
+    syncScriptsWithEsplora(client: EsploraClientLike, request: SyncScriptsRequest, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
+        signal: AbortSignal;
+    }): Promise<void>;
     syncWithElectrum(client: ElectrumClientLike, stopGap: bigint, inspector: SyncProgressInspector | undefined, asyncOpts_?: {
         signal: AbortSignal;
     }): Promise<void>;
@@ -6261,8 +6366,22 @@ declare const _default: Readonly<{
             lift(value: UniffiByteArray): Recipient;
             lower(value: Recipient, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
         };
+        FfiConverterTypeRevealedScript: {
+            readFromCursor(c: Cursor): RevealedScript;
+            writeIntoCursor(value: RevealedScript, c: Cursor): void;
+            allocationSize(value: RevealedScript): number;
+            lift(value: UniffiByteArray): RevealedScript;
+            lower(value: RevealedScript, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
         FfiConverterTypeRpcClient: FfiConverterObject<RpcClientLike>;
         FfiConverterTypeRpcSyncProgressInspector: FfiConverterObjectWithCallbacks<RpcSyncProgressInspector>;
+        FfiConverterTypeScriptPosition: {
+            readFromCursor(c: Cursor): ScriptPosition;
+            writeIntoCursor(value: ScriptPosition, c: Cursor): void;
+            allocationSize(value: ScriptPosition): number;
+            lift(value: UniffiByteArray): ScriptPosition;
+            lower(value: ScriptPosition, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
         FfiConverterTypeSelectionStrategy: {
             readFromCursor(c: Cursor): SelectionStrategy;
             writeIntoCursor(value: SelectionStrategy, c: Cursor): void;
@@ -6292,6 +6411,13 @@ declare const _default: Readonly<{
             lower(value: SpendAssets, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
         };
         FfiConverterTypeSyncProgressInspector: FfiConverterObjectWithCallbacks<SyncProgressInspector>;
+        FfiConverterTypeSyncScriptsRequest: {
+            readFromCursor(c: Cursor): SyncScriptsRequest;
+            writeIntoCursor(value: SyncScriptsRequest, c: Cursor): void;
+            allocationSize(value: SyncScriptsRequest): number;
+            lift(value: UniffiByteArray): SyncScriptsRequest;
+            lower(value: SyncScriptsRequest, alloc: import("@ubjs/core").RustBufferAllocator): UniffiByteArray;
+        };
         FfiConverterTypeTxBuilder: FfiConverterObject<TxBuilderLike>;
         FfiConverterTypeTxDetails: {
             readFromCursor(c: Cursor): TxDetails;

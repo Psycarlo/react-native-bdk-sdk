@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+Faster Electrum and Esplora syncs for wallets with many used addresses. No breaking changes.
+
+### Added
+
+- `BdkWallet.syncScriptsWithElectrum` and `BdkWallet.syncScriptsWithEsplora` — sync only chosen scripts (by keychain position, already revealed), outpoints and txids instead of every revealed script. The request keeps the chain tip and the txids already expected under the chosen scripts, like the full sync
+- `BdkWallet.revealedScripts` — the revealed scripts of a keychain with their index and whether they are used, to choose what a partial sync checks
+- `BdkElectrumClient` takes `{ batchSize }` and `BdkEsploraClient` takes `{ parallelRequests }` (`ElectrumClient.withOptions` / `EsploraClient.withOptions` in the raw bindings). Both default to 1, as before. Applies to full scans, syncs and partial syncs; every script was one round trip, which is slow over Tor
+- The `BdkWallet` Electrum and Esplora sync and full scan methods take an optional `{ signal }` that cancels them. It reached only the raw bindings before
+
 ## [0.8.0] - 2026-10-18
 
 Exposes the new `bdk_wallet` 3.2 APIs. No breaking changes.

@@ -613,3 +613,156 @@ fn tx_builder_finish_and_fee_bump_persist_change() {
     drop(wallet);
     let _ = std::fs::remove_file(&path);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  revealed_scripts / partial sync requests
+// ═══════════════════════════════════════════════════════════════════════════════
+
+fn position(keychain: KeychainKind, index: u32) -> ScriptPosition {
+    ScriptPosition { keychain, index }
+}
+
+#[test]
+fn revealed_scripts_report_index_and_use() {
+    let wallet = new_wallet();
+    fund(&wallet, 50_000, 1);
+    wallet.reveal_addresses_to(KeychainKind::External, 2).unwrap();
+
+    let scripts = wallet.revealed_scripts(KeychainKind::External);
+    let indexes: Vec<u32> = scripts.iter().map(|s| s.index).collect();
+    assert_eq!(indexes, vec![0, 1, 2]);
+    assert!(scripts[0].is_used);
+    assert!(!scripts[1].is_used);
+    let expected = wallet.peek_address(KeychainKind::External, 1).unwrap();
+    let address =
+        address_from_script(scripts[1].script_hex.clone(), Network::Regtest).unwrap();
+    assert_eq!(address, expected.address);
+    assert!(wallet.revealed_scripts(KeychainKind::Internal).is_empty());
+}
+
+#[test]
+fn scripts_sync_request_holds_only_the_chosen_items() {
+    let wallet = new_wallet();
+    let funded = fund(&wallet, 50_000, 1);
+    wallet.reveal_addresses_to(KeychainKind::External, 5).unwrap();
+    let unconfirmed = fund_unconfirmed(&wallet, 20_000, 2, 2);
+
+    let w = wallet.inner.lock().unwrap();
+    let mut request = crate::wallet::build_scripts_sync_request(
+        &w,
+        SyncScriptsRequest {
+            scripts: vec![
+                position(KeychainKind::External, 4),
+                position(KeychainKind::External, 2),
+                position(KeychainKind::External, 4),
+            ],
+            outpoints: vec![ffi_outpoint(funded)],
+            txids: vec![unconfirmed.txid.to_string()],
+        },
+        None,
+    )
+    .unwrap();
+    drop(w);
+
+    assert_eq!(request.chain_tip().unwrap().height(), 1);
+    let spks: Vec<_> = request
+        .iter_spks_with_expected_txids()
+        .map(|s| s.spk)
+        .collect();
+    let want: Vec<_> = [2, 4]
+        .iter()
+        .map(|&i| {
+            wallet
+                .inner
+                .lock()
+                .unwrap()
+                .peek_address(bdk_wallet::KeychainKind::External, i)
+                .script_pubkey()
+        })
+        .collect();
+    assert_eq!(spks, want);
+    assert_eq!(request.iter_outpoints().collect::<Vec<_>>(), vec![funded]);
+    assert_eq!(request.iter_txids().collect::<Vec<_>>(), vec![unconfirmed.txid]);
+}
+
+#[test]
+fn scripts_sync_request_carries_expected_txids_of_chosen_scripts() {
+    let wallet = new_wallet();
+    // Each funding reveals a new address: index 0, then index 1.
+    let funded = fund(&wallet, 50_000, 1);
+    let unconfirmed = fund_unconfirmed(&wallet, 20_000, 2, 2);
+
+    let w = wallet.inner.lock().unwrap();
+    let mut chosen = crate::wallet::build_scripts_sync_request(
+        &w,
+        SyncScriptsRequest {
+            scripts: vec![position(KeychainKind::External, 1)],
+            ..Default::default()
+        },
+        None,
+    )
+    .unwrap();
+    let mut other = crate::wallet::build_scripts_sync_request(
+        &w,
+        SyncScriptsRequest {
+            scripts: vec![position(KeychainKind::External, 0)],
+            ..Default::default()
+        },
+        None,
+    )
+    .unwrap();
+    drop(w);
+
+    let chosen_expected: Vec<_> = chosen
+        .iter_spks_with_expected_txids()
+        .flat_map(|s| s.expected_txids)
+        .collect();
+    assert_eq!(chosen_expected, vec![unconfirmed.txid]);
+    let other_expected: Vec<_> = other
+        .iter_spks_with_expected_txids()
+        .flat_map(|s| s.expected_txids)
+        .collect();
+    assert_eq!(other_expected, vec![funded.txid]);
+}
+
+#[test]
+fn scripts_sync_request_rejects_unrevealed_scripts() {
+    let wallet = new_wallet();
+    wallet.reveal_addresses_to(KeychainKind::External, 1).unwrap();
+
+    let w = wallet.inner.lock().unwrap();
+    // Index 3 is derived ahead (lookahead) but not revealed.
+    let unrevealed = crate::wallet::build_scripts_sync_request(
+        &w,
+        SyncScriptsRequest {
+            scripts: vec![position(KeychainKind::External, 3)],
+            ..Default::default()
+        },
+        None,
+    );
+    assert!(matches!(unrevealed, Err(BdkError::Generic { .. })));
+
+    let bad_txid = crate::wallet::build_scripts_sync_request(
+        &w,
+        SyncScriptsRequest {
+            txids: vec!["not-a-txid".into()],
+            ..Default::default()
+        },
+        None,
+    );
+    assert!(matches!(bad_txid, Err(BdkError::InvalidTransaction { .. })));
+}
+
+#[test]
+fn clients_reject_zero_batch_size() {
+    assert!(matches!(
+        ElectrumClient::with_options("tcp://127.0.0.1:1".into(), 0),
+        Err(BdkError::Generic { .. })
+    ));
+    assert!(matches!(
+        EsploraClient::with_options("http://127.0.0.1:1".into(), 0),
+        Err(BdkError::Generic { .. })
+    ));
+    let esplora = EsploraClient::with_options("http://127.0.0.1:1".into(), 8).unwrap();
+    assert_eq!(esplora.parallel_requests, 8);
+}

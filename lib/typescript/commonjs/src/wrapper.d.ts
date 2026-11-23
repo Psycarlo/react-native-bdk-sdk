@@ -8,7 +8,7 @@
  * JS `number` safely handles up to 2^53 (~9 quadrillion), which covers
  * the entire Bitcoin supply in satoshis (2.1 quadrillion).
  */
-import type { AddressInfo, BlockId, ChangeSpendPolicy, Condition, CreatePsbtResult, DerivationInfo, ElectrumClientLike, EsploraClientLike, FinalizePsbtOutcome, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, RpcClientLike, SelectionStrategy, SpendAssets, TxOrdering } from './generated/bdk_ffi';
+import type { AddressInfo, BlockId, ChangeSpendPolicy, Condition, CreatePsbtResult, DerivationInfo, ElectrumClientLike, EsploraClientLike, FinalizePsbtOutcome, KeychainInfo, KeychainKind, KyotoClientLike, KyotoNodeEventHandler, KyotoScanType, Network, OutPoint, PsbtLike, RevealedScript, RpcClientLike, SelectionStrategy, SpendAssets, SyncScriptsRequest, TxOrdering } from './generated/bdk_ffi';
 import { PsbtParams, TxBuilder, Wallet } from './generated/bdk_ffi';
 export type BalanceN = {
     immature: number;
@@ -99,18 +99,33 @@ export type TxDetailsN = {
 };
 /** Pass a URL string (creates temp connection) or a BdkElectrumClient (reuses). */
 export type ElectrumInput = string | BdkElectrumClient;
+export type ElectrumClientOptions = {
+    /**
+     * Scripts sent per batch request in syncs and full scans (default 1).
+     * Larger batches cut round trips, which matters most over Tor.
+     */
+    batchSize?: number;
+};
 export declare class BdkElectrumClient {
     private readonly inner;
-    constructor(url: string);
+    constructor(url: string, options?: ElectrumClientOptions);
     get raw(): ElectrumClientLike;
 }
 /** Pass a URL string (creates temp client) or a BdkEsploraClient (reuses). */
 export type EsploraInput = string | BdkEsploraClient;
+export type EsploraClientOptions = {
+    /** HTTP requests run at once in syncs and full scans (default 1). */
+    parallelRequests?: number;
+};
 export declare class BdkEsploraClient {
     private readonly inner;
-    constructor(url: string);
+    constructor(url: string, options?: EsploraClientOptions);
     get raw(): EsploraClientLike;
 }
+/** Cancels a sync, full scan or partial sync when `signal` aborts. */
+export type SyncOptions = {
+    signal?: AbortSignal;
+};
 export type KyotoOptions = {
     /** Incremental `Sync`, `NewWallet` or full `Recovery` — see `KyotoScanType`. */
     scanType: KyotoScanType;
@@ -233,10 +248,23 @@ export declare class BdkWallet {
      * from the originals). Persists the wallet afterwards.
      */
     replaceByFee(params: BdkPsbtParams, txids: string[]): Promise<CreatePsbtResult>;
-    fullScanWithEsplora(client: EsploraInput, stopGap: number, inspector?: FullScanProgressInspectorN): Promise<void>;
-    syncWithEsplora(client: EsploraInput, stopGap: number, inspector?: SyncProgressInspectorN): Promise<void>;
-    fullScanWithElectrum(client: ElectrumInput, stopGap: number, inspector?: FullScanProgressInspectorN): Promise<void>;
-    syncWithElectrum(client: ElectrumInput, stopGap: number, inspector?: SyncProgressInspectorN): Promise<void>;
+    fullScanWithEsplora(client: EsploraInput, stopGap: number, inspector?: FullScanProgressInspectorN, options?: SyncOptions): Promise<void>;
+    syncWithEsplora(client: EsploraInput, stopGap: number, inspector?: SyncProgressInspectorN, options?: SyncOptions): Promise<void>;
+    fullScanWithElectrum(client: ElectrumInput, stopGap: number, inspector?: FullScanProgressInspectorN, options?: SyncOptions): Promise<void>;
+    syncWithElectrum(client: ElectrumInput, stopGap: number, inspector?: SyncProgressInspectorN, options?: SyncOptions): Promise<void>;
+    /**
+     * The revealed scripts of `keychain` in index order, with whether a
+     * transaction has used each. Use it to choose what a partial sync checks.
+     */
+    revealedScripts(keychain: KeychainKind): RevealedScript[];
+    /**
+     * Sync only the given scripts (by keychain position, already revealed),
+     * outpoints and txids. Much cheaper than {@link syncWithEsplora} on wallets
+     * with many used addresses; use that one to check every revealed script.
+     */
+    syncScriptsWithEsplora(client: EsploraInput, request: SyncScriptsRequest, inspector?: SyncProgressInspectorN, options?: SyncOptions): Promise<void>;
+    /** Electrum version of {@link syncScriptsWithEsplora}. */
+    syncScriptsWithElectrum(client: ElectrumInput, request: SyncScriptsRequest, inspector?: SyncProgressInspectorN, options?: SyncOptions): Promise<void>;
     /**
      * Sync against a Bitcoin Core node by downloading full blocks from
      * `startHeight` to the node's tip. Use the wallet's birthday height for
