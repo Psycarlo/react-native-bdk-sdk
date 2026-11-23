@@ -365,8 +365,18 @@ interface NativeModuleInterface {
     url: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_with_options(
+    url: Uint8Array,
+    batchSize: bigint,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_new(
     url: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_with_options(
+    url: Uint8Array,
+    parallelRequests: bigint,
     uniffi_out_err: UniffiRustCallStatus
   ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_finalizer_finalize(
@@ -994,6 +1004,11 @@ interface NativeModuleInterface {
     keychain: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_revealed_scripts(
+    uniffiSelf: bigint,
+    keychain: Uint8Array,
+    uniffi_out_err: UniffiRustCallStatus
+  ): Uint8Array;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_send(
     uniffiSelf: bigint,
     address: Uint8Array,
@@ -1029,6 +1044,18 @@ interface NativeModuleInterface {
     keychain: Uint8Array,
     uniffi_out_err: UniffiRustCallStatus
   ): Uint8Array;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum(
+    uniffiSelf: bigint,
+    client: bigint,
+    request: Uint8Array,
+    inspector: Uint8Array
+  ): bigint;
+  ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora(
+    uniffiSelf: bigint,
+    client: bigint,
+    request: Uint8Array,
+    inspector: Uint8Array
+  ): bigint;
   ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_with_electrum(
     uniffiSelf: bigint,
     client: bigint,
@@ -1087,7 +1114,9 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_func_version(): number;
   ubrn_uniffi_bdk_ffi_checksum_func_wallet_name_from_descriptor(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new(): number;
+  ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_finalizer_finalize(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_fullscanprogressinspector_inspect(): number;
   ubrn_uniffi_bdk_ffi_checksum_constructor_kyotoclient_new(): number;
@@ -1216,12 +1245,15 @@ interface NativeModuleInterface {
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_replace_by_fee(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_addresses_to(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_reveal_next_address(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_send(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_send_with_electrum(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sent_and_received(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sign_with_descriptors(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_spending_policy(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum(): number;
+  ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_electrum(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_esplora(): number;
   ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_with_kyoto(): number;

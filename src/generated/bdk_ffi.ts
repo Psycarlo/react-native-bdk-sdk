@@ -3940,10 +3940,7 @@ export const FinalizeInputOutcome = (() => {
  */
 export type FinalizeInputOutcome = InstanceType<
   (typeof FinalizeInputOutcome)[
-    | "AlreadyFinalized"
-    | "Finalized"
-    | "MissingDescriptor"
-    | "CouldNotSatisfy"]
+    "AlreadyFinalized" | "Finalized" | "MissingDescriptor" | "CouldNotSatisfy"]
 >;
 
 // FfiConverter for enum FinalizeInputOutcome
@@ -4550,6 +4547,107 @@ const FfiConverterTypeRecipient = (() => {
   return new FFIConverter();
 })();
 
+/**
+ * A revealed wallet script and whether a transaction has used it.
+ */
+export type RevealedScript = {
+  index: number;
+  scriptHex: string;
+  isUsed: boolean;
+};
+
+/**
+ * Generated factory for {@link RevealedScript} record objects.
+ */
+export const RevealedScript = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<RevealedScript, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<RevealedScript>,
+  });
+})();
+
+const FfiConverterTypeRevealedScript = (() => {
+  type TypeName = RevealedScript;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        index: FfiConverterUInt32.readFromCursor(c),
+        scriptHex: FfiConverterString.readFromCursor(c),
+        isUsed: FfiConverterBool.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterUInt32.writeIntoCursor(value.index, c);
+      FfiConverterString.writeIntoCursor(value.scriptHex, c);
+      FfiConverterBool.writeIntoCursor(value.isUsed, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterUInt32.allocationSize(value.index) +
+        FfiConverterString.allocationSize(value.scriptHex) +
+        FfiConverterBool.allocationSize(value.isUsed)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+/**
+ * A wallet script by its position in a keychain. Used instead of raw
+ * scripts so a sync can only ask the server about the wallet's own scripts.
+ */
+export type ScriptPosition = {
+  keychain: KeychainKind;
+  index: number;
+};
+
+/**
+ * Generated factory for {@link ScriptPosition} record objects.
+ */
+export const ScriptPosition = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<ScriptPosition, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<ScriptPosition>,
+  });
+})();
+
+const FfiConverterTypeScriptPosition = (() => {
+  type TypeName = ScriptPosition;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        keychain: FfiConverterTypeKeychainKind.readFromCursor(c),
+        index: FfiConverterUInt32.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterTypeKeychainKind.writeIntoCursor(value.keychain, c);
+      FfiConverterUInt32.writeIntoCursor(value.index, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterTypeKeychainKind.allocationSize(value.keychain) +
+        FfiConverterUInt32.allocationSize(value.index)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
 export type SentAndReceived = {
   sent: bigint;
   received: bigint;
@@ -4653,6 +4751,60 @@ const FfiConverterTypeSpendAssets = (() => {
         FfiConverterSequenceString.allocationSize(value.keys) +
         FfiConverterOptionalUInt32.allocationSize(value.after) +
         FfiConverterOptionalUInt32.allocationSize(value.older)
+      );
+    }
+  }
+  return new FFIConverter();
+})();
+
+/**
+ * What a partial sync asks the server about: wallet scripts (by position),
+ * outpoints (to find what spends them) and txids (to find whether they
+ * confirmed or left the mempool).
+ */
+export type SyncScriptsRequest = {
+  scripts: Array<ScriptPosition>;
+  outpoints: Array<OutPoint>;
+  txids: Array<string>;
+};
+
+/**
+ * Generated factory for {@link SyncScriptsRequest} record objects.
+ */
+export const SyncScriptsRequest = (() => {
+  const defaults = () => ({});
+  const create = (() => {
+    return uniffiCreateRecord<SyncScriptsRequest, ReturnType<typeof defaults>>(
+      defaults
+    );
+  })();
+  return Object.freeze({
+    create,
+    new: create,
+    defaults: () => Object.freeze(defaults()) as Partial<SyncScriptsRequest>,
+  });
+})();
+
+const FfiConverterTypeSyncScriptsRequest = (() => {
+  type TypeName = SyncScriptsRequest;
+  class FFIConverter extends AbstractFfiConverterByteArray<TypeName> {
+    readFromCursor(c: Cursor): TypeName {
+      return {
+        scripts: FfiConverterSequenceTypeScriptPosition.readFromCursor(c),
+        outpoints: FfiConverterSequenceTypeOutPoint.readFromCursor(c),
+        txids: FfiConverterSequenceString.readFromCursor(c),
+      };
+    }
+    writeIntoCursor(value: TypeName, c: Cursor): void {
+      FfiConverterSequenceTypeScriptPosition.writeIntoCursor(value.scripts, c);
+      FfiConverterSequenceTypeOutPoint.writeIntoCursor(value.outpoints, c);
+      FfiConverterSequenceString.writeIntoCursor(value.txids, c);
+    }
+    allocationSize(value: TypeName): number {
+      return (
+        FfiConverterSequenceTypeScriptPosition.allocationSize(value.scripts) +
+        FfiConverterSequenceTypeOutPoint.allocationSize(value.outpoints) +
+        FfiConverterSequenceString.allocationSize(value.txids)
       );
     }
   }
@@ -5068,10 +5220,7 @@ export const KyotoRecoveryStart = (() => {
  */
 export type KyotoRecoveryStart = InstanceType<
   (typeof KyotoRecoveryStart)[
-    | "Genesis"
-    | "SegwitActivation"
-    | "TaprootActivation"
-    | "FromBlock"]
+    "Genesis" | "SegwitActivation" | "TaprootActivation" | "FromBlock"]
 >;
 
 // FfiConverter for enum KyotoRecoveryStart
@@ -5794,6 +5943,35 @@ export class ElectrumClient
       uniffiTypeElectrumClientObjectFactory.bless(pointer);
   }
 
+  /**
+   * Connect to an Electrum server, sending up to `batch_size` scripts per
+   * request in syncs and full scans. Larger batches cut round trips, which
+   * matters most on high-latency links such as Tor.
+   */
+  static withOptions(
+    url: string,
+    batchSize: bigint
+  ): ElectrumClientLike /*throws*/ {
+    return FfiConverterTypeElectrumClient.lift(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
+        /*caller:*/ (callStatus) => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_electrumclient_with_options(
+            FfiConverterString.lower(url, nativeModule().rustbuffer_alloc),
+            FfiConverterUInt64.lower(
+              batchSize,
+              nativeModule().rustbuffer_alloc
+            ),
+            callStatus
+          );
+        },
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+      )
+    );
+  }
+
   uniffiDestroy(): void {
     const ptr = (this as any)[destructorGuardSymbol];
     if (ptr !== undefined) {
@@ -5919,6 +6097,34 @@ export class EsploraClient
     this[pointerLiteralSymbol] = pointer;
     this[destructorGuardSymbol] =
       uniffiTypeEsploraClientObjectFactory.bless(pointer);
+  }
+
+  /**
+   * Connect to an Esplora server, running up to `parallel_requests` HTTP
+   * requests at once in syncs and full scans.
+   */
+  static withOptions(
+    url: string,
+    parallelRequests: bigint
+  ): EsploraClientLike /*throws*/ {
+    return FfiConverterTypeEsploraClient.lift(
+      uniffiCaller.rustCallWithError(
+        /*liftError:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        ),
+        /*caller:*/ (callStatus) => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_constructor_esploraclient_with_options(
+            FfiConverterString.lower(url, nativeModule().rustbuffer_alloc),
+            FfiConverterUInt64.lower(
+              parallelRequests,
+              nativeModule().rustbuffer_alloc
+            ),
+            callStatus
+          );
+        },
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+      )
+    );
   }
 
   uniffiDestroy(): void {
@@ -8360,6 +8566,12 @@ export interface WalletLike {
     index: number
   ) /*throws*/ : Array<AddressInfo>;
   revealNextAddress(keychain: KeychainKind) /*throws*/ : AddressInfo;
+  /**
+   * The revealed scripts of `keychain`, in index order, with whether a
+   * transaction has used each one. Lets the caller pick which scripts a
+   * partial sync should check.
+   */
+  revealedScripts(keychain: KeychainKind): Array<RevealedScript>;
   send(
     address: string,
     amountSats: bigint,
@@ -8396,6 +8608,28 @@ export interface WalletLike {
    * them with `TxBuilder.policy_path`.
    */
   spendingPolicy(keychain: KeychainKind) /*throws*/ : string | undefined;
+  /**
+   * Sync only the given scripts, outpoints and txids against Electrum.
+   * Scripts are named by keychain position and must already be revealed.
+   * Use [`Wallet::sync_with_electrum`] to check every revealed script.
+   */
+  syncScriptsWithElectrum(
+    client: ElectrumClientLike,
+    request: SyncScriptsRequest,
+    inspector: SyncProgressInspector | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<void>;
+  /**
+   * Sync only the given scripts, outpoints and txids against Esplora.
+   * Scripts are named by keychain position and must already be revealed.
+   * Use [`Wallet::sync_with_esplora`] to check every revealed script.
+   */
+  syncScriptsWithEsplora(
+    client: EsploraClientLike,
+    request: SyncScriptsRequest,
+    inspector: SyncProgressInspector | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ) /*throws*/ : Promise<void>;
   syncWithElectrum(
     client: ElectrumClientLike,
     stopGap: bigint,
@@ -9693,6 +9927,32 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
     }
   }
 
+  /**
+   * The revealed scripts of `keychain`, in index order, with whether a
+   * transaction has used each one. Lets the caller pick which scripts a
+   * partial sync should check.
+   */
+  revealedScripts(keychain: KeychainKind): Array<RevealedScript> {
+    const __rb: Uint8Array = uniffiCaller.rustCall(
+      /*caller:*/ (callStatus) => {
+        return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_revealed_scripts(
+          uniffiTypeWalletObjectFactory.clonePointer(this),
+          FfiConverterTypeKeychainKind.lower(
+            keychain,
+            nativeModule().rustbuffer_alloc
+          ),
+          callStatus
+        );
+      },
+      /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString)
+    );
+    try {
+      return FfiConverterSequenceTypeRevealedScript.lift(__rb);
+    } finally {
+      nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
   async send(
     address: string,
     amountSats: bigint,
@@ -9919,6 +10179,110 @@ export class Wallet extends UniffiAbstractObject implements WalletLike {
       return FfiConverterOptionalString.lift(__rb);
     } finally {
       nativeModule().rustbuffer_free(__rb);
+    }
+  }
+
+  /**
+   * Sync only the given scripts, outpoints and txids against Electrum.
+   * Scripts are named by keychain position and must already be revealed.
+   * Use [`Wallet::sync_with_electrum`] to check every revealed script.
+   */
+  async syncScriptsWithElectrum(
+    client: ElectrumClientLike,
+    request: SyncScriptsRequest,
+    inspector: SyncProgressInspector | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_electrum(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypeElectrumClient.lower(
+              client,
+              nativeModule().rustbuffer_alloc
+            ),
+            FfiConverterTypeSyncScriptsRequest.lower(
+              request,
+              nativeModule().rustbuffer_alloc
+            ),
+            FfiConverterOptionalTypeSyncProgressInspector.lower(
+              inspector,
+              nativeModule().rustbuffer_alloc
+            )
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
+    }
+  }
+
+  /**
+   * Sync only the given scripts, outpoints and txids against Esplora.
+   * Scripts are named by keychain position and must already be revealed.
+   * Use [`Wallet::sync_with_esplora`] to check every revealed script.
+   */
+  async syncScriptsWithEsplora(
+    client: EsploraClientLike,
+    request: SyncScriptsRequest,
+    inspector: SyncProgressInspector | undefined,
+    asyncOpts_?: { signal: AbortSignal }
+  ): Promise<void> /*throws*/ {
+    const __stack = uniffiIsDebug ? new Error().stack : undefined;
+    try {
+      return await uniffiRustCallAsync(
+        /*rustCaller:*/ uniffiCaller,
+        /*rustFutureFunc:*/ () => {
+          return nativeModule().ubrn_uniffi_bdk_ffi_fn_method_wallet_sync_scripts_with_esplora(
+            uniffiTypeWalletObjectFactory.clonePointer(this),
+            FfiConverterTypeEsploraClient.lower(
+              client,
+              nativeModule().rustbuffer_alloc
+            ),
+            FfiConverterTypeSyncScriptsRequest.lower(
+              request,
+              nativeModule().rustbuffer_alloc
+            ),
+            FfiConverterOptionalTypeSyncProgressInspector.lower(
+              inspector,
+              nativeModule().rustbuffer_alloc
+            )
+          );
+        },
+        /*pollFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_poll_void,
+        /*cancelFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_cancel_void,
+        /*completeFunc:*/ nativeModule()
+          .ubrn_ffi_bdk_ffi_rust_future_complete_void,
+        /*freeFunc:*/ nativeModule().ubrn_ffi_bdk_ffi_rust_future_free_void,
+        /*liftFunc:*/ (_v) => {},
+        /*liftString:*/ FfiConverterString.lift.bind(FfiConverterString),
+        /*asyncOpts:*/ asyncOpts_,
+        /*errorHandler:*/ FfiConverterTypeBdkError.lift.bind(
+          FfiConverterTypeBdkError
+        )
+      );
+    } catch (__error: any) {
+      if (uniffiIsDebug && __error instanceof Error) {
+        __error.stack = __stack;
+      }
+      throw __error;
     }
   }
 
@@ -10951,6 +11315,16 @@ const FfiConverterOptionalTypeConfirmationBlockTime = new FfiConverterOptional(
 // FfiConverter for Array<string>
 const FfiConverterSequenceString = new FfiConverterArray(FfiConverterString);
 
+// FfiConverter for Array<ScriptPosition>
+const FfiConverterSequenceTypeScriptPosition = new FfiConverterArray(
+  FfiConverterTypeScriptPosition
+);
+
+// FfiConverter for Array<OutPoint>
+const FfiConverterSequenceTypeOutPoint = new FfiConverterArray(
+  FfiConverterTypeOutPoint
+);
+
 // FfiConverter for Array<TxInput>
 const FfiConverterSequenceTypeTxInput = new FfiConverterArray(
   FfiConverterTypeTxInput
@@ -10967,11 +11341,6 @@ const FfiConverterSequenceTypeTxOutput = new FfiConverterArray(
 // FfiConverter for Array<Recipient>
 const FfiConverterSequenceTypeRecipient = new FfiConverterArray(
   FfiConverterTypeRecipient
-);
-
-// FfiConverter for Array<OutPoint>
-const FfiConverterSequenceTypeOutPoint = new FfiConverterArray(
-  FfiConverterTypeOutPoint
 );
 
 // FfiConverter for Array<BlockId>
@@ -11011,6 +11380,11 @@ const FfiConverterSequenceTypeLocalOutput = new FfiConverterArray(
 // FfiConverter for Array<AddressInfo>
 const FfiConverterSequenceTypeAddressInfo = new FfiConverterArray(
   FfiConverterTypeAddressInfo
+);
+
+// FfiConverter for Array<RevealedScript>
+const FfiConverterSequenceTypeRevealedScript = new FfiConverterArray(
+  FfiConverterTypeRevealedScript
 );
 
 // FfiConverter for SyncProgressInspector | undefined
@@ -11162,11 +11536,27 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options() !==
+    39905
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_electrumclient_with_options"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_new() !==
     22120
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_constructor_esploraclient_new"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options() !==
+    2511
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_constructor_esploraclient_with_options"
     );
   }
   if (
@@ -12189,6 +12579,14 @@ function uniffiEnsureInitialized() {
     );
   }
   if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts() !==
+    5205
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_revealed_scripts"
+    );
+  }
+  if (
     nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_send() !== 30966
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
@@ -12232,6 +12630,22 @@ function uniffiEnsureInitialized() {
   ) {
     throw new UniffiInternalError.ApiChecksumMismatch(
       "uniffi_bdk_ffi_checksum_method_wallet_spending_policy"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum() !==
+    57712
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_electrum"
+    );
+  }
+  if (
+    nativeModule().ubrn_uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora() !==
+    47791
+  ) {
+    throw new UniffiInternalError.ApiChecksumMismatch(
+      "uniffi_bdk_ffi_checksum_method_wallet_sync_scripts_with_esplora"
     );
   }
   if (
@@ -12339,13 +12753,16 @@ export default Object.freeze({
     FfiConverterTypePsbt,
     FfiConverterTypePsbtParams,
     FfiConverterTypeRecipient,
+    FfiConverterTypeRevealedScript,
     FfiConverterTypeRpcClient,
     FfiConverterTypeRpcSyncProgressInspector,
+    FfiConverterTypeScriptPosition,
     FfiConverterTypeSelectionStrategy,
     FfiConverterTypeSentAndReceived,
     FfiConverterTypeSingleKeyDescriptorTemplate,
     FfiConverterTypeSpendAssets,
     FfiConverterTypeSyncProgressInspector,
+    FfiConverterTypeSyncScriptsRequest,
     FfiConverterTypeTxBuilder,
     FfiConverterTypeTxDetails,
     FfiConverterTypeTxInput,

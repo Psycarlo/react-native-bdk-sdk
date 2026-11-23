@@ -470,6 +470,32 @@ pub struct DerivationInfo {
     pub index: u32,
 }
 
+/// A wallet script by its position in a keychain. Used instead of raw
+/// scripts so a sync can only ask the server about the wallet's own scripts.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
+pub struct ScriptPosition {
+    pub keychain: KeychainKind,
+    pub index: u32,
+}
+
+/// A revealed wallet script and whether a transaction has used it.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct RevealedScript {
+    pub index: u32,
+    pub script_hex: String,
+    pub is_used: bool,
+}
+
+/// What a partial sync asks the server about: wallet scripts (by position),
+/// outpoints (to find what spends them) and txids (to find whether they
+/// confirmed or left the mempool).
+#[derive(Debug, Clone, Default, uniffi::Record)]
+pub struct SyncScriptsRequest {
+    pub scripts: Vec<ScriptPosition>,
+    pub outpoints: Vec<OutPoint>,
+    pub txids: Vec<String>,
+}
+
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct KeychainInfo {
     pub keychain: KeychainKind,

@@ -360,7 +360,7 @@ impl Wallet {
         let update = crate::run_async(async move {
             client
                 .inner
-                .full_scan(request, stop_gap as usize, 1)
+                .full_scan(request, stop_gap as usize, client.parallel_requests)
                 .await
                 .map_err(|e| BdkError::SyncFailed {
                     message: format!("Esplora full scan failed: {}", e),
@@ -396,7 +396,7 @@ impl Wallet {
         let update = crate::run_async(async move {
             client
                 .inner
-                .sync(request, 1)
+                .sync(request, client.parallel_requests)
                 .await
                 .map_err(|e| BdkError::SyncFailed {
                     message: format!("Esplora sync failed: {}", e),
@@ -436,7 +436,7 @@ impl Wallet {
         let update = crate::run_async(async move {
             tokio::task::spawn_blocking(move || {
                 let c = client.inner.lock().unwrap();
-                c.full_scan(request, stop_gap as usize, 1, false)
+                c.full_scan(request, stop_gap as usize, client.batch_size, false)
                     .map_err(|e| BdkError::SyncFailed {
                         message: format!("Electrum full scan failed: {}", e),
                     })
@@ -474,7 +474,92 @@ impl Wallet {
         let update = crate::run_async(async move {
             tokio::task::spawn_blocking(move || {
                 let c = client.inner.lock().unwrap();
-                c.sync(request, 1, false)
+                c.sync(request, client.batch_size, false)
+                    .map_err(|e| BdkError::SyncFailed {
+                        message: format!("Electrum sync failed: {}", e),
+                    })
+            })
+            .await
+            .map_err(|e| BdkError::SyncFailed {
+                message: format!("Electrum sync task panicked: {}", e),
+            })?
+        }).await?;
+
+        let mut w = self.inner.lock().unwrap();
+        w.apply_update(update)?;
+        self.persist_wallet(&mut w)?;
+        Ok(())
+    }
+
+    // ── Partial sync (chosen scripts) ───────────────────────────────────────
+
+    /// The revealed scripts of `keychain`, in index order, with whether a
+    /// transaction has used each one. Lets the caller pick which scripts a
+    /// partial sync should check.
+    pub fn revealed_scripts(&self, keychain: KeychainKind) -> Vec<RevealedScript> {
+        let w = self.inner.lock().unwrap();
+        let index = w.spk_index();
+        let bdk_keychain: bdk_wallet::KeychainKind = keychain.into();
+        index
+            .revealed_keychain_spks(bdk_keychain)
+            .map(|(i, spk)| RevealedScript {
+                index: i,
+                script_hex: hex::encode(spk.as_bytes()),
+                is_used: index.is_used(bdk_keychain, i),
+            })
+            .collect()
+    }
+
+    /// Sync only the given scripts, outpoints and txids against Esplora.
+    /// Scripts are named by keychain position and must already be revealed.
+    /// Use [`Wallet::sync_with_esplora`] to check every revealed script.
+    pub async fn sync_scripts_with_esplora(
+        &self,
+        client: Arc<EsploraClient>,
+        request: SyncScriptsRequest,
+        inspector: Option<Arc<dyn SyncProgressInspector>>,
+    ) -> Result<(), BdkError> {
+        use bdk_esplora::EsploraAsyncExt;
+
+        let request = {
+            let w = self.inner.lock().unwrap();
+            build_scripts_sync_request(&w, request, inspector)?
+        };
+
+        let update = crate::run_async(async move {
+            client
+                .inner
+                .sync(request, client.parallel_requests)
+                .await
+                .map_err(|e| BdkError::SyncFailed {
+                    message: format!("Esplora sync failed: {}", e),
+                })
+        }).await?;
+
+        let mut w = self.inner.lock().unwrap();
+        w.apply_update(update)?;
+        self.persist_wallet(&mut w)?;
+        Ok(())
+    }
+
+    /// Sync only the given scripts, outpoints and txids against Electrum.
+    /// Scripts are named by keychain position and must already be revealed.
+    /// Use [`Wallet::sync_with_electrum`] to check every revealed script.
+    pub async fn sync_scripts_with_electrum(
+        &self,
+        client: Arc<ElectrumClient>,
+        request: SyncScriptsRequest,
+        inspector: Option<Arc<dyn SyncProgressInspector>>,
+    ) -> Result<(), BdkError> {
+        let request = {
+            let w = self.inner.lock().unwrap();
+            build_scripts_sync_request(&w, request, inspector)?
+        };
+
+        let update = crate::run_async(async move {
+            tokio::task::spawn_blocking(move || {
+                let c = client.inner.lock().unwrap();
+                c.sync(request, client.batch_size, false)
                     .map_err(|e| BdkError::SyncFailed {
                         message: format!("Electrum sync failed: {}", e),
                     })
@@ -1091,6 +1176,81 @@ impl Wallet {
         let w = self.inner.lock().unwrap();
         w.network().into()
     }
+}
+
+type KeychainSyncRequest = bdk_wallet::chain::spk_client::SyncRequest<(bdk_wallet::KeychainKind, u32)>;
+
+/// A sync request for the chosen scripts, outpoints and txids. Like
+/// `start_sync_with_revealed_spks`, it carries the chain tip and the txids
+/// already expected under the chosen scripts, so a dropped or replaced
+/// incoming transaction is noticed.
+pub(crate) fn build_scripts_sync_request(
+    w: &bdk_wallet::Wallet,
+    request: SyncScriptsRequest,
+    inspector: Option<Arc<dyn SyncProgressInspector>>,
+) -> Result<KeychainSyncRequest, BdkError> {
+    use std::collections::BTreeSet;
+
+    let positions: BTreeSet<(bdk_wallet::KeychainKind, u32)> = request
+        .scripts
+        .iter()
+        .map(|p| (p.keychain.into(), p.index))
+        .collect();
+
+    let index = w.spk_index();
+    let mut spks = Vec::with_capacity(positions.len());
+    for (keychain, i) in positions {
+        let revealed = index
+            .last_revealed_index(keychain)
+            .is_some_and(|last| i <= last);
+        let spk = index
+            .spk_at_index(keychain, i)
+            .filter(|_| revealed)
+            .ok_or_else(|| BdkError::Generic {
+                message: format!("Script {:?}/{} is not revealed", keychain, i),
+            })?;
+        spks.push(((keychain, i), spk));
+    }
+
+    let outpoints = request
+        .outpoints
+        .iter()
+        .map(OutPoint::to_bdk)
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let txids = request
+        .txids
+        .iter()
+        .map(|txid| {
+            txid.parse::<Txid>()
+                .map_err(|e| BdkError::InvalidTransaction {
+                    message: format!("Invalid txid '{}': {}", txid, e),
+                })
+        })
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let requested: BTreeSet<&ScriptBuf> = spks.iter().map(|(_, spk)| spk).collect();
+    let chain = w.local_chain();
+    let expected: Vec<(ScriptBuf, Txid)> = w
+        .tx_graph()
+        .list_expected_spk_txids(chain, chain.tip().block_id(), index, ..)
+        .filter(|(spk, _)| requested.contains(spk))
+        .collect();
+
+    let builder = bdk_wallet::chain::spk_client::SyncRequest::builder()
+        .chain_tip(chain.tip())
+        .spks_with_indexes(spks)
+        .outpoints(outpoints)
+        .txids(txids)
+        .expected_spk_txids(expected);
+
+    Ok(match inspector {
+        Some(insp) => builder.inspect(move |_item, progress| {
+            insp.inspect(progress.consumed() as u64, progress.total() as u64);
+        }),
+        None => builder,
+    }
+    .build())
 }
 
 // Private helpers — NOT exported via uniffi.

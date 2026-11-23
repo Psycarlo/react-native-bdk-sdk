@@ -28,11 +28,13 @@ import type {
   Network,
   OutPoint,
   PsbtLike,
+  RevealedScript,
   RpcClientLike,
   RpcSyncProgressInspector,
   SelectionStrategy,
   SpendAssets,
   SyncProgressInspector,
+  SyncScriptsRequest,
   TxOrdering,
 } from './generated/bdk_ffi';
 
@@ -245,11 +247,22 @@ function toLocalOutputN(o: {
 /** Pass a URL string (creates temp connection) or a BdkElectrumClient (reuses). */
 export type ElectrumInput = string | BdkElectrumClient;
 
-export class BdkElectrumClient {
-  private readonly inner: ElectrumClient;
+export type ElectrumClientOptions = {
+  /**
+   * Scripts sent per batch request in syncs and full scans (default 1).
+   * Larger batches cut round trips, which matters most over Tor.
+   */
+  batchSize?: number;
+};
 
-  constructor(url: string) {
-    this.inner = new ElectrumClient(url);
+export class BdkElectrumClient {
+  private readonly inner: ElectrumClientLike;
+
+  constructor(url: string, options?: ElectrumClientOptions) {
+    this.inner =
+      options?.batchSize === undefined
+        ? new ElectrumClient(url)
+        : ElectrumClient.withOptions(url, BigInt(options.batchSize));
   }
 
   get raw(): ElectrumClientLike {
@@ -271,11 +284,19 @@ function resolveElectrum(input: ElectrumInput): ElectrumClientLike {
 /** Pass a URL string (creates temp client) or a BdkEsploraClient (reuses). */
 export type EsploraInput = string | BdkEsploraClient;
 
-export class BdkEsploraClient {
-  private readonly inner: EsploraClient;
+export type EsploraClientOptions = {
+  /** HTTP requests run at once in syncs and full scans (default 1). */
+  parallelRequests?: number;
+};
 
-  constructor(url: string) {
-    this.inner = new EsploraClient(url);
+export class BdkEsploraClient {
+  private readonly inner: EsploraClientLike;
+
+  constructor(url: string, options?: EsploraClientOptions) {
+    this.inner =
+      options?.parallelRequests === undefined
+        ? new EsploraClient(url)
+        : EsploraClient.withOptions(url, BigInt(options.parallelRequests));
   }
 
   get raw(): EsploraClientLike {
@@ -288,6 +309,17 @@ function resolveEsplora(input: EsploraInput): EsploraClientLike {
     return new EsploraClient(input);
   }
   return input.raw;
+}
+
+/** Cancels a sync, full scan or partial sync when `signal` aborts. */
+export type SyncOptions = {
+  signal?: AbortSignal;
+};
+
+function toAsyncOpts(
+  options?: SyncOptions
+): { signal: AbortSignal } | undefined {
+  return options?.signal ? { signal: options.signal } : undefined;
 }
 
 // Bridge the number-friendly inspector callbacks to the bigint-based FFI ones.
@@ -641,24 +673,28 @@ export class BdkWallet {
   fullScanWithEsplora(
     client: EsploraInput,
     stopGap: number,
-    inspector?: FullScanProgressInspectorN
+    inspector?: FullScanProgressInspectorN,
+    options?: SyncOptions
   ): Promise<void> {
     return this.inner.fullScanWithEsplora(
       resolveEsplora(client),
       BigInt(stopGap),
-      adaptFullScanInspector(inspector)
+      adaptFullScanInspector(inspector),
+      toAsyncOpts(options)
     );
   }
 
   syncWithEsplora(
     client: EsploraInput,
     stopGap: number,
-    inspector?: SyncProgressInspectorN
+    inspector?: SyncProgressInspectorN,
+    options?: SyncOptions
   ): Promise<void> {
     return this.inner.syncWithEsplora(
       resolveEsplora(client),
       BigInt(stopGap),
-      adaptSyncInspector(inspector)
+      adaptSyncInspector(inspector),
+      toAsyncOpts(options)
     );
   }
 
@@ -667,24 +703,72 @@ export class BdkWallet {
   fullScanWithElectrum(
     client: ElectrumInput,
     stopGap: number,
-    inspector?: FullScanProgressInspectorN
+    inspector?: FullScanProgressInspectorN,
+    options?: SyncOptions
   ): Promise<void> {
     return this.inner.fullScanWithElectrum(
       resolveElectrum(client),
       BigInt(stopGap),
-      adaptFullScanInspector(inspector)
+      adaptFullScanInspector(inspector),
+      toAsyncOpts(options)
     );
   }
 
   syncWithElectrum(
     client: ElectrumInput,
     stopGap: number,
-    inspector?: SyncProgressInspectorN
+    inspector?: SyncProgressInspectorN,
+    options?: SyncOptions
   ): Promise<void> {
     return this.inner.syncWithElectrum(
       resolveElectrum(client),
       BigInt(stopGap),
-      adaptSyncInspector(inspector)
+      adaptSyncInspector(inspector),
+      toAsyncOpts(options)
+    );
+  }
+
+  // ── Partial sync (chosen scripts) ──────────────────────────────────────
+
+  /**
+   * The revealed scripts of `keychain` in index order, with whether a
+   * transaction has used each. Use it to choose what a partial sync checks.
+   */
+  revealedScripts(keychain: KeychainKind): RevealedScript[] {
+    return this.inner.revealedScripts(keychain);
+  }
+
+  /**
+   * Sync only the given scripts (by keychain position, already revealed),
+   * outpoints and txids. Much cheaper than {@link syncWithEsplora} on wallets
+   * with many used addresses; use that one to check every revealed script.
+   */
+  syncScriptsWithEsplora(
+    client: EsploraInput,
+    request: SyncScriptsRequest,
+    inspector?: SyncProgressInspectorN,
+    options?: SyncOptions
+  ): Promise<void> {
+    return this.inner.syncScriptsWithEsplora(
+      resolveEsplora(client),
+      request,
+      adaptSyncInspector(inspector),
+      toAsyncOpts(options)
+    );
+  }
+
+  /** Electrum version of {@link syncScriptsWithEsplora}. */
+  syncScriptsWithElectrum(
+    client: ElectrumInput,
+    request: SyncScriptsRequest,
+    inspector?: SyncProgressInspectorN,
+    options?: SyncOptions
+  ): Promise<void> {
+    return this.inner.syncScriptsWithElectrum(
+      resolveElectrum(client),
+      request,
+      adaptSyncInspector(inspector),
+      toAsyncOpts(options)
     );
   }
 
